@@ -1,0 +1,66 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage[most]{tcolorbox}
+\usepackage{array}
+\usepackage{tikz}
+\usetikzlibrary{decorations.pathreplacing}
+\usepackage{hyperref}
+
+% --- Riquadri con bordo nero, senza numero ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={colback=white, colframe=black, boxrule=0.5pt,
+  sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+\theoremstyle{definition}
+\newtheorem*{esempio}{Esempio}
+\newtheorem*{osservazione}{Osservazione}
+\newtheorem*{esercizio}{Esercizio}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+\title{Funzioni in due variabili}
+\author{Marco Cerbella}
+\date{Lezione 4 -- 5 ottobre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Funzioni in due variabili}
+
+\begin{definizione}
+Si dice \emph{funzione di due variabili} una applicazione che ha come dominio un sottoinsieme di $\mathbb{R}^2$ e come codominio un sottoinsieme di $\mathbb{R}$:
+\[
+f : D \subseteq \mathbb{R}^2 \to \mathbb{R}, \qquad (x, y) \mapsto f(x, y).
+\]
+\end{definizione}
+
+\begin{itemize}
+    \item \emph{Grafico}: $\mathrm{Gr}(f) = \{(x, y, z) \in \mathbb{R}^2 \times \mathbb{R} : z = f(x, y),\ (x, y) \in D\}$ (una superficie nello spazio).
+    \item \emph{Curva di livello} $c$: $\{(x, y) \in D : f(x, y) = c\}$, cioè l'insieme dei punti del dominio in cui la funzione vale $c$.
+\end{itemize}
+
+\begin{esempio}
+\leavevmode
+\begin{itemize}
+    \item \textbf{piano}: $f : \mathbb{R}^2 \to \mathbb{R}$, $f(x, y) = x + y$; le curve di livello $x + y = c$ sono rette;
+    \item \textbf{paraboloide}: $f : \mathbb{R}^2 \to \mathbb{R}$, $f(x, y) = x^2 + y^2$; le curve di livello $x^2 + y^2 = c$ (con $c > 0$) sono circonferenze di raggio $\sqrt c$;
+    \item \textbf{cono}: $f : \mathbb{R}^2 \to \mathbb{R}$, $f(x, y) = \sqrt{x^2 + y^2}$; le curve di livello $\sqrt{x^2 + y^2} = c$ (con $c > 0$) sono circonferenze di raggio $c$.
+\end{itemize}
+\end{esempio}
+
+\end{document}

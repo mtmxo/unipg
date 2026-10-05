@@ -1,0 +1,193 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage[most]{tcolorbox}
+\usepackage{array}
+\usepackage{hyperref}
+
+% --- Riquadri con bordo nero, senza numero ---
+\tcbset{nota/.style={colback=white, colframe=black, boxrule=0.5pt,
+  sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+\theoremstyle{definition}
+\newtheorem*{esempio}{Esempio}
+\newtheorem*{osservazione}{Osservazione}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+\title{Logica}
+\author{Marco Cerbella}
+\date{Lezione 1 -- 21 settembre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Enunciati e connettivi}
+
+\begin{definizione}
+Un \emph{enunciato} (o \emph{proposizione}) è una frase di cui possiamo
+dire con certezza se è \V\ (vera) oppure \F\ (falsa). Gli enunciati si
+indicano con $p, q, r, \dots$
+\end{definizione}
+
+\begin{esempio}
+Sono enunciati: ``$5 > 3$'', ``$99$ è divisibile per $3$'',
+``$508$ è multiplo di $5$''. Invece ``$n$ è un numero primo'' \textbf{non}
+è un enunciato, perché la sua verità dipende da $n$.
+\end{esempio}
+
+Dati due enunciati $p, q$ se ne costruiscono di nuovi con i
+\emph{connettivi}:
+\begin{center}
+\begin{tabular}{cll}
+$p \land q$ & ``$p$ e $q$'' & congiunzione \\
+$p \lor q$ & ``$p$ o $q$'' & disgiunzione \\
+$\neg p$ & ``non $p$'' & negazione \\
+$p \to q$ & ``se $p$ allora $q$'' & implicazione \\
+$p \leftrightarrow q$ & ``$p$ se e soltanto se $q$'' & coimplicazione
+\end{tabular}
+\end{center}
+
+\subsection*{Tavola di verità}
+
+\begin{center}
+\begin{tabular}{cc|c|c|c|c}
+$p$ & $q$ & $p \land q$ & $p \lor q$ & $p \to q$ & $p \leftrightarrow q$ \\ \hline
+\V & \V & \V & \V & \V & \V \\
+\V & \F & \F & \V & \F & \F \\
+\F & \V & \F & \V & \V & \F \\
+\F & \F & \F & \F & \V & \V
+\end{tabular}
+\end{center}
+
+\section{Proprietà dei connettivi}
+
+\begin{proposizione}
+Siano $p, q, r$ enunciati. Allora:
+\begin{enumerate}
+    \item $p \lor q \iff q \lor p$;
+    \item $p \land q \iff q \land p$;
+    \item $(p \land q) \lor r \iff (p \lor r) \land (q \lor r)$;
+    \item $(p \lor q) \land r \iff (p \land r) \lor (q \land r)$;
+    \item $\neg(p \land q) \iff (\neg p) \lor (\neg q)$;
+    \item $\neg(p \lor q) \iff (\neg p) \land (\neg q)$;
+    \item $p \to q \iff (\neg p) \lor q$;
+    \item $p \to q \iff \neg q \to \neg p$;
+    \item $p \leftrightarrow q \iff (p \to q) \land (q \to p)$.
+\end{enumerate}
+\end{proposizione}
+
+Due enunciati composti sono equivalenti ($\iff$) quando hanno la stessa
+tavola di verità. Le prime due proprietà sono la commutatività di $\lor$ e
+$\land$; la 3 e la 4 sono le proprietà distributive; la 5 e la 6 sono le
+leggi di De Morgan; la 8 è la \emph{contronominale}.
+
+\begin{proof}[Verifica della proprietà 7]
+Confrontiamo le tavole di verità di $p \to q$ e di $(\neg p) \lor q$:
+\begin{center}
+\begin{tabular}{cc|c|c|c}
+$p$ & $q$ & $p \to q$ & $\neg p$ & $(\neg p) \lor q$ \\ \hline
+\V & \V & \V & \F & \V \\
+\V & \F & \F & \F & \F \\
+\F & \V & \V & \V & \V \\
+\F & \F & \V & \V & \V
+\end{tabular}
+\end{center}
+Le colonne di $p \to q$ e di $(\neg p) \lor q$ sono uguali.
+\end{proof}
+
+\begin{proof}[Verifica della proprietà 4]
+Servono otto righe, una per ogni combinazione dei valori di $p, q, r$:
+\begin{center}
+\begin{tabular}{ccc|c|c|c|c|c}
+$p$ & $q$ & $r$ & $p \lor q$ & $(p \lor q) \land r$ & $p \land r$ &
+$q \land r$ & $(p \land r) \lor (q \land r)$ \\ \hline
+\V & \V & \V & \V & \V & \V & \V & \V \\
+\V & \V & \F & \V & \F & \F & \F & \F \\
+\V & \F & \V & \V & \V & \V & \F & \V \\
+\V & \F & \F & \V & \F & \F & \F & \F \\
+\F & \V & \V & \V & \V & \F & \V & \V \\
+\F & \V & \F & \V & \F & \F & \F & \F \\
+\F & \F & \V & \F & \F & \F & \F & \F \\
+\F & \F & \F & \F & \F & \F & \F & \F
+\end{tabular}
+\end{center}
+Le colonne di $(p \lor q) \land r$ e di $(p \land r) \lor (q \land r)$
+coincidono. Le altre proprietà si verificano allo stesso modo.
+\end{proof}
+
+\section{Formule aperte e quantificatori}
+
+\begin{definizione}
+Una \emph{formula aperta} è un'affermazione che contiene un'incognita, un
+parametro o una variabile.
+\end{definizione}
+
+\begin{esempio}
+\[
+p(x):\ x + 3 = 0, \qquad
+q(n):\ \text{``$n$ è un numero pari''}, \qquad
+r(k):\ \text{``$k$ è multiplo di $5$''}.
+\]
+\end{esempio}
+
+Una formula aperta non è né vera né falsa. Per passare dalla formula aperta
+a un enunciato ci sono tre modi.
+
+\begin{enumerate}
+    \item \textbf{Sostituzione}: si sostituisce alla variabile un valore
+          preciso. Ad esempio $p(3)$ è l'enunciato $3 + 3 = 0$ (falso),
+          $p(-3)$ è $-3 + 3 = 0$ (vero), $q(8)$ è ``$8$ è un numero pari''
+          (vero).
+
+    \item \textbf{Quantificatore esistenziale} $\exists$ (``esiste''):
+          \[
+          \exists\, x \in \mathbb{R} : p(x)
+          \]
+          si legge ``esiste $x$ reale tale che $x + 3 = 0$'' ed è vero
+          (basta $x = -3$). Invece
+          $\exists\, x \in \mathbb{R} : x^2 = -10$ è falso.
+
+    \item \textbf{Quantificatore universale} $\forall$ (``per ogni''):
+          $\forall\, x \in \mathbb{R} : x + 3 = 0$ è falso, mentre
+          $\forall\, x \in \mathbb{R} : x^2 \geq 0$ è vero.
+\end{enumerate}
+
+\begin{proposizione}[Negazione dei quantificatori]
+\[
+\neg\big(\forall x : p(x)\big) \iff \exists\, x : \neg p(x), \qquad
+\neg\big(\exists\, x : p(x)\big) \iff \forall x : \neg p(x).
+\]
+Il secondo enunciato si scrive anche $\nexists\, x : p(x)$.
+\end{proposizione}
+
+Per negare una frase con un quantificatore si scambia $\forall$ con
+$\exists$ e si nega la formula.
+
+\section{Implicazione: condizioni necessarie e sufficienti}
+
+L'implicazione $p \to q$ si legge in tre modi:
+\begin{itemize}
+    \item ``se $p$ allora $q$'';
+    \item ``$p$ è condizione \emph{sufficiente} per $q$'';
+    \item ``$q$ è condizione \emph{necessaria} per $p$''.
+\end{itemize}
+
+\begin{esempio}
+Per ogni $n \in \mathbb{N}$: se $n$ è divisibile per $4$ (è $p$), allora
+$n$ è pari (è $q$). Essere divisibile per $4$ è sufficiente per essere
+pari; essere pari è necessario per essere divisibile per $4$.
+\end{esempio}
+
+\end{document}

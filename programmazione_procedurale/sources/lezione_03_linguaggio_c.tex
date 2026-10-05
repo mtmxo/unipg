@@ -1,0 +1,154 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage{hyperref}
+
+% --- Riquadri con bordo nero, senza numero ---
+\tcbset{nota/.style={colback=white, colframe=black, boxrule=0.5pt,
+  sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{osservazione}{}{nota,
+  before upper={\textbf{Osservazione.}\ }}
+\theoremstyle{definition}
+\newtheorem*{esempio}{Esempio}
+\newtheorem*{esercizio}{Esercizio}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}; \begin{risultato} ... \end{risultato}
+%      \lstinline|printf("ciao");| per il codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{risultato}{listing only, colback=black!5, colframe=black,
+  boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={}}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning}
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Il linguaggio C}
+\author{Marco Cerbella}
+\date{Lezione 3 -- 28 settembre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Linguaggi di programmazione}
+
+\begin{definizione}
+Un \emph{linguaggio di programmazione} è un linguaggio formale che specifica un
+insieme di istruzioni per un elaboratore. Si usa per realizzare programmi che
+implementano algoritmi. I linguaggi \emph{ad alto livello} sono vicini al
+linguaggio umano e lontani dal linguaggio macchina.
+\end{definizione}
+
+I \emph{paradigmi di programmazione} classificano i linguaggi in base alle loro
+caratteristiche. Il C è \emph{imperativo}: il programmatore indica alla
+macchina \emph{come} modificare il proprio stato, ad esempio
+\lstinline|a = a + 1;|.
+
+\section{Dal linguaggio macchina al C}
+
+\begin{itemize}
+    \item Il \emph{linguaggio macchina} (sequenze di bit) è l'unico eseguito
+          direttamente dal processore.
+    \item L'\emph{assembly} usa abbreviazioni mnemoniche per le operazioni,
+          ma è legato alla macchina.
+    \item I linguaggi \emph{ad alto livello} sono indipendenti dalla macchina.
+\end{itemize}
+
+\begin{definizione}
+Un \emph{compilatore} è un programma di sistema che traduce il programma
+sorgente scritto in un linguaggio ad alto livello in un programma
+\emph{target} equivalente (assembly/linguaggio macchina). Il programma target
+viene eseguito in un secondo momento.
+\end{definizione}
+
+In questo corso il compilatore è \textbf{gcc}.
+
+\begin{center}
+\begin{tikzpicture}[node distance=1.6cm]
+  \node (src) [processo] {sorgente C};
+  \node (gcc) [processo, right=of src] {gcc};
+  \node (exe) [processo, right=of gcc] {programma eseguibile};
+  \draw [freccia] (src) -- (gcc);
+  \draw [freccia] (gcc) -- (exe);
+\end{tikzpicture}
+\end{center}
+
+\section{Caratteristiche del C}
+
+Il C è un linguaggio ad alto livello, \emph{procedurale} e di uso generale,
+progettato (Dennis Ritchie, anni '70) per scrivere sistemi operativi con la
+massima indipendenza dall'hardware.
+
+\textbf{Pregi:}
+\begin{itemize}
+    \item veloce (compilato, vicino alla macchina) e portabile;
+    \item linguaggio piccolo e maturo, con molti strumenti;
+    \item accesso diretto alla memoria e alle funzionalità di basso livello.
+\end{itemize}
+
+\textbf{Difficoltà:}
+\begin{itemize}
+    \item si può facilmente fare danni con accessi diretti alla memoria e
+          puntatori;
+    \item la memoria va gestita a mano;
+    \item il codice è più verboso rispetto a linguaggi di scripting come Python.
+\end{itemize}
+
+\begin{osservazione}
+Il linguaggio C in sé non ha istruzioni di input/output né di gestione della
+memoria dinamica: queste funzioni sono fornite dalla \emph{libreria standard}
+(ad esempio \lstinline|stdio.h|).
+\end{osservazione}
+
+\section{Standard}
+
+Il C è stato standardizzato più volte: C89/C90 (ANSI/ISO), C99, C11, C18. Con
+gcc si può scegliere lo standard:
+\begin{codice}
+gcc file.c -std=c11
+\end{codice}
+
+\section{Compilati e interpretati}
+
+Un linguaggio \emph{compilato} (come C) viene analizzato a fondo dal traduttore
+prima dell'esecuzione, e quasi tutti i controlli semantici sono fatti a tempo di
+compilazione. In un linguaggio \emph{interpretato} (come Python) l'interprete
+resta presente durante l'esecuzione e la maggior parte dei controlli è fatta a
+tempo di esecuzione.
+\end{document}

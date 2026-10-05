@@ -1,0 +1,229 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage{hyperref}
+
+% --- Riquadri con bordo nero, senza numero ---
+\tcbset{nota/.style={colback=white, colframe=black, boxrule=0.5pt,
+  sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{osservazione}{}{nota,
+  before upper={\textbf{Osservazione.}\ }}
+\theoremstyle{definition}
+\newtheorem*{esempio}{Esempio}
+\newtheorem*{esercizio}{Esercizio}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}; \begin{risultato} ... \end{risultato}
+%      \lstinline|printf("ciao");| per il codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{risultato}{listing only, colback=black!5, colframe=black,
+  boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={}}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning}
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Struttura di un programma C e compilazione}
+\author{Marco Cerbella}
+\date{Lezione 4 -- 29 settembre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Struttura di un programma}
+
+Gli elementi costitutivi di un programma C sono le \emph{funzioni}, che possono
+chiamarsi a vicenda.
+\begin{itemize}
+    \item Ogni funzione ha uno scopo preciso; le funzioni \emph{non} si possono
+          annidare.
+    \item Una funzione contiene istruzioni eseguite in sequenza; le istruzioni
+          si raggruppano in \emph{blocchi}.
+    \item Si possono usare funzioni della libreria standard (\lstinline|printf|)
+          o scriverne di proprie.
+    \item Ogni programma deve definire almeno la funzione \lstinline|main()|:
+          è la prima funzione eseguita ed è il livello principale di controllo.
+\end{itemize}
+
+\section{Hello World e compilazione con gcc}
+
+\begin{codice}
+#include <stdio.h>
+
+int main() {
+    printf("Hello World\n");
+    return 0;
+}
+\end{codice}
+
+Salvato il codice in \texttt{test.c}, da terminale:
+\begin{codice}
+gcc -o test test.c     // compila e crea l'eseguibile "test"
+./test                 // esegue il programma
+\end{codice}
+
+\begin{osservazione}
+Per il corso e per l'esame si compila \emph{solo con gcc} da terminale (anche
+se si usa un editor che ha un terminale integrato). Senza \lstinline|-o| il
+file eseguibile si chiama \texttt{a.out}.
+\end{osservazione}
+
+\section{Input e output: printf e scanf}
+
+\begin{esempio}[Somma di due interi]
+\begin{codice}
+#include <stdio.h>
+int main() {
+    int firstNumber, secondNumber, sumOfTwoNumbers;
+
+    printf("Enter two integers: ");
+
+    // gli interi inseriti vengono memorizzati con scanf()
+    scanf("%d %d", &firstNumber, &secondNumber);
+
+    // la somma viene salvata in sumOfTwoNumbers
+    sumOfTwoNumbers = firstNumber + secondNumber;
+
+    // stampa della somma
+    printf("%d + %d = %d", firstNumber, secondNumber, sumOfTwoNumbers);
+
+    return 0;
+}
+\end{codice}
+\begin{risultato}
+Enter two integers: 12
+11
+12 + 11 = 23
+\end{risultato}
+\end{esempio}
+
+\begin{esempio}[Quoziente e resto]
+\begin{codice}
+#include <stdio.h>
+int main() {
+    int dividend, divisor, quotient, remainder;
+
+    printf("Enter dividend: ");
+    scanf("%d", &dividend);
+
+    printf("Enter divisor: ");
+    scanf("%d", &divisor);
+
+    quotient = dividend / divisor;    // quoziente
+    remainder = dividend % divisor;   // resto
+
+    printf("Quotient = %d\n", quotient);
+    printf("Remainder = %d", remainder);
+
+    return 0;
+}
+\end{codice}
+\begin{risultato}
+Enter dividend: 25
+Enter divisor: 4
+Quotient = 6
+Remainder = 1
+\end{risultato}
+\end{esempio}
+
+\begin{osservazione}
+\lstinline|%d| è il segnaposto per un intero; in \lstinline|scanf| le variabili
+vanno precedute da \lstinline|&|.
+\end{osservazione}
+
+\section{Programmazione procedurale e modulare}
+
+\begin{definizione}
+La \emph{programmazione procedurale} è un paradigma, derivato dalla
+programmazione strutturata, basato sul concetto di chiamata di procedura. Le
+procedure (o routine, sottoprogrammi, funzioni) contengono una serie di passi di
+calcolo da eseguire. Il C è imperativo e procedurale: le istruzioni sono
+raggruppate in funzioni.
+\end{definizione}
+
+\begin{esempio}
+\texttt{mainfile.c}
+\begin{codice}
+#include <stdio.h>
+void myPrintHello();
+
+int main() {
+    myPrintHello();
+    return(0);
+}
+
+void myPrintHello(void) {
+    printf("Hello!\n");
+    return;
+}
+\end{codice}
+\end{esempio}
+
+\begin{definizione}
+La \emph{programmazione modulare} è una tecnica di progettazione che separa le
+funzionalità di un programma in \emph{moduli} indipendenti e intercambiabili,
+ciascuno contenente tutto il necessario per realizzare un solo aspetto della
+funzionalità.
+\end{definizione}
+
+Ad esempio il codice si può dividere in file diversi.
+
+\texttt{mainfile.c}:
+\begin{codice}
+int main() {
+    myPrintHello();
+    return(0);
+}
+\end{codice}
+
+\texttt{hello.c}:
+\begin{codice}
+#include <stdio.h>
+
+void myPrintHello(void) {
+    printf("Hello!\n");
+    return;
+}
+\end{codice}
+
+e si compilano insieme:
+\begin{codice}
+gcc -o executable mainfile.c hello.c
+\end{codice}
+\end{document}

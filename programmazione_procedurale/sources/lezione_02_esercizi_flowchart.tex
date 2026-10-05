@@ -1,0 +1,227 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage{hyperref}
+
+% --- Riquadri con bordo nero, senza numero ---
+\tcbset{nota/.style={colback=white, colframe=black, boxrule=0.5pt,
+  sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{osservazione}{}{nota,
+  before upper={\textbf{Osservazione.}\ }}
+\theoremstyle{definition}
+\newtheorem*{esempio}{Esempio}
+\newtheorem*{esercizio}{Esercizio}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}; \begin{risultato} ... \end{risultato}
+%      \lstinline|printf("ciao");| per il codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{risultato}{listing only, colback=black!5, colframe=black,
+  boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={}}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning}
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Esercizi sui diagrammi di flusso}
+\author{Marco Cerbella}
+\date{Lezione 2 -- 23 settembre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Somma di 10 e 20}
+
+Si usa una variabile \texttt{sum} inizializzata a zero; si leggono i due numeri,
+si sommano salvando il risultato in \texttt{sum} e infine si stampa.
+
+\begin{enumerate}
+    \item Inizializza $sum = 0$ (processo)
+    \item Leggi i numeri (I/O)
+    \item $sum = 10 + 20$ (processo)
+    \item Stampa $sum$ (I/O)
+\end{enumerate}
+
+\begin{center}
+\begin{tikzpicture}[node distance=0.7cm]
+  \node (a) [terminale] {Inizio};
+  \node (b) [processo, below=of a] {$sum = 0$};
+  \node (c) [io, below=of b] {Leggi i numeri};
+  \node (d) [processo, below=of c] {$sum = 10 + 20$};
+  \node (e) [io, below=of d] {Stampa $sum$};
+  \node (f) [terminale, below=of e] {Fine};
+  \draw [freccia] (a) -- (b);
+  \draw [freccia] (b) -- (c);
+  \draw [freccia] (c) -- (d);
+  \draw [freccia] (d) -- (e);
+  \draw [freccia] (e) -- (f);
+\end{tikzpicture}
+\end{center}
+
+\section{Somma di 5 numeri}
+
+Servono due variabili: \texttt{sum} (il risultato) e \texttt{count} (quanti
+numeri sono stati letti). Si usa un \emph{ciclo}: i passi si ripetono finché la
+condizione è vera.
+
+\begin{enumerate}
+    \item $sum = 0$, $count = 0$ (processo)
+    \item Leggi $n$ (I/O)
+    \item $sum = sum + n$ e $count = count + 1$ (processo)
+    \item $count < 5$? (decisione)
+    \item Se sì, torna al passo 2; altrimenti stampa $sum$ (I/O)
+\end{enumerate}
+
+\begin{center}
+\begin{tikzpicture}
+  \node (a) at (0,0) [terminale] {Inizio};
+  \node (b) at (0,-1.4) [processo] {$sum = 0,\ count = 0$};
+  \node (c) at (0,-2.8) [io] {Leggi $n$};
+  \node (d) at (0,-4.2) [processo] {$sum = sum + n$};
+  \node (d2) at (0,-5.4) [processo] {$count = count + 1$};
+  \node (e) at (0,-7.2) [decisione] {$count < 5$};
+  \node (f) at (0,-9.2) [io] {Stampa $sum$};
+  \node (g) at (0,-10.6) [terminale] {Fine};
+  \draw [freccia] (a) -- (b);
+  \draw [freccia] (b) -- (c);
+  \draw [freccia] (c) -- (d);
+  \draw [freccia] (d) -- (d2);
+  \draw [freccia] (d2) -- (e);
+  \draw [freccia] (e) -- node[right]{No} (f);
+  \draw [freccia] (f) -- (g);
+  \draw [freccia] (e.west) -- node[above]{Sì} ++(-2.3,0) |- (c.west);
+\end{tikzpicture}
+\end{center}
+
+Il programma C corrispondente:
+\begin{codice}
+#include <stdio.h>
+
+int main() {
+    int sum = 0, count = 0, n;
+    while (count < 5) {
+        scanf("%d", &n);
+        sum = sum + n;
+        count = count + 1;
+    }
+    printf("sum = %d\n", sum);
+    return 0;
+}
+\end{codice}
+
+\section{Stampare ``Hello World'' 10 volte}
+
+Anche qui si usa un ciclo con un contatore.
+
+\begin{enumerate}
+    \item $count = 0$ (processo)
+    \item Stampa ``Hello World'' (I/O)
+    \item $count = count + 1$ (processo)
+    \item $count < 10$? Se sì torna al passo 2, altrimenti termina.
+\end{enumerate}
+
+\begin{center}
+\begin{tikzpicture}
+  \node (a) at (0,0) [terminale] {Inizio};
+  \node (b) at (0,-1.4) [processo] {$count = 0$};
+  \node (c) at (0,-2.8) [io] {Stampa ``Hello World''};
+  \node (d) at (0,-4.2) [processo] {$count = count + 1$};
+  \node (e) at (0,-6) [decisione] {$count < 10$};
+  \node (f) at (0,-8) [terminale] {Fine};
+  \draw [freccia] (a) -- (b);
+  \draw [freccia] (b) -- (c);
+  \draw [freccia] (c) -- (d);
+  \draw [freccia] (d) -- (e);
+  \draw [freccia] (e) -- node[right]{No} (f);
+  \draw [freccia] (e.west) -- node[above]{Sì} ++(-2.6,0) |- (c.west);
+\end{tikzpicture}
+\end{center}
+
+\begin{codice}
+#include <stdio.h>
+
+int main() {
+    int count = 0;
+    do {
+        printf("Hello World\n");
+        count = count + 1;
+    } while (count < 10);
+    return 0;
+}
+\end{codice}
+
+\begin{osservazione}
+Il diagramma esegue la stampa \emph{prima} di controllare la condizione, quindi
+il costrutto C fedele è \lstinline|do ... while|. Con un \lstinline|while|
+la condizione verrebbe controllata prima del corpo.
+\end{osservazione}
+
+\section{Login a un account (da risolvere liberamente)}
+
+Esercizio aperto: non esiste una sola soluzione. Una possibile sequenza:
+\begin{enumerate}
+    \item Inserisci l'indirizzo del sito nel browser (I/O)
+    \item Si carica la home page (processo)
+    \item Inserisci email e password (I/O)
+    \item Credenziali valide? (decisione)
+    \item Se no: errore di login (processo) e torna al passo 3;
+          se sì: mostra l'account (I/O) e termina.
+\end{enumerate}
+
+\begin{center}
+\begin{tikzpicture}
+  \node (a) at (0,0) [terminale] {Inizio};
+  \node (b) at (0,-1.3) [io] {Inserisci URL};
+  \node (c) at (0,-2.6) [processo] {Si carica la home};
+  \node (d) at (0,-3.9) [io] {Inserisci email e password};
+  \node (e) at (0,-5.8) [decisione] {Credenziali valide?};
+  \node (f) at (0,-7.8) [io] {Mostra l'account};
+  \node (g) at (0,-9.1) [terminale] {Fine};
+  \node (err) at (4.8,-5.8) [processo] {Errore di login};
+  \draw [freccia] (a) -- (b);
+  \draw [freccia] (b) -- (c);
+  \draw [freccia] (c) -- (d);
+  \draw [freccia] (d) -- (e);
+  \draw [freccia] (e) -- node[right]{Sì} (f);
+  \draw [freccia] (f) -- (g);
+  \draw [freccia] (e.east) -- node[above]{No} (err.west);
+  \draw [freccia] (err.north) |- (d.east);
+\end{tikzpicture}
+\end{center}
+\end{document}

@@ -1,0 +1,232 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage[most]{tcolorbox}
+\usepackage{hyperref}
+
+% --- Riquadri con bordo nero, senza numero ---
+\tcbset{nota/.style={colback=white, colframe=black, boxrule=0.5pt,
+  sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+\theoremstyle{definition}
+\newtheorem*{esempio}{Esempio}
+\newtheorem*{osservazione}{Osservazione}
+
+\title{Insiemi}
+\author{Marco Cerbella}
+\date{Lezione 1 -- 21 settembre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Insiemi ed elementi}
+
+\begin{definizione}
+Un \emph{insieme} è una collezione (o famiglia) di oggetti di cui possiamo
+dire con precisione se un oggetto appartiene o no alla famiglia. Un oggetto
+di un insieme si chiama \emph{elemento}.
+\end{definizione}
+
+Gli insiemi si indicano di solito con lettere maiuscole ($A, B, X, S, V,
+\dots$), gli elementi con lettere minuscole ($x, y, v, k, \dots$).
+\begin{itemize}
+    \item $x \in S$: l'elemento $x$ appartiene all'insieme $S$;
+    \item $y \notin S$: $y$ non appartiene a $S$.
+\end{itemize}
+
+Un insieme si può dare in due modi.
+\begin{enumerate}
+    \item \textbf{Per elencazione}: si scrivono gli elementi tra graffe.
+          Ad esempio $V = \{1, 3, 5, 88\}$ definisce l'insieme $V$ per
+          elencazione.
+    \item \textbf{Per descrizione} (o per caratteristica): ad esempio
+          $X = \{\text{le lettere dell'alfabeto inglese}\}$.
+\end{enumerate}
+
+Quando la descrizione usa una formula aperta si scrive
+\[
+W = \{x \mid x^2 - 3x + 2 = 0\}, \qquad
+A = \{x \in \mathbb{R} \mid P(x)\}, \qquad
+B = \{x \in \mathbb{R} \mid x > 3\} = \{x : x > 3\},
+\]
+dove ``$\mid$'' (oppure ``$:$'') si legge ``tale che''.
+
+Un insieme con un solo elemento, come $U = \{4\}$ (per cui $4 \in U$ e
+$3 \notin U$), si chiama \emph{singoletto} (in inglese \emph{singleton}).
+
+L'\emph{insieme vuoto}, indicato con $\emptyset = \{\ \}$, è l'insieme senza
+elementi: per ogni $x$ vale $x \notin \emptyset$ (cioè
+$\nexists\, x : x \in \emptyset$).
+
+\section{Sottoinsiemi e uguaglianza}
+
+\begin{definizione}
+Siano $A, B$ insiemi. $B$ è un \emph{sottoinsieme} di $A$ se
+\[
+\forall\, x \in B \implies x \in A.
+\]
+Si scrive $B \subset A$ oppure $B \subseteq A$; equivalentemente
+$A \supseteq B$ (o $A \supset B$).
+\end{definizione}
+
+\begin{definizione}
+Due insiemi $S, T$ sono \emph{uguali}, $S = T$, se hanno gli stessi
+elementi, cioè
+\[
+x \in S \iff x \in T.
+\]
+\end{definizione}
+
+\begin{osservazione}
+$S = T$ se e solo se $S \subseteq T$ e $T \subseteq S$.
+\end{osservazione}
+
+Dato un insieme $A$ valgono sempre $\emptyset \subseteq A$ e
+$A \subseteq A$.
+
+\subsection*{Insiemi numerici}
+
+\begin{center}
+\begin{tabular}{ll}
+$\mathbb{N} = \{0, 1, 2, 3, \dots\}$ & numeri naturali \\
+$\mathbb{Z} = \{0, \pm 1, \pm 2, \pm 3, \dots\}
+              = \{\dots, -3, -2, -1, 0, 1, 2, \dots\}$ & numeri interi \\
+$\mathbb{Q} = \left\{ \dfrac{a}{b} \;\middle|\; a, b \in \mathbb{Z},\
+              b \neq 0 \right\}$ & numeri razionali \\
+$\mathbb{R}$ & numeri reali \\
+$\mathbb{C}$ & numeri complessi
+\end{tabular}
+\end{center}
+
+Valgono le inclusioni
+\[
+\mathbb{N} \subseteq \mathbb{Z} \subseteq \mathbb{Q} \subseteq
+\mathbb{R} \subseteq \mathbb{C}.
+\]
+Con $i$ si indica l'unità immaginaria, $i^2 = -1$. Ad esempio:
+\begin{center}
+\begin{tabular}{llll}
+$-2 \in \mathbb{Z}$, & $\frac12 \in \mathbb{Q}$, &
+$\sqrt{2}, \pi \in \mathbb{R}$, & $i \in \mathbb{C}$, \\
+$-2 \notin \mathbb{N}$, & $\frac12 \notin \mathbb{Z}$, &
+$\sqrt{2}, \pi \notin \mathbb{Q}$, & $i \notin \mathbb{R}$.
+\end{tabular}
+\end{center}
+
+\section{Insieme delle parti}
+
+\begin{definizione}
+Sia $A$ un insieme. L'\emph{insieme delle parti} di $A$ è l'insieme di
+tutti i sottoinsiemi di $A$:
+\[
+\mathcal{P}(A) = \{B \mid B \subseteq A\}.
+\]
+\end{definizione}
+
+\begin{osservazione}
+Per ogni insieme $A$: $\emptyset \subseteq A$ e $\emptyset \in
+\mathcal{P}(A)$; $A \subseteq A$ e $A \in \mathcal{P}(A)$.
+\end{osservazione}
+
+\begin{esempio}
+Sia $A = \{1, 2, 3\}$. Allora
+\[
+\mathcal{P}(A) = \big\{\emptyset,\ \{1\},\ \{2\},\ \{3\},\
+\{1,3\},\ \{2,3\},\ \{1,2\},\ A\big\}.
+\]
+Bisogna distinguere bene appartenenza e inclusione:
+\begin{itemize}
+    \item $1 \in A$, \quad $\{1\} \subseteq A$, \quad
+          $\{1, 3\} \subseteq A$;
+    \item $\{1\} \in A$: \textbf{no}; \quad $\{1\} \in \mathcal{P}(A)$:
+          sì;
+    \item $A \subseteq \mathcal{P}(A)$: \textbf{no}; \quad
+          $A \in \mathcal{P}(A)$: sì.
+\end{itemize}
+\end{esempio}
+
+\begin{esempio}
+$\mathcal{P}(\emptyset) = \{\emptyset\}$ e
+\[
+\mathcal{P}(\{\emptyset\}) = \mathcal{P}(\mathcal{P}(\emptyset))
+= \{\emptyset, \{\emptyset\}\}.
+\]
+\end{esempio}
+
+\section{Operazioni tra insiemi}
+
+Siano $A, B$ insiemi.
+
+\begin{definizione}
+\begin{itemize}
+    \item \textbf{Unione}: $A \cup B = \{x \mid x \in A \lor x \in B\}$.
+    \item \textbf{Intersezione}: $A \cap B = \{x \mid x \in A \land
+          x \in B\}$.
+    \item \textbf{Differenza} tra $A$ e $B$:
+          $A \setminus B = \{x \mid x \in A \text{ e } x \notin B\}$.
+    \item \textbf{Differenza simmetrica} tra $A$ e $B$:
+          $A \,\triangle\, B = (A \setminus B) \cup (B \setminus A)$.
+\end{itemize}
+$A$ e $B$ sono \emph{disgiunti} se $A \cap B = \emptyset$.
+\end{definizione}
+
+Esercizio: $A \,\triangle\, B = (A \cup B) \setminus (A \cap B)$.
+
+\begin{definizione}
+Se $A \subseteq U$, il \emph{complementare} di $A$ in $U$ è l'insieme
+\[
+A^c = U \setminus A.
+\]
+\end{definizione}
+
+\begin{esempio}
+Siano $A = \{1, 2, 3, 4\} = \{4, 1, 3, 2\}$ (l'ordine non conta) e
+$B = \{1, 3, 6, 9, 12\}$. Allora
+\begin{align*}
+A \cup B &= \{1, 2, 3, 4, 6, 9, 12\}, & A \cap B &= \{1, 3\}, \\
+A \setminus B &= \{2, 4\}, & B \setminus A &= \{6, 9, 12\}, \\
+A \,\triangle\, B &= \{2, 4, 6, 9, 12\}.
+\end{align*}
+\end{esempio}
+
+\section{Prodotto cartesiano}
+
+\begin{definizione}
+Siano $A, B$ insiemi. Il \emph{prodotto cartesiano} di $A$ e $B$ è
+\[
+A \times B = \{(a, b) \mid a \in A,\ b \in B\},
+\]
+l'insieme delle \emph{coppie ordinate}. Vale $(a, b) \neq (b, a)$ in
+generale, e
+\[
+(x, y) = (x', y') \iff x = x' \text{ e } y = y'.
+\]
+\end{definizione}
+
+\begin{esempio}
+Siano $A = \{1, 2, 3\}$ e $B = \{v, w\}$. Allora
+\begin{align*}
+A \times B &= \{(1,v), (1,w), (2,v), (2,w), (3,v), (3,w)\}, \\
+B \times A &= \{(v,1), (w,1), (v,2), (w,2), (v,3), (w,3)\},
+\end{align*}
+quindi $A \times B \neq B \times A$. Inoltre
+\[
+A \times A = A^2 = \{(1,1), (1,2), (1,3), (2,1), (2,2), (2,3), (3,1),
+(3,2), (3,3)\}.
+\]
+\end{esempio}
+
+Analogamente
+\[
+A \times B \times C = \{(a, b, c) \mid a \in A,\ b \in B,\ c \in C\},
+\qquad A \times A \times A = A^3.
+\]
+
+\end{document}

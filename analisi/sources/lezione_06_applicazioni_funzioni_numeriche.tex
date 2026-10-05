@@ -1,0 +1,124 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage[most]{tcolorbox}
+\usepackage{array}
+\usepackage{tikz}
+\usetikzlibrary{decorations.pathreplacing}
+\usepackage{hyperref}
+
+% --- Riquadri con bordo nero, senza numero ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={colback=white, colframe=black, boxrule=0.5pt,
+  sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+\theoremstyle{definition}
+\newtheorem*{esempio}{Esempio}
+\newtheorem*{osservazione}{Osservazione}
+\newtheorem*{esercizio}{Esercizio}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+\title{Applicazioni e funzioni numeriche}
+\author{Marco Cerbella}
+\date{Lezione 3 -- 1 ottobre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Applicazioni tra insiemi}
+
+\begin{definizione}
+Siano $A$ e $B$ due insiemi. Si dice \emph{applicazione} da $A$ in $B$ una relazione che ad ogni elemento di $A$ associa \textbf{uno ed un solo} elemento di $B$. In simboli
+\[
+f : A \to B, \qquad a \mapsto f(a) = b.
+\]
+\end{definizione}
+
+\begin{itemize}
+    \item $f(a)$ è l'\emph{immagine} di $a$ tramite $f$;
+    \item $A$ è il \emph{dominio} di $f$;
+    \item $B$ è il \emph{codominio} di $f$;
+    \item $f(A) = \{f(a) \mid a \in A\} \subseteq B$ è l'\emph{immagine di $f$}, indicata con $\mathrm{Im}(f)$;
+    \item il \emph{grafico} di $f$ è
+    $\mathrm{Gr}(f) = \{(a, b) \in A \times B : b = f(a),\ \forall\, a \in A\} = \{(a, f(a)) \mid a \in A\}$.
+\end{itemize}
+
+\begin{osservazione}
+Da ogni elemento del dominio deve partire \textbf{una sola freccia}: non è ammesso che $a$ abbia due immagini diverse $b_1 \neq b_2$. Possono invece esistere elementi del codominio senza freccia in arrivo (non tutto $B$ è immagine), o con più frecce in arrivo.
+\end{osservazione}
+
+\begin{center}
+\begin{tikzpicture}[every node/.style={font=\small}]
+  \draw (0,0) ellipse (0.9 and 1.1);
+  \draw (3.2,0) ellipse (1.2 and 1.1);
+  \node at (0,1.35) {$A$}; \node at (3.2,1.35) {$B$};
+  \fill (0,0.5) circle (1.5pt) node[left=2pt] {$a$};
+  \fill (3.2,0.5) circle (1.5pt) node[right=2pt] {$f(a) = b$};
+  \draw[->] (0,0.5) -- (3.2,0.5);
+  \node at (1.6,0.75) {$f$};
+  % non ammesso
+  \begin{scope}[xshift=7.5cm]
+    \draw (0,0) ellipse (0.9 and 1.1);
+    \draw (3.2,0) ellipse (1.2 and 1.1);
+    \node at (0,1.35) {$A$}; \node at (3.2,1.35) {$B$};
+    \fill (0,-0.1) circle (1.5pt) node[left=2pt] {$a_1$};
+    \fill (3.2,0.5) circle (1.5pt) node[right=2pt] {$b_1$};
+    \fill (3.2,-0.7) circle (1.5pt) node[right=2pt] {$b_2$};
+    \draw[->] (0,-0.1) -- (3.2,0.5);
+    \draw[->] (0,-0.1) -- (3.2,-0.7);
+    \draw[red, thick] (1.3,0.3) -- (1.9,-0.5);
+    \draw[red, thick] (1.3,-0.5) -- (1.9,0.3);
+    \node at (1.6,-1.5) {non è un'applicazione};
+  \end{scope}
+\end{tikzpicture}
+\end{center}
+
+\section{Funzioni numeriche}
+
+\begin{definizione}
+Si dice \emph{funzione} (numerica) una applicazione che ha come dominio un sottoinsieme $D$ di $\mathbb{R}$ e come codominio $\mathbb{R}$:
+\[
+f : D \subseteq \mathbb{R} \to \mathbb{R}, \qquad x \mapsto f(x).
+\]
+\end{definizione}
+
+L'immagine è $f(D) = \{f(x) \mid x \in D\} \subseteq \mathbb{R}$ ($\mathrm{Im}(f)$) e il grafico è
+\[
+\mathrm{Gr}(f) = \{(x, y) \in \mathbb{R} \times \mathbb{R} : y = f(x),\ x \in D\}.
+\]
+
+La proprietà fondamentale, che ad ogni ingresso $x \in D$ corrisponde una ed una sola uscita $f(x) \in \mathbb{R}$, ha un significato geometrico: \textbf{ogni retta parallela all'asse delle ordinate che taglia l'asse delle ascisse in un punto $x \in D$ interseca il grafico di $f$ in uno ed un solo punto.} Una curva che viene tagliata da una retta verticale in due o più punti non è il grafico di una funzione.
+
+\section{Dominio}
+
+\begin{definizione}
+Il \emph{dominio} di una funzione data da un'espressione è il più grande insieme delle variabili indipendenti per cui le espressioni coinvolte sono ben definite.
+\end{definizione}
+
+Le regole più frequenti per determinarlo:
+\begin{enumerate}
+    \item gli argomenti delle radici di ordine pari devono essere non negativi;
+    \item gli argomenti dei logaritmi devono essere positivi;
+    \item i denominatori devono essere non nulli.
+\end{enumerate}
+
+\begin{esempio}
+$f(x) = \sqrt{x - 2}$ ha dominio $[2, +\infty)$; $f(x) = \ln(x + 1)$ ha dominio $(-1, +\infty)$; $f(x) = \dfrac{1}{x - 3}$ ha dominio $\mathbb{R} \setminus \{3\}$.
+\end{esempio}
+
+\end{document}

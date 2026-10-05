@@ -1,0 +1,165 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage[most]{tcolorbox}
+\usepackage{tikz}
+\usepackage{hyperref}
+
+% --- Riquadri con bordo nero, senza numero ---
+\tcbset{nota/.style={colback=white, colframe=black, boxrule=0.5pt,
+  sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+\theoremstyle{definition}
+\newtheorem*{esempio}{Esempio}
+\newtheorem*{osservazione}{Osservazione}
+
+\title{Funzioni}
+\author{Marco Cerbella}
+\date{Lezione 3 -- 28 settembre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Definizione di funzione}
+
+\begin{definizione}
+Siano $A$ e $B$ due insiemi. Una \emph{funzione} $f$ da $A$ a $B$ è un
+sottoinsieme del prodotto cartesiano $A \times B$ tale che
+\[
+\forall\, a \in A \quad \exists!\, b \in B : (a, b) \in f.
+\]
+\end{definizione}
+
+In altre parole, ogni elemento di $A$ compare come prima componente in
+\textbf{una e una sola} coppia di $f$. Si usano le notazioni seguenti:
+\begin{itemize}
+    \item $f : A \to B$ indica che $f$ è una funzione da $A$ a $B$;
+    \item $a \mathrel{f} b$ oppure $f(a) = b$ significa $(a, b) \in f$;
+          $b$ si dice \emph{immagine} di $a$;
+    \item $A$ è il \emph{dominio} di $f$ e $B$ è il \emph{codominio} di $f$.
+\end{itemize}
+
+Il sottoinsieme di $A \times B$
+\[
+f = \{\, (a, f(a)) \mid a \in A,\ f(a) \in B \,\} \subseteq A \times B
+\]
+si chiama \emph{grafico} della funzione $f$.
+
+\begin{osservazione}
+Secondo la definizione, la funzione \emph{coincide} con il suo grafico.
+Le due condizioni che la definiscono sono:
+\begin{enumerate}
+    \item \textbf{esistenza}: ogni $a \in A$ ha almeno un'immagine in $B$
+          (nessun elemento del dominio resta ``senza freccia'');
+    \item \textbf{unicità}: ogni $a \in A$ ha \emph{una sola} immagine
+          (da ogni elemento del dominio parte una sola freccia).
+\end{enumerate}
+Invece \emph{non} si chiede che ogni elemento di $B$ sia immagine di
+qualcuno, né che sia immagine di uno solo: nell'esempio~2 qui sotto $a$ e
+$b$ hanno ciascuno due elementi che arrivano su di loro.
+\end{osservazione}
+
+\section{Esempi}
+
+\begin{esempio}
+\leavevmode
+\begin{enumerate}
+    \item Siano $A = \{x, y, z\}$ e $B = \{1, 2, 3, 4\}$ e sia
+          $f : A \to B$ data da
+          \[
+          f(x) = 1, \qquad f(y) = 3, \qquad f(z) = 4.
+          \]
+          Quindi $x \mathrel{f} 1$, cioè $(x, 1) \in f$, e il grafico è
+          $f = \{(x,1), (y,3), (z,4)\}$. L'elemento $2 \in B$ non è
+          immagine di nessun elemento di $A$.
+
+    \item Siano $B = \{1, 2, 3, 4\}$ e $C = \{a, b\}$ e sia
+          $g : B \to C$ data da
+          \[
+          g(1) = b, \quad g(2) = b, \quad g(3) = a, \quad g(4) = a.
+          \]
+\end{enumerate}
+
+\begin{center}
+\begin{tikzpicture}[scale=0.9, every node/.style={font=\small}]
+  % funzione f : A -> B
+  \draw (0,0) ellipse (0.9 and 1.4);
+  \draw (3,0) ellipse (0.9 and 1.7);
+  \node at (0,1.75) {$A$};
+  \node at (3,2.05) {$B$};
+  \node at (1.5,2.0) {$f$};
+  \foreach \n/\y in {x/0.8, y/0, z/-0.8} {
+    \fill (-0.3,\y) circle (1.5pt) node[left] {$\n$};
+  }
+  \foreach \n/\y in {1/1.1, 2/0.35, 3/-0.4, 4/-1.15} {
+    \fill (2.7,\y) circle (1.5pt) node[right] {$\n$};
+  }
+  \draw[->] (-0.3,0.8) -- (2.7,1.1);
+  \draw[->] (-0.3,0) -- (2.7,-0.4);
+  \draw[->] (-0.3,-0.8) -- (2.7,-1.15);
+
+  % funzione g : B -> C
+  \begin{scope}[xshift=8cm]
+    \draw (0,0) ellipse (0.9 and 1.7);
+    \draw (3,0) ellipse (0.9 and 1.0);
+    \node at (0,2.05) {$B$};
+    \node at (3,1.35) {$C$};
+    \node at (1.5,2.0) {$g$};
+    \foreach \n/\y in {1/1.1, 2/0.35, 3/-0.4, 4/-1.15} {
+      \fill (-0.3,\y) circle (1.5pt) node[left] {$\n$};
+    }
+    \fill (2.7,0.5) circle (1.5pt) node[right] {$b$};
+    \fill (2.7,-0.5) circle (1.5pt) node[right] {$a$};
+    \draw[->] (-0.3,1.1) -- (2.7,0.5);
+    \draw[->] (-0.3,0.35) -- (2.7,0.5);
+    \draw[->] (-0.3,-0.4) -- (2.7,-0.5);
+    \draw[->] (-0.3,-1.15) -- (2.7,-0.5);
+  \end{scope}
+\end{tikzpicture}
+\end{center}
+
+\begin{enumerate}
+    \setcounter{enumi}{2}
+    \item $f : \mathbb{N} \to \mathbb{N}$, \quad $f(n) = 2n$.
+          Si scrive anche $n \mapsto f(n) = 2n$.
+
+    \item $f : \mathbb{Z} \to \mathbb{N}$, \quad
+          $k \mapsto |k| =
+          \begin{cases}
+            k & \text{se } k \geq 0, \\
+            -k & \text{se } k < 0.
+          \end{cases}$
+
+    \item $h : \mathbb{R} \to \mathbb{R}$, \quad $h(x) = x^2 - 2$.
+
+    \item $L : \mathbb{R} \to \mathbb{R}$, \quad $L(x) = 5x + 3$.
+
+    \item $F : \mathbb{Z} \to \mathbb{Z}$, \quad $F(k) = 3$.
+
+    \item $F : \mathbb{Z} \to \{3\}$, \quad $F(k) = 3$.
+\end{enumerate}
+\end{esempio}
+
+Gli ultimi due esempi sono funzioni \emph{costanti}: tutti gli elementi del
+dominio hanno la stessa immagine. Notiamo che la legge $F(k) = 3$ è la
+stessa, ma le due funzioni hanno codomini diversi ($\mathbb{Z}$ nel primo
+caso, $\{3\}$ nel secondo).
+
+\begin{definizione}
+Una funzione $f : A \to B$ tale che
+\[
+f(x_1) = f(x_2) \qquad \forall\, x_1, x_2 \in A
+\]
+si dice \emph{funzione costante}.
+\end{definizione}
+
+\end{document}

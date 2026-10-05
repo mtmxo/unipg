@@ -1,0 +1,127 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage[most]{tcolorbox}
+\usepackage{array}
+\usepackage{tikz}
+\usetikzlibrary{decorations.pathreplacing}
+\usepackage{hyperref}
+
+% --- Riquadri con bordo nero, senza numero ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={colback=white, colframe=black, boxrule=0.5pt,
+  sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+\theoremstyle{definition}
+\newtheorem*{esempio}{Esempio}
+\newtheorem*{osservazione}{Osservazione}
+\newtheorem*{esercizio}{Esercizio}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+\title{Sistemi di riferimento}
+\author{Marco Cerbella}
+\date{Lezione 3 -- 1 ottobre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Sistemi di riferimento}
+
+Stabilire un sistema di riferimento in uno spazio significa fissare
+\begin{enumerate}
+    \item un punto detto \emph{origine};
+    \item un metodo per determinare univocamente la posizione di tutti gli altri punti rispetto all'origine, associando loro dei numeri reali detti \emph{coordinate}.
+\end{enumerate}
+La \emph{dimensione} dello spazio è il numero di coordinate necessarie a descrivere la posizione di un punto. Si considerano sistemi unidimensionali (1D), bidimensionali (2D) e tridimensionali (3D).
+
+\section{Sistema unidimensionale}
+
+Un sistema di riferimento unidimensionale è costituito da:
+\begin{itemize}
+    \item una retta orizzontale detta \emph{asse delle ascisse};
+    \item un'origine, di solito indicata con $O$;
+    \item un verso di percorrenza, solitamente verso destra;
+    \item un punto $U$, distinto da $O$ e situato alla destra di $O$, che fissa come unità di misura la lunghezza del segmento $OU$, indicata con $|OU|$.
+\end{itemize}
+L'\emph{ascissa} è il numero reale associato ad ogni punto $P$; $|x|$ è la lunghezza del segmento $OP$ secondo l'unità di misura stabilita. Se $x > 0$, $P$ è a destra di $O$; se $x < 0$ è a sinistra; se $x = 0$, $P$ coincide con $O$.
+
+\begin{center}
+\begin{tikzpicture}
+  \draw[->] (-3,0) -- (4,0);
+  \fill (0,0) circle (1.5pt) node[below] {$O$};
+  \fill (1,0) circle (1.5pt) node[below] {$U$};
+  \fill (2.7,0) circle (1.5pt) node[below] {$P$};
+  \node[above] at (2.7,0.05) {$x_P$};
+\end{tikzpicture}
+\end{center}
+
+\section{Sistema bidimensionale: il piano cartesiano}
+
+Sistema di coordinate cartesiane bidimensionale (piano cartesiano monometrico):
+\begin{enumerate}
+    \item si fissano nel piano due rette perpendicolari che si intersecano in un punto $O$;
+    \item si fissano sulla prima un punto $U$ e sulla seconda un punto $V$, entrambi distinti da $O$, con $|OU| = |OV|$ (unità di misura);
+    \item dato un punto $P$ si indicano con $P_1$ e $P_2$ le sue proiezioni ortogonali sulle due rette;
+    \item ognuna delle due rette è un sistema di coordinate unidimensionale: si indicano con $x_P$ e $y_P$ le coordinate di $P_1$ e $P_2$.
+\end{enumerate}
+Ad ogni punto $P$ del piano è così associata una coppia ordinata $(x_P, y_P)$ di numeri reali, le \emph{coordinate cartesiane bidimensionali} di $P$.
+
+Rappresentando il piano, la prima retta è orizzontale (\emph{asse delle $x$} o delle ascisse) e la seconda verticale (\emph{asse delle $y$} o delle ordinate). Per $P = (x_P, y_P)$: $x_P$ è l'ascissa e $y_P$ è l'ordinata di $P$.
+
+Il piano risulta suddiviso in quattro \emph{quadranti} numerati in senso antiorario a partire da quello in cui entrambe le coordinate sono positive.
+
+\begin{center}
+\begin{tikzpicture}[scale=0.9]
+  \draw[->] (-3.2,0) -- (3.5,0) node[right] {$x$};
+  \draw[->] (0,-2.5) -- (0,3) node[above] {$y$};
+  \fill (2,1.5) circle (1.5pt) node[above right] {$P = (x_P, y_P)$};
+  \draw[dashed] (2,0) -- (2,1.5);
+  \draw[dashed] (0,1.5) -- (2,1.5);
+  \node[below] at (2,0) {$x_P$};
+  \node[left] at (0,1.5) {$y_P$};
+  \node at (1.3,2.4) {I}; \node at (-1.3,2.4) {II};
+  \node at (-1.3,-1.6) {III}; \node at (1.3,-1.6) {IV};
+\end{tikzpicture}
+\end{center}
+
+\section{Sistema tridimensionale: lo spazio cartesiano}
+
+Sistema di coordinate cartesiane tridimensionale (spazio cartesiano monometrico):
+\begin{enumerate}
+    \item si fissano nello spazio tre rette perpendicolari che si intersecano in un punto $O$ detto origine;
+    \item si fissano sulla prima un punto $U$, sulla seconda un punto $V$ e sulla terza un punto $W$, tutti distinti da $O$, con $|OU| = |OV| = |OW|$;
+    \item dato un punto $P$ si indicano con $P_1, P_2, P_3$ le proiezioni ortogonali sulle tre rette;
+    \item ognuna delle rette è un sistema di coordinate unidimensionale: si indicano con $x_P, y_P, z_P$ le coordinate di $P_1, P_2, P_3$.
+\end{enumerate}
+Ad ogni punto dello spazio è associata una terna ordinata $(x_P, y_P, z_P)$ di numeri reali, le \emph{coordinate cartesiane tridimensionali} di $P$:
+\begin{itemize}
+    \item \emph{ascissa}: primo numero della terna, sull'asse $x$;
+    \item \emph{ordinata}: secondo numero della terna, sull'asse $y$;
+    \item \emph{quota}: terzo numero della terna, sull'asse $z$.
+\end{itemize}
+
+\begin{center}
+\begin{tikzpicture}[scale=1]
+  \draw[->] (0,0) -- (0,3) node[above] {$z$};
+  \draw[->] (0,0) -- (3.2,0) node[right] {$y$};
+  \draw[->] (0,0) -- (-1.6,-1.2) node[below left] {$x$};
+  \fill (1.6,1.5) circle (1.5pt) node[above right] {$P = (x_P, y_P, z_P)$};
+\end{tikzpicture}
+\end{center}
+
+\end{document}

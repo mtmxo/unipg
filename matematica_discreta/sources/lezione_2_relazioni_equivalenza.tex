@@ -1,0 +1,322 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage[most]{tcolorbox}
+\usepackage{hyperref}
+
+% --- Riquadri con bordo nero, senza numero ---
+\tcbset{nota/.style={colback=white, colframe=black, boxrule=0.5pt,
+  sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+\theoremstyle{definition}
+\newtheorem*{esempio}{Esempio}
+\newtheorem*{osservazione}{Osservazione}
+
+\title{Relazioni di equivalenza}
+\author{Marco Cerbella}
+\date{Lezione 2 -- 22 settembre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Relazioni}
+
+\begin{definizione}
+Una \emph{relazione} $R$ (o $\rho$) su un insieme $A$ è un sottoinsieme del
+prodotto cartesiano $A \times A$:
+\[
+R \subseteq A \times A.
+\]
+Se $(a, b) \in R$ si scrive $a \mathrel{R} b$.
+\end{definizione}
+
+\begin{esempio}
+Sia $A = \{a, b, c\}$ e $R = \{(a,a), (a,b), (c,b)\}$. Si ha
+$a \mathrel{R} b$, mentre $(b, a) \notin R$, cioè $b \not\mathrel{R} a$.
+Questa relazione è transitiva, non è simmetrica e non è riflessiva
+($b \not\mathrel{R} b$).
+\end{esempio}
+
+\begin{esempio}[Relazioni su $\mathbb{N}$ e $\mathbb{R}$]
+\leavevmode
+\begin{enumerate}
+    \item Su $\mathbb{N}$ la relazione $\leq$: $(5, 8) \in\ \leq$ perché
+          $5 \leq 8$, mentre $(10, 3) \notin\ \leq$ perché $10 \nleq 3$.
+          È riflessiva ($a \leq a$) e transitiva
+          ($a \leq b \land b \leq c \Rightarrow a \leq c$). Non è
+          simmetrica: $3 \leq 5$ ma $5 \nleq 3$.
+
+    \item Su $\mathbb{R}$ sia
+          $R_1 = \{(x, y) \in \mathbb{R}^2 \mid x + 2y = 3\}
+          \subseteq \mathbb{R} \times \mathbb{R}$.
+          Si ha $(2, 2) \notin R_1$ perché $2 + 2 \cdot 2 = 6 \neq 3$;
+          invece $1 \mathrel{R_1} 1$ (perché $1 + 2 = 3$), ma
+          $2 \not\mathrel{R_1} 2$: $R_1$ \textbf{non è riflessiva}.
+          Inoltre $(-1, 2) \in R_1$ perché $-1 + 2 \cdot 2 = 3$, ma
+          $(2, -1) \notin R_1$ perché $2 + 2 \cdot (-1) = 0 \neq 3$:
+          $R_1$ non è simmetrica.
+
+    \item Su $\mathbb{N}$: $h \mathrel{R_2} k \iff h - k = 12$. Allora
+          \[
+          R_2 = \{(12, 0), (13, 1), (14, 2), \dots\}
+              = \{(12 + k, k) \mid k \in \mathbb{N}\}.
+          \]
+          $(0, 0) \notin R_2$: non è riflessiva.
+
+    \item Su $\mathbb{N}$: $m \mathrel{R_3} n \iff m + n = 5$. Allora
+          \[
+          R_3 = \{(0,5), (1,4), (2,3), (3,2), (4,1), (5,0)\}.
+          \]
+          Non è riflessiva ($0 \not\mathrel{R_3} 0$). È simmetrica.
+          \textbf{Non} è transitiva: $1 \mathrel{R_3} 4$ e
+          $4 \mathrel{R_3} 1$, ma $1 \not\mathrel{R_3} 1$.
+\end{enumerate}
+\end{esempio}
+
+\begin{definizione}
+Se $R$ è una relazione su $A$, la \emph{relazione opposta} $R^{op}$ si
+ottiene scambiando di posto gli elementi delle coppie di $R$:
+\[
+(a, b) \in R \iff (b, a) \in R^{op}, \qquad
+a \mathrel{R} b \iff b \mathrel{R^{op}} a.
+\]
+\end{definizione}
+
+\begin{definizione}
+Sia $R$ una relazione su $A$. Si dice che $R$ è:
+\begin{itemize}
+    \item \emph{riflessiva} se $\forall\, a \in A \quad a \mathrel{R} a$;
+    \item \emph{simmetrica} se $a \mathrel{R} b \Rightarrow
+          b \mathrel{R} a$;
+    \item \emph{transitiva} se $a \mathrel{R} b \land b \mathrel{R} c
+          \Rightarrow a \mathrel{R} c$.
+\end{itemize}
+\end{definizione}
+
+\section{Relazioni di equivalenza}
+
+\begin{definizione}
+Una relazione $R$ su $A$ riflessiva, simmetrica e transitiva si dice
+\emph{relazione di equivalenza}.
+\end{definizione}
+
+\begin{esempio}
+\leavevmode
+\begin{enumerate}
+    \item Dato un insieme $A$, la relazione $R = A \times A$ è di
+          equivalenza (tutti sono in relazione con tutti). Per ogni
+          $a \in A$ si ha $[a] = A$, quindi $A/_R = \{[a]\} = \{A\}$.
+
+    \item In $\mathbb{N}$ la relazione di uguaglianza,
+          $n \mathrel{R} k \iff n = k$, è di equivalenza. Le classi sono
+          $[n]_= = \{n\}$, ad esempio $[5]_= = \{5\}$, e
+          $\mathbb{N}/_= = \{[0], [1], [2], \dots\}$.
+
+    \item Sia $S$ l'insieme delle rette di un piano. Due rette
+          $r, s \in S$ sono in relazione se $r$ è parallela a $s$,
+          $r \parallel s$. È riflessiva ($s \parallel s$), simmetrica
+          ($r \parallel s \Rightarrow s \parallel r$) e transitiva
+          ($r \parallel s \land s \parallel t \Rightarrow r \parallel t$):
+          è una relazione di equivalenza. La classe di $r$ è
+          $[r]_{\parallel} = \{s \mid s \parallel r\}$, e se
+          $r_1 \parallel r_2$ allora $[r_1]_{\parallel} =
+          [r_2]_{\parallel}$.
+
+    \item Sia $A = \{1, 2, 3, 4, 5, 6\}$ e
+          \[
+          R = \{(1,1), (1,2), (1,6), (2,1), (2,6), (2,2), (6,6), (6,1),
+          (6,2), (3,3), (4,4), (4,5), (5,4), (5,5)\}.
+          \]
+          È riflessiva e simmetrica. È transitiva: ad esempio
+          $(1,6), (6,2) \in R \Rightarrow (1,2) \in R$ e
+          $4 \mathrel{R} 5, 5 \mathrel{R} 4 \Rightarrow 4 \mathrel{R} 4$.
+          Quindi è di equivalenza, con
+          \[
+          [1]_R = \{1, 2, 6\} = [2]_R = [6]_R, \quad [3]_R = \{3\},
+          \quad [4]_R = [5]_R = \{4, 5\},
+          \]
+          e $A/_R = \{[1]_R, [3]_R, [4]_R\}$.
+\end{enumerate}
+\end{esempio}
+
+\begin{esempio}[Relazioni che non sono di equivalenza]
+\leavevmode
+\begin{enumerate}
+    \setcounter{enumi}{4}
+    \item Su $\mathbb{Z}$: $k \mathrel{R} h \iff h + k = 10$. Non è
+          riflessiva ($0 \not\mathrel{R} 0$), quindi non è di equivalenza.
+
+    \item $A = \{a, b, c\}$ e $R = \{(a,a), (b,b), (a,c), (c,a)\}$.
+          Non è riflessiva ($c \not\mathrel{R} c$). È simmetrica. Non è
+          transitiva: $c \mathrel{R} a$ e $a \mathrel{R} c$, ma
+          $c \not\mathrel{R} c$. (Altri casi, come
+          $c \mathrel{R} a, a \mathrel{R} a \Rightarrow c \mathrel{R} a$,
+          vanno bene: basta un caso che fallisce.)
+
+    \item Su $\mathcal{P}(A)$ la relazione $X \subseteq Y$ (``essere
+          sottoinsieme di'', con $X, Y \in \mathcal{P}(A)$) non è
+          simmetrica.
+
+    \item Su $\mathbb{N}$ la relazione $\leq$ non è di equivalenza: non è
+          simmetrica.
+\end{enumerate}
+\end{esempio}
+
+\section{Classi di equivalenza e insieme quotiente}
+
+\begin{definizione}
+Sia $A$ un insieme e $\rho$ una relazione di equivalenza su $A$. La
+\emph{classe di equivalenza} di $a \in A$ è l'insieme
+\[
+[a]_\rho = \{x \in A \mid x \mathrel{\rho} a\}.
+\]
+L'insieme di tutte le classi di equivalenza è detto \emph{insieme
+quotiente} di $A$ rispetto a $\rho$:
+\[
+A/_\rho = \{[a]_\rho \mid a \in A\}.
+\]
+\end{definizione}
+
+\begin{osservazione}
+Sia $\rho$ una relazione di equivalenza su $A$ e $a \in A$.
+\begin{enumerate}
+    \item $[a]_\rho \subseteq A$, quindi $[a]_\rho \in \mathcal{P}(A)$ e
+          $A/_\rho = \{[a]_\rho \mid a \in A\} \subseteq \mathcal{P}(A)$.
+    \item $[a]_\rho = [b]_\rho \iff a \mathrel{\rho} b \iff
+          [a]_\rho \cap [b]_\rho \neq \emptyset$.
+    \item Se $\rho$ è di equivalenza, $\rho^{op} = \rho$.
+\end{enumerate}
+\end{osservazione}
+
+\section{Partizioni}
+
+\begin{definizione}
+Sia $A$ un insieme e $\mathcal{F} \subseteq \mathcal{P}(A)$ una famiglia di
+sottoinsiemi di $A$. $\mathcal{F}$ è una \emph{partizione} di $A$ se:
+\begin{enumerate}
+    \item $\forall\, X \in \mathcal{F} \quad X \neq \emptyset$;
+    \item $\forall\, X, Y \in \mathcal{F} \quad X \neq Y \Rightarrow
+          X \cap Y = \emptyset$;
+    \item $\displaystyle \bigcup_{X \in \mathcal{F}} X = A$.
+\end{enumerate}
+\end{definizione}
+
+In parole: i pezzi non sono vuoti, sono a due a due disgiunti e ricoprono
+tutto $A$.
+
+\begin{esempio}
+\leavevmode
+\begin{enumerate}
+    \item Se $A \neq \emptyset$, $\mathcal{F} = \{A\}$ è una partizione.
+    \item $\mathcal{F} = \{\{x\} \mid x \in A\}$ è una partizione.
+    \item $A = \{a, b, c, d, e\}$ e
+          $\mathcal{F} = \{\{a, c, e\}, \{b\}, \{d\}\}$ è una partizione
+          di $A$.
+    \item In $\mathbb{Z}$ siano
+          \begin{align*}
+          X_0 &= \{3k \mid k \in \mathbb{Z}\} = \{0, \pm 3, \pm 6, \dots\},\\
+          X_1 &= \{3k + 1 \mid k \in \mathbb{Z}\}
+                = \{1, 4, -2, 7, -5, \dots\},\\
+          X_2 &= \{3k + 2 \mid k \in \mathbb{Z}\}
+                = \{2, 5, -1, 8, -4, \dots\}.
+          \end{align*}
+          Allora $\mathcal{F} = \{X_0, X_1, X_2\}$ è una partizione di
+          $\mathbb{Z}$.
+\end{enumerate}
+\end{esempio}
+
+\begin{proposizione}[A]
+Sia $\rho$ una relazione di equivalenza su $A$. Allora l'insieme quotiente
+$A/_\rho$ è una partizione di $A$.
+\end{proposizione}
+
+\begin{proof}
+Verifichiamo le proprietà 1, 2 e 3 della definizione di partizione.
+\begin{enumerate}
+    \item $[a]_\rho \neq \emptyset$: infatti $a \mathrel{\rho} a$, cioè
+          $a \in [a]_\rho$.
+    \item Se $[a]_\rho \neq [b]_\rho$, vogliamo $[a]_\rho \cap [b]_\rho =
+          \emptyset$. Sia, per assurdo, $x \in [a]_\rho \cap [b]_\rho$:
+          allora $x \mathrel{\rho} a$ e $x \mathrel{\rho} b$. Per la
+          simmetria $a \mathrel{\rho} x$ e $x \mathrel{\rho} b$, e per la
+          transitività $a \mathrel{\rho} b$, cioè $a \in [b]_\rho$ e
+          $b \in [a]_\rho$. Quindi $[a]_\rho = [b]_\rho$ (hanno gli stessi
+          elementi), contro l'ipotesi. Dunque se $[a]_\rho \neq
+          [b]_\rho$ non esiste $x \in [a]_\rho \cap [b]_\rho$, cioè
+          $[a]_\rho \cap [b]_\rho = \emptyset$.
+    \item $\displaystyle \bigcup_{[a]_\rho \in A/_\rho} [a]_\rho = A$:
+          se $a \in A$ allora $a \in [a]_\rho$, cioè le classi
+          ricoprono tutto $A$. \qedhere
+\end{enumerate}
+\end{proof}
+
+Viceversa, da una partizione si ricava una relazione di equivalenza.
+
+\begin{definizione}
+Sia $\mathcal{F}$ una partizione di $A$. Si definisce la relazione
+$R_\mathcal{F}$ su $A$ ponendo
+\[
+a \mathrel{R_\mathcal{F}} b \iff \exists\, X \in \mathcal{F} \text{ tale
+che } a, b \in X.
+\]
+Cioè $a$ e $b$ sono in relazione se stanno nello stesso pezzo della
+partizione.
+\end{definizione}
+
+\begin{proposizione}[B]
+Se $\mathcal{F}$ è una partizione su $A$, la relazione $R_\mathcal{F}$ è
+una relazione di equivalenza su $A$.
+\end{proposizione}
+
+\begin{proof}
+Verifichiamo che $R_\mathcal{F}$ è riflessiva, simmetrica e transitiva.
+\begin{enumerate}
+    \item \emph{Riflessiva}: $a \mathrel{R_\mathcal{F}} a$? Poiché
+          $\mathcal{F}$ è una partizione, per la proprietà 3
+          $\bigcup_{X \in \mathcal{F}} X = A$. Se $a \in A$, allora
+          $a \in \bigcup_{X \in \mathcal{F}} X$, cioè esiste
+          $X \in \mathcal{F}$ tale che $a \in X$. Quindi
+          $a \mathrel{R_\mathcal{F}} a$.
+    \item \emph{Simmetrica}: se $a \mathrel{R_\mathcal{F}} b$, cioè esiste
+          $X \in \mathcal{F}$ con $a, b \in X$, allora anche
+          $b, a \in X$, cioè $b \mathrel{R_\mathcal{F}} a$.
+    \item \emph{Transitiva}: siano $a \mathrel{R_\mathcal{F}} b$ e
+          $b \mathrel{R_\mathcal{F}} c$. Esistono $X \in \mathcal{F}$ con
+          $a, b \in X$ e $Y \in \mathcal{F}$ con $b, c \in Y$. Poiché
+          $b \in X \cap Y \neq \emptyset$, ma per la proprietà 2 gli
+          elementi della partizione sono disgiunti, deve essere $X = Y$.
+          Quindi $a, b, c \in X = Y$, cioè $a, c \in X$, cioè
+          $a \mathrel{R_\mathcal{F}} c$. \qedhere
+\end{enumerate}
+\end{proof}
+
+\begin{teorema}[Fondamentale delle relazioni di equivalenza]
+Esiste una corrispondenza 1 a 1 tra l'insieme di tutte le relazioni di
+equivalenza su $A$ e l'insieme di tutte le partizioni di $A$.
+\end{teorema}
+
+\begin{proof}
+Se $\rho$ è una relazione di equivalenza su $A$, allora $A/_\rho$ è una
+partizione (Proposizione A). Se $\mathcal{F}$ è una partizione di $A$,
+$R_\mathcal{F}$ è una relazione di equivalenza su $A$ (Proposizione B).
+\end{proof}
+
+\begin{osservazione}
+Le due costruzioni sono l'una l'inversa dell'altra: la classe di $a$
+rispetto a $R_\mathcal{F}$ è esattamente l'elemento di $\mathcal{F}$ che
+contiene $a$, quindi $A/_{R_\mathcal{F}} = \mathcal{F}$; e due elementi
+stanno nella stessa classe di $A/_\rho$ se e solo se sono in relazione
+rispetto a $\rho$, quindi $R_{A/_\rho} = \rho$. Questo è ciò che rende la
+corrispondenza biunivoca.
+\end{osservazione}
+
+\end{document}

@@ -1,0 +1,196 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage{hyperref}
+
+% --- Riquadri con bordo nero, senza numero ---
+\tcbset{nota/.style={colback=white, colframe=black, boxrule=0.5pt,
+  sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{osservazione}{}{nota,
+  before upper={\textbf{Osservazione.}\ }}
+\theoremstyle{definition}
+\newtheorem*{esempio}{Esempio}
+\newtheorem*{esercizio}{Esercizio}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}; \begin{risultato} ... \end{risultato}
+%      \lstinline|printf("ciao");| per il codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{risultato}{listing only, colback=black!5, colframe=black,
+  boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={}}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning}
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Algoritmi e diagrammi di flusso}
+\author{Marco Cerbella}
+\date{Lezione 1 -- 22 settembre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Algoritmi e diagrammi di flusso}
+
+\begin{definizione}
+Un \emph{algoritmo} è una procedura che risolve un problema attraverso una
+sequenza finita di passi elementari e non ambigui. Spesso comporta la
+ripetizione di alcune operazioni.
+\end{definizione}
+
+\begin{esempio}
+Il primo algoritmo celebre è quello di Euclide (\emph{Elementi}, 300 a.C.) per
+il massimo comun divisore.
+\end{esempio}
+
+\begin{definizione}
+Un \emph{diagramma di flusso} (\emph{flowchart}) è la rappresentazione grafica
+di un algoritmo. Le operazioni si leggono dall'alto verso il basso, seguendo le
+frecce. I simboli sono standardizzati (ANSI/ISO).
+\end{definizione}
+
+I simboli principali sono:
+\begin{itemize}
+    \item \textbf{ellisse}: inizio e fine;
+    \item \textbf{parallelogramma}: input e output (I/O);
+    \item \textbf{rettangolo}: operazione (\emph{processo});
+    \item \textbf{rombo}: decisione (condizione vero/falso).
+\end{itemize}
+
+\begin{center}
+\begin{tikzpicture}[node distance=0.8cm]
+  \node (inizio) [terminale] {Inizio};
+  \node (input)  [io, below=of inizio] {Input};
+  \node (op)     [processo, below=of input] {Operazioni};
+  \node (output) [io, below=of op] {Output};
+  \node (fine)   [terminale, below=of output] {Fine};
+
+  \draw [freccia] (inizio) -- (input);
+  \draw [freccia] (input) -- (op);
+  \draw [freccia] (op) -- (output);
+  \draw [freccia] (output) -- (fine);
+\end{tikzpicture}
+\end{center}
+
+Lo stesso schema in linguaggio \textit{C}:
+\begin{codice}
+// Importare le librerie necessarie
+#include <stdio.h>
+
+// Funzione principale
+int main() {
+    // Lettura dell'input e operazioni
+
+    // Stampa del risultato
+    return 0;
+}
+\end{codice}
+
+\section{Programmare}
+
+\begin{definizione}
+\emph{Programmare} significa tradurre un algoritmo in una notazione, un
+linguaggio di programmazione, che un elaboratore può eseguire. Un
+\emph{programma} è un insieme di istruzioni.
+\end{definizione}
+
+I passi sono: partire dal problema, \emph{pensare all'algoritmo}, scegliere il
+linguaggio giusto e solo dopo programmare.
+
+\section{Esempio: massimo comun divisore}
+
+Algoritmo di Euclide (versione con sottrazioni): finché $b \neq 0$, si
+sostituisce il maggiore tra $a$ e $b$ con la differenza tra i due. Alla fine $a$
+contiene il MCD.
+
+\begin{center}
+\begin{tikzpicture}
+  \node (s) at (0,0) [terminale] {Inizio};
+  \node (in) at (0,-1.3) [io] {Leggi $a$, $b$};
+  \node (d1) at (0,-3.3) [decisione] {$b \neq 0$};
+  \node (d2) at (0,-5.8) [decisione] {$a > b$};
+  \node (pa) at (-2.3,-8) [processo] {$a = a - b$};
+  \node (pb) at (2.3,-8) [processo] {$b = b - a$};
+  \node (j) at (0,-9.5) {};
+  \node (m) at (0,-2.3) {};
+  \node (out) at (4.3,-3.3) [io] {Stampa $a$};
+  \node (e) at (4.3,-4.8) [terminale] {Fine};
+
+  \draw [freccia] (s) -- (in);
+  \draw [freccia] (in) -- (d1);
+  \draw [freccia] (d1) -- node[right]{Sì} (d2);
+  \draw [freccia] (d1.east) -- node[above]{No} (out.west);
+  \draw [freccia] (out) -- (e);
+  \draw [freccia] (d2.west) -| node[above, pos=0.2]{Sì} (pa.north);
+  \draw [freccia] (d2.east) -| node[above, pos=0.2]{No} (pb.north);
+  \draw (pa.south) |- (j.center);
+  \draw (pb.south) |- (j.center);
+  \draw [freccia] (j.center) -- (-4.4,-9.5) -- (-4.4,-2.3) -- (m.center);
+\end{tikzpicture}
+\end{center}
+
+E il programma C corrispondente:
+\begin{codice}
+#include <stdio.h>
+
+int main() {
+    int a, b;
+
+    printf("Enter first positive integer: \n");
+    scanf("%d", &a);
+    printf("Enter second positive integer: \n");
+    scanf("%d", &b);
+
+    while (b != 0) {
+        if (a > b)
+            a = a - b;
+        else
+            b = b - a;
+    }
+    printf("GCD = %d\n", a);
+
+    return 0;
+}
+\end{codice}
+
+\begin{osservazione}
+Il ciclo \lstinline|while| corrisponde al rombo $b \neq 0$ con la freccia che
+torna indietro; l'\lstinline|if|/\lstinline|else| corrisponde al secondo rombo.
+\end{osservazione}
+\end{document}

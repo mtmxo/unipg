@@ -1,0 +1,139 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage{hyperref}
+
+% --- Riquadri con bordo nero, senza numero ---
+\tcbset{nota/.style={colback=white, colframe=black, boxrule=0.5pt,
+  sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{osservazione}{}{nota,
+  before upper={\textbf{Osservazione.}\ }}
+\theoremstyle{definition}
+\newtheorem*{esempio}{Esempio}
+\newtheorem*{esercizio}{Esercizio}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}; \begin{risultato} ... \end{risultato}
+%      \lstinline|printf("ciao");| per il codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{risultato}{listing only, colback=black!5, colframe=black,
+  boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={}}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning}
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Errori di compilazione e di esecuzione}
+\author{Marco Cerbella}
+\date{Lezione 5 -- 30 settembre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Compile-time e run-time}
+
+La vita di un programmatore ha due momenti: il \emph{compile-time}, quando si
+esegue \texttt{gcc}, e il \emph{run-time}, quando si esegue il programma.
+
+\begin{definizione}
+Un \emph{errore di compilazione} (\emph{compile-time}) è un errore rilevato dal
+compilatore. Cause comuni: errori di sintassi, come un punto e virgola mancante
+o l'uso di una parola riservata (ad esempio \lstinline|while|) come nome.
+\end{definizione}
+
+\begin{definizione}
+Un \emph{errore di esecuzione} (\emph{run-time}) è un errore del programma che
+si verifica mentre il programma è in esecuzione.
+\end{definizione}
+
+\section{Esempio di errore di compilazione}
+
+Nel programma del MCD manca il \texttt{;} dopo la seconda \lstinline|scanf|:
+\begin{codice}
+printf("Enter first positive integer: \n");
+scanf("%d", &b)        // manca il ';'
+\end{codice}
+
+Il compilatore segnala:
+\begin{risultato}
+$ gcc -o euclid euclid.c
+euclid.c:9:20: error: expected ';' after expression
+   scanf("%d", &b)
+                 ^
+                 ;
+1 error generated.
+\end{risultato}
+
+Il messaggio indica file, riga e colonna dell'errore: bisogna imparare a
+leggere l'output del compilatore per eliminare tutti gli errori di compilazione.
+
+\section{Esempio di errore di esecuzione}
+
+Il programma compila senza problemi, ma dereferenzia un puntatore nullo:
+\begin{codice}
+#include <stdio.h>
+int main() {
+    int *a = NULL;
+
+    printf("%d", *a);    // accesso a memoria non valida
+
+    int i = 0;
+    while (i < 4) {
+        printf("Hello World");
+        i++;
+    }
+    return 0;
+}
+\end{codice}
+\begin{risultato}
+$ gcc -o runtime_error runtime_error.c
+$ ./runtime_error
+Segmentation fault: 11
+\end{risultato}
+
+\begin{osservazione}
+Eliminare gli errori di compilazione non basta: bisogna testare il programma
+con molti input diversi per eliminare (il più possibile) gli errori di
+esecuzione.
+\end{osservazione}
+
+\begin{center}
+\emph{``Testing shows the presence, not the absence of bugs''} -- E.\,W.\ Dijkstra
+\end{center}
+\end{document}

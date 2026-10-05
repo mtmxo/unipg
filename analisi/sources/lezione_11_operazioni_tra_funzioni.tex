@@ -1,0 +1,66 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage[most]{tcolorbox}
+\usepackage{array}
+\usepackage{tikz}
+\usetikzlibrary{decorations.pathreplacing}
+\usepackage{hyperref}
+
+% --- Riquadri con bordo nero, senza numero ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={colback=white, colframe=black, boxrule=0.5pt,
+  sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+\theoremstyle{definition}
+\newtheorem*{esempio}{Esempio}
+\newtheorem*{osservazione}{Osservazione}
+\newtheorem*{esercizio}{Esercizio}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+\title{Operazioni tra funzioni}
+\author{Marco Cerbella}
+\date{Lezione 4 -- 5 ottobre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Operazioni aritmetiche tra funzioni}
+
+Date due funzioni $f : D(f) \subseteq \mathbb{R} \to \mathbb{R}$ e $g : D(g) \subseteq \mathbb{R} \to \mathbb{R}$ si definiscono:
+\begin{itemize}
+    \item \emph{somma}: $(f + g)(x) = f(x) + g(x)$;
+    \item \emph{differenza}: $(f - g)(x) = f(x) - g(x)$;
+    \item \emph{prodotto}: $(fg)(x) = f(x)\,g(x)$;
+    \item \emph{quoziente}: $\left(\dfrac{f}{g}\right)(x) = \dfrac{f(x)}{g(x)}$.
+\end{itemize}
+Il dominio delle prime tre funzioni è $D(f) \cap D(g)$. Il dominio del quoziente è
+\[
+D(f) \cap \{x \in D(g) : g(x) \neq 0\}.
+\]
+
+\section{Funzione massimo e funzione minimo}
+
+Date $f : D(f) \subseteq \mathbb{R} \to \mathbb{R}$ e $g : D(g) \subseteq \mathbb{R} \to \mathbb{R}$ si definiscono:
+\begin{itemize}
+    \item \emph{massimo}: $\max\{f, g\}(x) = \max\{f(x), g(x)\}$;
+    \item \emph{minimo}: $\min\{f, g\}(x) = \min\{f(x), g(x)\}$.
+\end{itemize}
+Il dominio di queste funzioni è $D(f) \cap D(g)$. Nel grafico, $\max\{f, g\}$ segue in ogni punto la più alta tra le due curve, $\min\{f, g\}$ la più bassa.
+
+\end{document}

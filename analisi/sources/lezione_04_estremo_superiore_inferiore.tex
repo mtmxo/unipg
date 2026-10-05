@@ -1,0 +1,191 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage[most]{tcolorbox}
+\usepackage{array}
+\usepackage{tikz}
+\usetikzlibrary{decorations.pathreplacing}
+\usepackage{hyperref}
+
+% --- Riquadri con bordo nero, senza numero ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={colback=white, colframe=black, boxrule=0.5pt,
+  sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+\theoremstyle{definition}
+\newtheorem*{esempio}{Esempio}
+\newtheorem*{osservazione}{Osservazione}
+\newtheorem*{esercizio}{Esercizio}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+\title{Estremo superiore ed estremo inferiore}
+\author{Marco Cerbella}
+\date{Lezione 2 -- 28 settembre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Estremo superiore ed estremo inferiore}
+
+In $[0, 1)$ i maggioranti sono $[1, +\infty)$, e il più piccolo di essi è
+$1$: è proprio il valore a cui l'insieme ``si avvicina''. Questo suggerisce
+la definizione seguente.
+
+\begin{definizione}
+Sia $A \subseteq \mathbb{R}$ non vuoto e limitato superiormente.
+L'\emph{estremo superiore} di $A$, indicato con $\sup A$, è il
+\textbf{minimo dei maggioranti} di $A$.
+
+Analogamente, se $A$ è non vuoto e limitato inferiormente, l'\emph{estremo
+inferiore} di $A$, indicato con $\inf A$, è il \textbf{massimo dei
+minoranti} di $A$.
+\end{definizione}
+
+\begin{center}
+\begin{tikzpicture}[scale=1.5]
+  \draw[->] (-0.3,0) -- (7,0) node[right] {$\mathbb{R}$};
+  \draw[line width=3pt, black!25] (0.5,0) -- (3.5,0);
+  \fill (0.5,0) circle (1.8pt);
+  \draw[fill=white] (3.5,0) circle (1.8pt);
+  \draw[decorate, decoration={brace, amplitude=5pt}]
+    (0.5,0.2) -- (3.5,0.2) node[midway, above=6pt] {$A$};
+  \draw[line width=3pt, black!60] (3.5,-0.35) -- (6.8,-0.35);
+  \node[below] at (5.2,-0.45) {maggioranti};
+  \draw[thick] (3.5,0.15) -- (3.5,-0.6);
+  \node[above] at (3.5,0.55) {$\sup A$};
+\end{tikzpicture}
+\end{center}
+
+\begin{esempio}
+\leavevmode
+\begin{enumerate}
+    \item $A = [0, 1)$: $\sup A = 1$ (che non è massimo, perché $1 \notin A$)
+          e $\inf A = \min A = 0$.
+    \item $A = \left\{ 1 - \frac{1}{n} \;\middle|\; n \in \mathbb{N},\
+          n \geq 1 \right\} = \left\{ 0, \frac12, \frac23, \frac34, \dots
+          \right\}$: gli elementi crescono avvicinandosi a $1$ senza mai
+          raggiungerlo. Quindi $\sup A = 1$, ma $A$ non ha massimo;
+          $\inf A = \min A = 0$.
+\end{enumerate}
+\end{esempio}
+
+\textbf{Legame con massimo e minimo.}
+\begin{itemize}
+    \item Se $A$ ha massimo, allora $\sup A = \max A$.
+    \item Se $\sup A \in A$, allora $\sup A$ è il massimo di $A$. Se invece
+          $\sup A \notin A$, allora $A$ non ha massimo.
+    \item Lo stesso vale per $\inf A$ e il minimo.
+\end{itemize}
+
+\begin{teorema}[Caratterizzazione dell'estremo superiore]
+Sia $A \subseteq \mathbb{R}$ non vuoto e limitato superiormente. Allora
+$s = \sup A$ se e solo se:
+\begin{enumerate}
+    \item $a \leq s$ per ogni $a \in A$ \quad ($s$ è un maggiorante);
+    \item per ogni $\varepsilon > 0$ esiste $a \in A$ tale che
+          $a > s - \varepsilon$ \quad (nessun numero più piccolo di $s$ è
+          un maggiorante).
+\end{enumerate}
+\end{teorema}
+
+In parole: $s$ sta sopra tutti gli elementi di $A$, ma se lo si abbassa
+anche di pochissimo si trova subito un elemento di $A$ che lo supera. Per
+l'estremo inferiore vale lo stesso con le disuguaglianze rovesciate:
+$i \leq a$ per ogni $a \in A$ e, per ogni $\varepsilon > 0$, esiste
+$a \in A$ con $a < i + \varepsilon$.
+
+\section{Esistenza dell'estremo superiore}
+
+Finora abbiamo dato per scontato che il minimo dei maggioranti esista. Non è
+ovvio: l'insieme dei maggioranti potrebbe non avere minimo, come $[0, 1)$ non
+ha massimo. È qui che interviene l'assioma di completezza.
+
+\begin{teorema}[Esistenza dell'estremo superiore]
+Ogni insieme $A \subseteq \mathbb{R}$ non vuoto e limitato superiormente
+ammette estremo superiore in $\mathbb{R}$.
+
+Analogamente, ogni insieme non vuoto e limitato inferiormente ammette
+estremo inferiore in $\mathbb{R}$.
+\end{teorema}
+
+\begin{proof}
+Sia $B$ l'insieme dei maggioranti di $A$. $B$ non è vuoto, perché $A$ è
+limitato superiormente, e per definizione di maggiorante
+\[
+a \leq b \quad \text{per ogni } a \in A \text{ e per ogni } b \in B.
+\]
+Per l'assioma di completezza esiste un elemento separatore $c$:
+\[
+a \leq c \leq b \quad \text{per ogni } a \in A \text{ e per ogni } b \in B.
+\]
+Dalla prima disuguaglianza, $c$ è un maggiorante di $A$, cioè $c \in B$.
+Dalla seconda, $c$ è minore o uguale a ogni maggiorante. Quindi $c$ è il
+minimo di $B$, cioè $c = \sup A$.
+\end{proof}
+
+\textbf{In $\mathbb{Q}$ il teorema è falso.} L'insieme
+$A = \{q \in \mathbb{Q} \mid q > 0,\ q^2 < 2\}$ è limitato superiormente
+(ad esempio da $2$), ma tra i \emph{razionali} non ha estremo superiore:
+l'unico candidato è $\sqrt{2}$, che non è razionale. Per questo l'esistenza
+dell'estremo superiore è una forma equivalente dell'assioma di completezza.
+
+
+\textbf{Convenzione.} Se $A$ non è limitato superiormente si scrive
+$\sup A = +\infty$; se non è limitato inferiormente si scrive
+$\inf A = -\infty$. Ad esempio $\sup \mathbb{N} = +\infty$ e
+$\inf \mathbb{Z} = -\infty$.
+
+\section{Esempi}
+
+\begin{esempio}[L'insieme $B$]
+$\max B = \sup B = 7$. Per l'estremo inferiore verifichiamo che $\inf B = 3$:
+\begin{enumerate}
+    \item $3 \leq x$ per ogni $x \in B$: $3$ è un minorante;
+    \item per ogni $\varepsilon > 0$ esiste $x \in B$ con $x < 3 + \varepsilon$:
+          infatti $[3, 3 + \varepsilon[ \,\cap\, ]3, 7] \neq \emptyset$.
+\end{enumerate}
+Il numero $3$ non appartiene a $B$, quindi $B$ non ha minimo. Invece $0$ è
+un minorante ma \textbf{non} è l'estremo inferiore: per $\varepsilon = 2$ non
+esiste nessun $x \in B$ con $x < 0 + 2$ (la condizione 2 fallisce).
+\end{esempio}
+
+\begin{esempio}[$A = \{1/n \mid n \in \mathbb{N} \setminus \{0\}\}$]
+$A = \{1, \frac12, \frac13, \frac14, \dots\} \subseteq [0, 1]$, quindi $A$ è
+limitato.
+\begin{itemize}
+    \item $\max A = \sup A = 1$: infatti $1 \in A$ (è $x_1$) e
+          $x_n = \frac1n \leq 1$ per ogni $n \geq 1$.
+    \item $\inf A = 0$. Si ha $0 \leq x_n$ per ogni $n$. Dimostriamo che per
+          ogni $\varepsilon > 0$ esiste $x_n \in A$ con $x_n < 0 + \varepsilon$.
+          Per assurdo, supponiamo che esista $\varepsilon > 0$ tale che
+          $\frac1n \geq \varepsilon$ per ogni $n \in \mathbb{N} \setminus \{0\}$;
+          allora $n \leq \frac1\varepsilon$ per ogni $n \in \mathbb{N}$, che è
+          assurdo perché $\mathbb{N}$ non è limitato superiormente. Quindi
+          $0 = \inf A$.
+    \item $0 \notin A$, quindi $A$ \textbf{non ha minimo}.
+\end{itemize}
+\end{esempio}
+
+\textbf{Riassunto.}
+\begin{itemize}
+    \item se un insieme ha massimo, allora massimo $=$ estremo superiore;
+    \item se un insieme ha minimo, allora minimo $=$ estremo inferiore;
+    \item un insieme può avere estremo inferiore ma non minimo;
+    \item un insieme può avere estremo superiore ma non massimo.
+\end{itemize}
+\end{document}

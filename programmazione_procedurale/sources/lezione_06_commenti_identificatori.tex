@@ -1,0 +1,187 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage{hyperref}
+
+% --- Riquadri con bordo nero, senza numero ---
+\tcbset{nota/.style={colback=white, colframe=black, boxrule=0.5pt,
+  sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{osservazione}{}{nota,
+  before upper={\textbf{Osservazione.}\ }}
+\theoremstyle{definition}
+\newtheorem*{esempio}{Esempio}
+\newtheorem*{esercizio}{Esercizio}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}; \begin{risultato} ... \end{risultato}
+%      \lstinline|printf("ciao");| per il codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{risultato}{listing only, colback=black!5, colframe=black,
+  boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={}}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning}
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Commenti, identificatori e parole chiave}
+\author{Marco Cerbella}
+\date{Lezione 6 -- 5 ottobre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Commenti}
+
+In C ci sono due tipi di commenti:
+\begin{itemize}
+    \item \emph{a blocco}: iniziano con \lstinline|/*| e finiscono con \lstinline|*/|, possono
+          occupare più righe;
+    \item \emph{di riga}: iniziano con \lstinline|//| e finiscono a fine riga.
+\end{itemize}
+
+\begin{codice}
+double pi = 3.1415926536;   // Pi è 3,14
+\end{codice}
+
+All'interno di una stringa o di una costante carattere i simboli \lstinline|/*| e
+\lstinline|//| non iniziano un commento:
+\begin{codice}
+printf("Comments in C begin with /* or //.\n");
+\end{codice}
+
+\begin{osservazione}
+I commenti a blocco \emph{non si possono annidare}: il primo \lstinline|*/|
+chiude il commento aperto. Si possono invece usare per ``spegnere'' del codice
+che contiene commenti di riga.
+\end{osservazione}
+
+\begin{esempio}
+Qui il commento aperto alla riga 3 termina al primo \lstinline|*/| (riga 6): il
+secondo \lstinline|*/| è un errore di sintassi.
+\begin{codice}
+#include <stdio.h>
+int main() {
+    int x = 4; /*
+    int y = 10; /*
+
+    printf("x = %d\n", x); */
+    printf("y = %d\n", y); */
+}
+\end{codice}
+\end{esempio}
+
+\subsection{Scrivere buoni commenti}
+
+Il codice si scrive per essere eseguito da un computer ma letto da persone:
+da noi stessi mentre lo scriviamo e dopo settimane o mesi, dai colleghi che
+devono integrarlo e da chi lo manterrà anni dopo.
+\begin{itemize}
+    \item Evitare commenti ridondanti, come \lstinline|i = i + 1; // incrementa i|.
+    \item Non lasciare codice ``eliminato'' sotto forma di commento (va bene
+          solo temporaneamente durante il debug).
+    \item Evitare commenti decorati (riquadri di asterischi): sono difficili da
+          mantenere.
+    \item Un commento che chiarisce spesso segnala codice troppo complesso:
+          meglio semplificare il codice, che deve essere \emph{autoesplicativo}.
+\end{itemize}
+
+\section{Caratteri}
+
+Il C definisce due insiemi di caratteri: quello \emph{sorgente} (usabile nel
+codice) e quello di \emph{esecuzione} (interpretabile dal programma in
+esecuzione); nella maggior parte delle implementazioni coincidono. I caratteri
+\emph{spazio bianco} sono: spazio, \verb|\f| (form feed), \verb|\n| (a capo),
+\verb|\t| (tab orizzontale), \verb|\v| (tab verticale).
+
+\section{Identificatori}
+
+\begin{definizione}
+Un \emph{identificatore} è il nome di una variabile, funzione, macro,
+struttura o altro oggetto definito in un programma C. Può contenere:
+\begin{itemize}
+    \item lettere \texttt{a--z} e \texttt{A--Z} (il C è \emph{case-sensitive});
+    \item il carattere underscore \texttt{\_};
+    \item cifre \texttt{0--9}, ma il primo carattere \emph{non} può essere una cifra.
+\end{itemize}
+\end{definizione}
+
+\begin{esempio}
+Identificatori validi: \texttt{x}, \texttt{dollar}, \texttt{While},
+\texttt{error\_handler}, \texttt{scale64}.
+
+Non validi: \texttt{1st\_rank} (inizia con una cifra), \texttt{switch} (parola
+riservata), \texttt{y/n} e \texttt{x-ray} (caratteri non ammessi).
+\end{esempio}
+
+Non c'è un limite alla lunghezza, ma i compilatori considerano significativi
+solo i primi 31 o 63 caratteri. Molti nomi sono già usati dalla libreria
+standard (ad esempio \lstinline|printf|) e non si possono riutilizzare per
+funzioni proprie o variabili globali.
+
+\section{Parole riservate}
+
+Le seguenti 44 parole chiave sono riservate in C (erano 32 in C89), hanno un
+significato preciso per il compilatore e non si possono usare come
+identificatori:
+
+\begin{center}
+\begin{minipage}{0.9\textwidth}
+\ttfamily\small
+auto, break, case, char, const, continue, default, do, double, else, enum,
+extern, float, for, goto, if, inline, int, long, register, restrict, return,
+short, signed, sizeof, static, struct, switch, typedef, union, unsigned, void,
+volatile, while, \_Alignas, \_Alignof, \_Atomic, \_Bool, \_Complex, \_Generic,
+\_Imaginary, \_Noreturn, \_Static\_assert, \_Thread\_local
+\end{minipage}
+\end{center}
+
+\subsection{Scegliere i nomi}
+
+Un nome descrive l'oggetto, il suo comportamento e il suo uso: una variabile
+chiamata male può confondere molto.
+\begin{itemize}
+    \item evitare nomi inutilmente lunghi;
+    \item usare nomi diversi in ambiti diversi, per evitare confusione.
+\end{itemize}
+
+\begin{esempio}
+Confrontare \lstinline|a = b * c;| con
+\lstinline|weekly_pay = hours_worked * pay_rate;|.
+\end{esempio}
+\end{document}

@@ -1,0 +1,253 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage{hyperref}
+
+% --- Riquadri con bordo nero, senza numero ---
+\tcbset{nota/.style={colback=white, colframe=black, boxrule=0.5pt,
+  sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{osservazione}{}{nota,
+  before upper={\textbf{Osservazione.}\ }}
+\theoremstyle{definition}
+\newtheorem*{esempio}{Esempio}
+\newtheorem*{esercizio}{Esercizio}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}; \begin{risultato} ... \end{risultato}
+%      \lstinline|printf("ciao");| per il codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{risultato}{listing only, colback=black!5, colframe=black,
+  boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={}}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning}
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Scope e binding}
+\author{Marco Cerbella}
+\date{Lezione 7 -- 6 ottobre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Scope degli identificatori}
+
+\begin{definizione}
+Lo \emph{scope} (ambito) di un identificatore è la parte del programma in cui
+l'identificatore è significativo, cioè in cui può essere ``visto''. Il tipo di
+scope dipende da dove l'identificatore viene dichiarato.
+\end{definizione}
+
+\begin{itemize}
+    \item \textbf{File scope}: l'identificatore è dichiarato fuori da tutti i
+          blocchi e dalle liste di parametri (cioè fuori dalle funzioni). Si
+          può usare dalla dichiarazione fino alla fine del file.
+    \item \textbf{Block scope}: l'identificatore è dichiarato dentro un blocco.
+          Si può usare dalla dichiarazione fino alla fine del blocco più piccolo
+          che la contiene (spesso, ma non sempre, il corpo di una funzione).
+\end{itemize}
+
+\begin{esempio}
+\begin{codice}
+int p;                   // file scope
+
+int fun2(void) {         // fun2: file scope
+    int r = 3;           // r, s: block scope
+    int s = r;
+    while (r != s) {
+        r--;
+    }
+    return r;
+}
+\end{codice}
+\end{esempio}
+
+\begin{osservazione}
+Non si possono avere due variabili con lo stesso nome nello stesso scope:
+\begin{codice}
+int main() {
+    int a = 5;
+    float a = 6.5;   // errore: a già dichiarata
+}
+\end{codice}
+\end{osservazione}
+
+\section{Shadowing}
+
+Si può riusare un identificatore in una dichiarazione \emph{annidata} nello
+scope esistente; la nuova dichiarazione deve avere block scope, in un blocco
+contenuto in quello esterno. In questo caso la dichiarazione interna
+\emph{nasconde} (\emph{shadowing}) quella esterna, che non è visibile nello
+scope interno.
+
+\begin{esempio}
+\begin{codice}
+int main() {
+    int x = 1, y = 2, z = 3;
+    printf(" x = %d, y = %d, z = %d \n", x, y, z);
+    {
+        int x = 10;
+        float y = 20;
+        printf(" x = %d, y = %f, z = %d \n", x, y, z);
+        {
+            int z = 100;
+            printf(" x = %d, y = %f, z = %d \n", x, y, z);
+        }
+    }
+    return 0;
+}
+\end{codice}
+\begin{risultato}
+x = 1, y = 2, z = 3
+x = 10, y = 20.000000, z = 3
+x = 10, y = 20.000000, z = 100
+\end{risultato}
+\end{esempio}
+
+\begin{esempio}
+Qui \lstinline|x++| modifica la \lstinline|x| esterna (non è ridichiarata),
+mentre \lstinline|y++| modifica la \lstinline|y| interna; uscendo dal blocco
+interno la \lstinline|y| torna a valere 20.
+\begin{codice}
+int main() {
+    {
+        int x = 10, y = 20;
+        {
+            printf("x = %d, y = %d\n", x, y);
+            {
+                int y = 40;
+                x++;
+                y++;
+                printf("x = %d, y = %d\n", x, y);
+            }
+            printf("x = %d, y = %d\n", x, y);
+        }
+    }
+    return 0;
+}
+\end{codice}
+\begin{risultato}
+x = 10, y = 20
+x = 11, y = 41
+x = 11, y = 20
+\end{risultato}
+\end{esempio}
+
+\begin{esempio}
+Fuori dal blocco in cui è dichiarata, una variabile non è accessibile:
+\begin{codice}
+int main() {
+    {
+        int x = 10;
+    }
+    {
+        printf("%d", x);    // errore: x non visibile qui
+    }
+    return 0;
+}
+\end{codice}
+\begin{risultato}
+error: 'x' undeclared (first use in this function)
+\end{risultato}
+\end{esempio}
+
+\section{Binding statico}
+
+\begin{definizione}
+Un \emph{binding} è l'associazione tra un nome e l'oggetto che esso denota. Il
+\emph{binding time} è il momento in cui il binding viene creato (più in
+generale, il momento in cui viene presa una decisione di implementazione). La
+regione testuale del programma in cui un binding è attivo è il suo scope.
+\end{definizione}
+
+In C lo scope di un binding è determinato \emph{staticamente}, cioè a tempo di
+compilazione (\emph{static scoping}), come si vede dal testo del programma e non
+dall'ordine delle chiamate a run-time. Altri linguaggi usano lo scoping
+\emph{dinamico}: ad esempio in Perl \lstinline|my| definisce una variabile
+locale a scope statico, \lstinline|local| una a scope dinamico.
+
+\section{Esercizio}
+
+\begin{esercizio}
+Qual è l'output del seguente programma?
+\begin{codice}
+#include <stdio.h>
+
+int f1(void);
+int f2(int x, int a);
+
+int a;
+
+int main() {
+    int a, b, c;
+
+    a = 7;
+    b = f1();
+    c = f2(a, b);
+    printf("%d %d %d\n", a, b, c);
+}
+
+int f1(void) {
+    a = 12;
+    printf("%d ", a);
+    return (a + 5);
+}
+
+int f2(int x, int a) {
+    printf("%d ", a);
+    return (x * a);
+}
+\end{codice}
+\end{esercizio}
+
+\emph{Soluzione.}
+\begin{itemize}
+    \item In \lstinline|main| la \lstinline|a| locale (che vale 7) nasconde la
+          \lstinline|a| globale.
+    \item \lstinline|f1| non dichiara una propria \lstinline|a|: per binding
+          statico modifica quella \emph{globale}, la pone a 12, stampa
+          \texttt{12} e restituisce 17, quindi $b = 17$.
+    \item In \lstinline|f2(7, 17)| il parametro \lstinline|a| vale 17: stampa
+          \texttt{17} e restituisce $7 \cdot 17 = 119$, quindi $c = 119$.
+    \item Infine \lstinline|main| stampa \texttt{7 17 119}.
+\end{itemize}
+\begin{risultato}
+12 17 7 17 119
+\end{risultato}
+\end{document}
