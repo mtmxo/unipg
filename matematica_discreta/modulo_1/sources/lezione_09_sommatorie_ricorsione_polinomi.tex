@@ -1,0 +1,395 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\newrunin{osservazione}{Osservazione}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Sommatorie, ricorsione e polinomi}
+\author{Marco Cerbella}
+\date{Lezione 5 -- 5 ottobre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Sommatorie}
+
+Sia $f \colon \mathbb{N} \to \mathbb{R}$ una successione, $f(n) = a_n$. Ad
+esempio, per $a_n = n$ si ha $a_1 = 1$, $a_2 = 2$, \dots, $a_{100} = 100$.
+
+Sommare i primi due termini significa calcolare $a_1 + a_2 = 1 + 2$; i primi
+cinque, $a_1 + a_2 + a_3 + a_4 + a_5 = 1 + 2 + 3 + 4 + 5$. Per scrivere somme
+con molti termini si usa il simbolo di \emph{sommatoria}:
+\[
+\sum_{i=1}^{n} f(i) = f(1) + f(2) + f(3) + \dots + f(n).
+\]
+
+\begin{esempio}
+La somma dei primi $100$ numeri è
+\[
+1 + 2 + \dots + 100 = \sum_{i=1}^{100} a_i = \sum_{i=1}^{100} i .
+\]
+\end{esempio}
+
+\begin{definizione}
+Sia $a_n \colon \mathbb{N} \to \mathbb{R}$ una successione. Le si associa
+un'altra successione
+\[
+s_k = a_1 + a_2 + \dots + a_k = \sum_{i=1}^{k} a_i .
+\]
+La successione $\{s_k\}$ si dice \emph{serie associata} alla successione
+$\{a_n\}$.
+\end{definizione}
+
+\subsection{Proprietà della sommatoria}
+
+\begin{proposizione}
+Siano $\{a_n\}$, $\{b_n\}$ due successioni in $\mathbb{R}$ e $\bar n$ l'indice
+iniziale della somma. Si hanno le seguenti proprietà:
+\begin{enumerate}
+    \item $\displaystyle \sum_{i=\bar n}^{n} (\lambda a_i)
+          = \lambda \left( \sum_{i=\bar n}^{n} a_i \right)$, \quad
+          $\lambda \in \mathbb{R}$;
+    \item $\displaystyle \sum_{i=\bar n}^{n} (a_i + b_i)
+          = \left( \sum_{i=\bar n}^{n} a_i \right)
+          + \left( \sum_{i=\bar n}^{n} b_i \right)$;
+    \item $\displaystyle \sum_{i=\bar n}^{n} a_i
+          = \sum_{i=\bar n}^{k} a_i + \sum_{i=k+1}^{n} a_i$, \quad
+          con $\bar n \leq k < n$;
+    \item (cambio d'indice)
+          $\displaystyle \sum_{i=1}^{n} a_i = \sum_{j=1}^{n} a_j
+          = \sum_{k=1}^{n} a_k = \sum_{k=0}^{n-1} a_{k+1}$.
+\end{enumerate}
+\end{proposizione}
+
+\section{Ricorsione}
+
+\begin{definizione}
+Una successione $\{a_n\}_{n \in \mathbb{N}}$ di numeri reali è
+\emph{ricorsiva} se è definita specificando:
+\begin{enumerate}
+    \item il valore dei primi $m$ termini $a_1, a_2, \dots, a_m$;
+    \item una funzione $f \colon \mathbb{R}^m \to \mathbb{R}$ tale che
+          \[
+            a_i = f(a_{i-1}, a_{i-2}, \dots, a_{i-m}) \qquad \forall\, i > m .
+          \]
+\end{enumerate}
+\end{definizione}
+
+\begin{esempio}
+\begin{enumerate}
+    \item Sia $a_0 = 0$ e $a_n = 1 + a_{n-1}$ per $n \geq 1$. Allora
+          $a_1 = 1 + a_0 = 1$, $a_2 = 1 + a_1 = 2$, $a_3 = 1 + a_2 = 3$, \dots,
+          $a_n = n$ (formula chiusa).
+    \item \emph{Successione di Fibonacci}: $a_1 = 1$, $a_2 = 1$,
+          $a_n = a_{n-1} + a_{n-2}$. Si ottiene $1, 1, 2, 3, 5, 8, \dots$
+          (ad esempio $a_3 = a_2 + a_1 = 1 + 1 = 2$, $a_4 = a_3 + a_2 = 3$,
+          $a_5 = a_4 + a_3 = 5$, $a_6 = a_5 + a_4 = 8$).
+    \item Data $\{a_n\}$, la sua serie associata $\{s_n\}$ si definisce per
+          ricorsione:
+          \[
+            \begin{cases}
+              s_0 = a_0\\
+              s_n = s_{n-1} + a_n
+            \end{cases}
+          \]
+    \item $a_1 = 5$ e $a_n = 8$ per ogni $n > 1$: tutti i termini dopo il primo
+          valgono $8$.
+    \item \emph{Fattoriale}: $a_1 = 1$, $a_n = n \cdot a_{n-1}$. Allora
+          $a_2 = 2 \cdot a_1 = 2$, $a_3 = 3 \cdot a_2 = 3 \cdot 2 \cdot 1$,
+          $a_4 = 4 \cdot 3 \cdot 2 \cdot 1$, \dots, e in generale
+          $a_n = n \cdot (n-1) \cdot (n-2) \cdots 3 \cdot 2 \cdot 1$.
+          Si scrive $a_n = n!$ (formula esplicita), con $1! = 1$ e per
+          convenzione $0! = 1$.
+\end{enumerate}
+\end{esempio}
+
+\begin{definizione}
+Data una successione $\{a_n\}$, una \emph{formula esplicita} o
+\emph{formula chiusa} per $\{a_n\}$ è una formula $p(n)$ che esprime
+direttamente il valore della successione $a_n$ a partire da $n$.
+
+Se $\{a_n\}$ è definita per ricorsione, una formula chiusa per $\{a_n\}$ è
+un'espressione $p(n)$ che verifica le condizioni iniziali e verifica la
+relazione ricorsiva.
+\end{definizione}
+
+\begin{esempio}
+Sia
+\[
+  \begin{cases}
+    a_0 = 2\\
+    a_n = a_{n-1} + 5
+  \end{cases}
+\]
+Si ottiene $a_1 = 2 + 5 = 7$, $a_2 = 12$, $a_3 = 17$, $a_4 = 22$. La formula
+chiusa $a_n = 5n + 2$ è quella giusta? Verifichiamo.
+\begin{enumerate}
+    \item \emph{Caso base} ($n = 0$): la formula dà $0 \cdot 5 + 2 = 2$, che
+          coincide con il dato iniziale $a_0 = 2$.
+    \item \emph{Relazione ricorsiva} $a_n = a_{n-1} + 5$: sostituendo la
+          formula con $n-1$ al posto di $n$,
+          \[
+            a_{n-1} + 5 = \bigl( (n-1) \cdot 5 + 2 \bigr) + 5
+            = 5n - 5 + 2 + 5 = 5n + 2 = a_n .
+          \]
+\end{enumerate}
+Sono verificate entrambe: la formula chiusa è verificata.
+\end{esempio}
+
+\begin{esercizio}
+Verificare che per
+$\begin{cases} a_1 = 1\\ a_n = n + a_{n-1} \end{cases}$
+la formula chiusa è $a_n = \dfrac{n(n+1)}{2}$.
+\end{esercizio}
+
+\emph{Svolgimento (aggiunto).} Per $n = 1$ la formula dà $\frac{1 \cdot 2}{2} = 1 = a_1$.
+Inoltre
+$a_{n-1} + n = \frac{(n-1)n}{2} + n = \frac{n^2 - n + 2n}{2} = \frac{n(n+1)}{2}$.
+
+\subsection{Progressioni aritmetiche}
+
+\begin{definizione}
+Una successione $a_n \colon \mathbb{N} \to \mathbb{R}$ è una
+\emph{progressione aritmetica} se
+\[
+  a_n - a_{n-1} = d, \qquad d \in \mathbb{R}.
+\]
+Definita in maniera ricorsiva, $a_0 = a$ e $a_n = d + a_{n-1}$, ha formula
+chiusa
+\[
+  a_n = a + n \cdot d .
+\]
+\end{definizione}
+
+\begin{esercizio}
+Data $\begin{cases} a_0 = 8\\ a_n = a_{n-1} - 3 \end{cases}$, trovare la formula
+chiusa e verificarla.
+\end{esercizio}
+
+\emph{Svolgimento (aggiunto).} È una progressione aritmetica con $a = 8$ e
+$d = -3$, quindi $a_n = 8 - 3n$: per $n = 0$ vale $8$ e
+$a_{n-1} - 3 = 8 - 3(n-1) - 3 = 8 - 3n = a_n$.
+
+\section{Polinomi}
+
+\begin{definizione}
+Un \emph{polinomio nell'incognita $t$ a coefficienti in $\mathbb{R}$} è una
+funzione $p \colon \mathbb{R} \to \mathbb{R}$ del tipo
+\[
+  p(t) = a_0 + a_1 t + a_2 t^2 + a_3 t^3 + \dots + a_n t^n
+       = \sum_{i=0}^{n} a_i t^i ,
+\]
+dove $a_0, a_1, \dots, a_n \in \mathbb{R}$ sono i \emph{coefficienti} e $a_0$ è
+il \emph{termine noto}.
+
+Il più grande indice $k \in \mathbb{N}$ tale che $a_i = 0$ per $i > k$ e
+$a_k \neq 0$ è il \emph{grado} del polinomio, $\operatorname{gr}(p) = k$. Se
+$k$ non esiste, $\operatorname{gr}(p) = -\infty$.
+\end{definizione}
+
+\begin{esempio}
+\begin{itemize}
+    \item $o(t) = 0$ è il \emph{polinomio nullo}, con
+          $\operatorname{gr}(o) = -\infty$.
+    \item $q(t) = 3$ è un \emph{polinomio costante}
+          ($a_0 = 3$, $a_1 = a_2 = \dots = 0$) e $\operatorname{gr}(q) = 0$.
+    \item $p(t) = 5 - t + t^2$ ha $\operatorname{gr}(p) = 2$.
+\end{itemize}
+\end{esempio}
+
+Si indica con $\mathbb{R}[t]$ l'insieme dei polinomi nell'incognita $t$ a
+coefficienti reali, e con
+\[
+  \mathbb{R}_d[t] = \{ p \in \mathbb{R}[t] \mid \operatorname{gr}(p) \leq d \}
+\]
+quelli di grado al più $d$. Ad esempio $5 + t^2$ e $1 - 3t - t^2$ stanno in
+$\mathbb{R}_2[t]$, il polinomio nullo $o$ sta in $\mathbb{R}_0[t]$, mentre
+$5 + t^2 \notin \mathbb{R}_1[t]$.
+
+\begin{osservazione}
+Due polinomi $p = \sum_{i=0}^{n} a_i t^i$ e $q = \sum_{i=0}^{n} b_i t^i$ sono
+uguali, $p = q$, \textbf{se e solo se} $a_i = b_i$ per ogni $i$. Ad esempio
+$(x+2)^2 = x^2 + 4x + 4$.
+\end{osservazione}
+
+\subsection{Operazioni}
+
+Dati $p = \sum_{i=0}^{n} a_i t^i$, $q = \sum_{i=0}^{n} b_i t^i$ e
+$\lambda \in \mathbb{R}$, si definiscono:
+\begin{itemize}
+    \item il \emph{prodotto per uno scalare}:
+          $(\lambda p) = \sum_{i=0}^{n} (\lambda a_i)\, t^i$;
+    \item la \emph{somma}: $(p + q) = \sum_{i=0}^{n} (a_i + b_i)\, t^i$;
+    \item il polinomio $t p = \sum_{i=0}^{n} a_i t^{i+1}
+          = t a_0 + a_1 t^2 + \dots + a_n t^{n+1}
+          = \sum_{i=1}^{n+1} a_{i-1} t^i$;
+    \item il \emph{prodotto}:
+          $p \cdot q = (a_0 + \dots + a_n t^n) \cdot q
+          = a_0 q + a_1 t q + \dots + a_n t^n q$.
+\end{itemize}
+
+\begin{esempio}
+Siano $p = 6 + 3t - t^2$ e $q = -6 + 5t$. Allora
+\begin{align*}
+p + q &= (6 - 6) + (3 + 5)\,t + (-1 + 0)\,t^2 = 8t - t^2,\\
+p \cdot q &= (6 + 3t - t^2)(-6 + 5t)
+  = 6(-6 + 5t) + 3t(-6 + 5t) - t^2(-6 + 5t)\\
+  &= -36 + 30t - 18t + 15t^2 + 6t^2 - 5t^3
+  = -36 + 12t + 21t^2 - 5t^3 .
+\end{align*}
+\end{esempio}
+
+\begin{osservazione}
+Per i gradi valgono
+\[
+  \operatorname{gr}(p + q) \leq \max\{\operatorname{gr}(p), \operatorname{gr}(q)\},
+  \qquad
+  \operatorname{gr}(p \cdot q) = \operatorname{gr}(p) + \operatorname{gr}(q).
+\]
+\end{osservazione}
+
+\section{Divisione tra polinomi}
+
+\begin{teorema}[Divisione con resto]
+Siano $f, g \in \mathbb{R}[t]$ con $g \neq 0$. Allora esistono e sono unici due
+polinomi $q, r \in \mathbb{R}[t]$ tali che
+\[
+  f = q \cdot g + r , \qquad \operatorname{gr}(r) < \operatorname{gr}(g).
+\]
+$q$ è il \emph{quoziente} e $r$ il \emph{resto}.
+\end{teorema}
+
+\begin{esempio}
+Siano $f(t) = t^4 - t^3 + t - 1$ e $g(t) = t^2 - t$. Si ha
+$t^2 \cdot g = t^4 - t^3$, quindi
+\[
+  f - t^2 g = t - 1 ,
+\]
+che ha grado $1 < \operatorname{gr}(g) = 2$: la divisione si ferma. Dunque
+$q = t^2$, $r = t - 1$ e
+\[
+  f(t) = t^2 \cdot g + (t - 1).
+\]
+\end{esempio}
+
+\begin{esempio}
+Siano $f(t) = t^4 - t^3 + t - 1$ e $g(t) = t + 1$, con
+$\operatorname{gr}(g) = 1$. Ad ogni passo si sottrae al resto parziale il
+multiplo di $g$ che ne elimina il termine di grado massimo:
+\[
+\begin{array}{rcl}
+  t^4 - t^3 + 0t^2 + t - 1 \;-\; t^3 g &=& -2t^3 + 0t^2 + t - 1 \\
+  -2t^3 + 0t^2 + t - 1 \;-\; (-2t^2)\, g &=& 2t^2 + t - 1 \\
+  2t^2 + t - 1 \;-\; (2t)\, g &=& -t - 1 \\
+  -t - 1 \;-\; (-1)\, g &=& 0
+\end{array}
+\]
+Il quoziente è $q = t^3 - 2t^2 + 2t - 1$ e il resto è $r = 0$
+($\operatorname{gr}(0) = -\infty < \operatorname{gr}(g)$). Quindi
+\[
+  f(t) = (t^3 - 2t^2 + 2t - 1)\, g + 0 .
+\]
+\end{esempio}
+
+\begin{definizione}
+Siano $f, g \in \mathbb{R}[t]$ con $g \neq 0$. Si dice che $g$ \emph{divide}
+$f$, e si scrive $g \mid f$, se esiste $q \in \mathbb{R}[t]$ tale che
+$f = q \cdot g$ (cioè se il resto della divisione è nullo).
+\end{definizione}
+
+\end{document}

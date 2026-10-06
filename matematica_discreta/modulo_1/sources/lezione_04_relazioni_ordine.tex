@@ -1,0 +1,349 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\newrunin{osservazione}{Osservazione}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Relazioni d'ordine}
+\author{Marco Cerbella}
+\date{Lezione 3 -- 28 settembre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Ordini parziali e totali}
+
+\begin{definizione}
+Sia $A$ un insieme e $R$ una relazione su $A$. $R$ è
+\emph{antisimmetrica} se
+\[
+a \mathrel{R} b \ \land\ b \mathrel{R} a \implies a = b.
+\]
+\end{definizione}
+
+\begin{definizione}
+Una relazione $R$ (che si indica con $\preceq$) su $A$ è una
+\emph{relazione d'ordine parziale} se è riflessiva, antisimmetrica e
+transitiva.
+\end{definizione}
+
+\begin{itemize}
+    \item $A$ con una relazione d'ordine si dice \emph{parzialmente
+          ordinato}.
+    \item Si scrive $a \preceq b$; con $a \prec b$ si intende
+          $a \preceq b$ e $a \neq b$.
+    \item Una relazione d'ordine $\preceq$ è \emph{totale} se per ogni
+          $a, b \in A$ vale $a \preceq b$ oppure $b \preceq a$.
+\end{itemize}
+$A$ con una relazione d'ordine totale si dice \emph{totalmente ordinato}
+o \emph{catena}.
+
+\begin{esempio}
+\leavevmode
+\begin{enumerate}
+    \item $(\mathbb{N}, \leq)$ è riflessivo ($n \leq n$), antisimmetrico
+          ($n \leq k \land k \leq n \Rightarrow n = k$) e transitivo
+          ($n \leq k \land k \leq h \Rightarrow n \leq h$). È una
+          relazione d'ordine \textbf{totale}: per ogni $n, k \in
+          \mathbb{N}$ vale $n \leq k$ oppure $k \leq n$.
+
+    \item $(\mathbb{Z}, \leq)$ è una relazione d'ordine totale.
+
+    \item Sia $B = \{x, y, z\}$. Allora
+          \[
+          \mathcal{P}(B) = \big\{\emptyset, \{x\}, \{y\}, \{z\},
+          \{x,y\}, \{x,z\}, \{y,z\}, B\big\}.
+          \]
+          $(\mathcal{P}(B), \subseteq)$ è una relazione d'ordine
+          \textbf{parziale}. Non è totale: $\{x, y\}$ e $\{y, z\}$ non
+          sono in relazione.
+\end{enumerate}
+\end{esempio}
+
+\section{Il diagramma di Hasse}
+
+\begin{osservazione}
+Ad ogni relazione d'ordine si può associare un \emph{diagramma di Hasse}:
+\begin{itemize}
+    \item i nodi sono esattamente gli elementi dell'insieme;
+    \item se $x \preceq y$ (con $x \neq y$) il nodo $x$ è disegnato più in
+          basso del nodo $y$;
+    \item due nodi $x, y$ sono collegati da un arco se \emph{non} esiste
+          $z$ tale che $x \prec z$ e $z \prec y$ (cioè se $y$ ``viene
+          subito dopo'' $x$).
+\end{itemize}
+\end{osservazione}
+
+\begin{center}
+\begin{tikzpicture}[scale=1.1, every node/.style={font=\small}]
+  % catena N
+  \begin{scope}
+    \foreach \n/\y in {0/0, 1/1, 2/2, 3/3} {
+      \fill (0,\y) circle (1.5pt) node[right=2pt] {$\n$};
+    }
+    \draw (0,0) -- (0,3.4);
+    \node at (0,-0.7) {$(\mathbb{N}, \leq)$};
+  \end{scope}
+
+  % P(B)
+  \begin{scope}[xshift=6cm]
+    \node (e) at (0,0) {$\emptyset$};
+    \node (x) at (-2,1.4) {$\{x\}$};
+    \node (y) at (0,1.4) {$\{y\}$};
+    \node (z) at (2,1.4) {$\{z\}$};
+    \node (xy) at (-2,2.9) {$\{x,y\}$};
+    \node (xz) at (0,2.9) {$\{x,z\}$};
+    \node (yz) at (2,2.9) {$\{y,z\}$};
+    \node (b) at (0,4.3) {$B$};
+    \foreach \a/\b in {e/x, e/y, e/z, x/xy, x/xz, y/xy, y/yz, z/xz, z/yz,
+                       xy/b, xz/b, yz/b}
+      \draw (\a) -- (\b);
+    \node at (0,-0.9) {$(\mathcal{P}(B), \subseteq)$};
+  \end{scope}
+\end{tikzpicture}
+\end{center}
+
+\begin{esempio}[continua]
+\leavevmode
+\begin{enumerate}
+    \setcounter{enumi}{3}
+    \item Sia $X = \{1, 2, 3, 4, 5, 6\}$ con la relazione ``$\mid$''
+          (divide). Le coppie in relazione sono
+          \begin{center}
+          \begin{tabular}{llllll}
+          $1 \mid 1$ & $1 \mid 2$ & $1 \mid 3$ & $1 \mid 4$ & $1 \mid 5$ &
+          $1 \mid 6$ \\
+                     & $2 \mid 2$ & $2 \mid 4$ & $2 \mid 6$ \\
+                     & $3 \mid 3$ & $3 \mid 6$ \\
+                     & $4 \mid 4$ & $5 \mid 5$ & $6 \mid 6$
+          \end{tabular}
+          \end{center}
+          È una relazione d'ordine parziale, non totale: $4 \nmid 5$ e
+          $5 \nmid 4$.
+
+\begin{center}
+\begin{tikzpicture}[scale=1.1, every node/.style={font=\small}]
+  \node (1) at (1.5,0) {$1$};
+  \node (2) at (0,1.4) {$2$};
+  \node (3) at (1.5,1.4) {$3$};
+  \node (5) at (3,1.4) {$5$};
+  \node (4) at (0,2.8) {$4$};
+  \node (6) at (1.5,2.8) {$6$};
+  \foreach \a/\b in {1/2, 1/3, 1/5, 2/4, 2/6, 3/6}
+    \draw (\a) -- (\b);
+\end{tikzpicture}
+\end{center}
+
+    \item $(\mathbb{N} \setminus \{0\}, \mid)$ è una relazione d'ordine non
+          totale.
+
+    \item $\mathbb{Z} \setminus \{0\}$ con ``$\mid$'' (divide) è una
+          relazione d'ordine? \textbf{No}: non è antisimmetrica, perché
+          $5 \mid -5$ e $-5 \mid 5$ ma $-5 \neq 5$.
+\end{enumerate}
+\end{esempio}
+
+\begin{osservazione}
+La relazione opposta $R^{op}$ scambia le coppie. Se $\preceq$ è una
+relazione d'ordine, allora $(\preceq)^{op} = \succeq$ è ancora una relazione
+d'ordine: il suo diagramma di Hasse si ottiene capovolgendo quello di
+$\preceq$. Ad esempio $(\leq)^{op} = \ \geq$ su $\mathbb{N}$, e
+$(\subseteq)^{op} = \ \supseteq$ su $\mathcal{P}(B)$ (con $B$ in basso e
+$\emptyset$ in alto).
+\end{osservazione}
+
+\section{Minimo, massimo, minimale, massimale}
+
+\begin{definizione}
+Sia $(A, \preceq)$ un insieme parzialmente ordinato. Un elemento $t \in A$ è:
+\begin{itemize}
+    \item \emph{minimo} se $\forall\, a \in A \quad t \preceq a$;
+    \item \emph{massimo} se $\forall\, a \in A \quad a \preceq t$;
+    \item \emph{minimale} se non ci sono elementi minori di $t$, cioè
+          $\nexists\, a \in A$ tale che $a \prec t$;
+    \item \emph{massimale} se non ci sono elementi maggiori di $t$, cioè
+          $\nexists\, a \in A$ tale che $t \prec a$.
+\end{itemize}
+\end{definizione}
+
+Un minimo è sempre minimale (e un massimo è sempre massimale), ma il
+viceversa in generale è falso se l'ordine non è totale.
+
+\begin{esempio}
+Negli esempi precedenti:
+\begin{itemize}
+    \item $(\mathbb{N}, \leq)$: $0$ è minimo e minimale; non esistono
+          massimo né massimali.
+    \item $(\mathbb{Z}, \leq)$: non esistono minimo, massimo, minimali né
+          massimali.
+    \item $(\mathcal{P}(B), \subseteq)$: $\emptyset$ è minimo e minimale,
+          $B$ è massimo e massimale.
+    \item $(\{1, \dots, 6\}, \mid)$: $1$ è minimo e minimale; non esiste
+          il massimo; $4$, $5$, $6$ sono massimali.
+    \item $(\mathbb{N} \setminus \{0\}, \mid)$: $1$ è minimo e minimale;
+          non esistono massimo né massimali.
+\end{itemize}
+\end{esempio}
+
+\section{Maggioranti, minoranti, estremo superiore e inferiore}
+
+\begin{definizione}
+Sia $\preceq$ una relazione d'ordine su $A$ e sia $B \subseteq A$ un
+sottoinsieme. Un elemento $w \in A$ è:
+\begin{itemize}
+    \item un \emph{maggiorante} di $B$ se $b \preceq w$ per ogni
+          $b \in B$;
+    \item un \emph{minorante} di $B$ se $w \preceq b$ per ogni $b \in B$.
+\end{itemize}
+\end{definizione}
+
+\begin{esempio}
+\leavevmode
+\begin{enumerate}
+    \item In $(\mathbb{N}, \leq)$ sia $B = \{6, 9, 12\}$.
+          I minoranti di $B$ sono $\{0, 1, 2, \dots, 6\}$, i maggioranti
+          sono $\{12, 13, 14, \dots\}$. Il più grande dei minoranti è
+          $6 = \inf(B)$, il più piccolo dei maggioranti è
+          $12 = \sup(B)$.
+
+    \item In $(\mathbb{Z}, \leq)$ con $B = \{6,\allowbreak 9,\allowbreak 12\}$: i minoranti sono
+          $\{\dots,\allowbreak -1,\allowbreak 0,\allowbreak 1,\allowbreak \dots,\allowbreak 6\}$, i maggioranti
+          $\{12,\allowbreak 13,\allowbreak \dots\}$; $6 = \inf(B)$ e $12 = \sup(B)$.
+
+    \item In $(\mathbb{N} \setminus \{0\}, \mid)$ con $B = \{6, 9, 12\}$:
+          i minoranti sono i divisori comuni, $\{1, 3\}$; poiché $1 \mid 3$,
+          il più grande (rispetto a $\mid$) è $3 = \inf(B)$. I maggioranti
+          sono i multipli comuni, $\{36, 72, \dots\}$, cioè i multipli di
+          $36$; $36$ divide tutti gli altri, quindi $36 = \sup(B)$.
+
+    \item In $(\mathbb{Q}, \leq)$ sia
+          $B = \{x \in \mathbb{Q} \mid \sqrt{2} < x < \sqrt{3}\}$.
+          I minoranti sono tutti i razionali $q < \sqrt{2}$, i maggioranti
+          tutti i razionali $q > \sqrt{3}$. Tra i minoranti non c'è un
+          massimo e tra i maggioranti non c'è un minimo: in $\mathbb{Q}$
+          non esistono né $\inf(B)$ né $\sup(B)$.
+\end{enumerate}
+\end{esempio}
+
+\begin{definizione}
+Sia $(A, \preceq)$ parzialmente ordinato e $B \subseteq A$.
+\begin{itemize}
+    \item Un elemento $t \in A$ è l'\emph{estremo inferiore} di $B$,
+          $t = \inf(B)$, se $t$ è il \textbf{massimo} tra i minoranti di
+          $B$, cioè
+          \[
+          t = \inf(B) \iff
+          \begin{cases}
+            t \preceq b & \forall\, b \in B, \\
+            w \preceq b \ \ \forall\, b \in B \implies w \preceq t.
+          \end{cases}
+          \]
+    \item Un elemento $t \in A$ è l'\emph{estremo superiore} di $B$,
+          $t = \sup(B)$, se $t$ è il \textbf{minimo} tra i maggioranti di
+          $B$, cioè
+          \[
+          t = \sup(B) \iff
+          \begin{cases}
+            b \preceq t & \forall\, b \in B, \\
+            b \preceq w \ \ \forall\, b \in B \implies t \preceq w.
+          \end{cases}
+          \]
+\end{itemize}
+\end{definizione}
+
+\end{document}

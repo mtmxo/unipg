@@ -1,0 +1,580 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\NewTColorBox{osservazione}{}{nota,
+  before upper={\textbf{Osservazione.}\ }}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Tipi di dato}
+\author{Marco Cerbella}
+\date{Lezione 8 -- 7 ottobre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Tipi e oggetti}
+
+I programmi devono memorizzare ed elaborare dati di tipo diverso, come interi e
+numeri in virgola mobile, in modi diversi: il compilatore deve quindi sapere che
+tipo di dato rappresenta un valore.
+
+\begin{definizione}
+In C un \emph{oggetto} è una zona di memoria il cui contenuto può rappresentare
+valori. Gli oggetti che hanno un nome sono detti \emph{variabili}. Il
+\emph{tipo} di un oggetto determina:
+\begin{itemize}
+    \item quanto spazio occupa in memoria;
+    \item i valori che la variabile può assumere;
+    \item le operazioni che si possono eseguire su di essa.
+\end{itemize}
+\end{definizione}
+
+\subsection{Tipi in C}
+
+\begin{itemize}
+    \item \textbf{Tipi di base}: interi (standard ed estesi) e floating-point
+          (reali e complessi).
+    \item \textbf{Tipi enumerati}.
+    \item Il tipo \lstinline|void|.
+    \item \textbf{Tipi derivati}: puntatori, array, strutture, unioni, funzioni.
+\end{itemize}
+
+I tipi di base e i tipi enumerati formano i \emph{tipi aritmetici}; i tipi
+aritmetici e i puntatori formano i \emph{tipi scalari}; array e strutture sono
+detti \emph{tipi aggregati}. Un \emph{tipo funzione} descrive l'interfaccia di
+una funzione: il tipo del valore restituito ed eventualmente i tipi dei
+parametri.
+
+\section{Interi}
+
+I tipi interi con segno sono cinque (molti hanno sinonimi):
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\textbf{tipo} & \textbf{sinonimi} \\
+\midrule
+\lstinline|signed char| & \\
+\lstinline|int| & \lstinline|signed|, \lstinline|signed int| \\
+\lstinline|short| & \lstinline|short int|, \lstinline|signed short|, \lstinline|signed short int| \\
+\lstinline|long| & \lstinline|long int|, \lstinline|signed long|, \lstinline|signed long int| \\
+\lstinline|long long| (C99) & \lstinline|long long int|, \lstinline|signed long long|, \lstinline|signed long long int| \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+C definisce solo le dimensioni minime: \lstinline|short| occupa almeno 2 byte,
+\lstinline|long| almeno 4 e \lstinline|long long| almeno 8. I tipi possono essere
+più grandi, ma devono rispettare l'ordine
+\[
+  \texttt{sizeof(short)} \leq \texttt{sizeof(int)} \leq \texttt{sizeof(long)}
+  \leq \texttt{sizeof(long long)} .
+\]
+
+\subsection{Booleani}
+
+In C non esistono \emph{true} e \emph{false}: $0$ è falso e qualsiasi valore
+diverso da $0$ (ad esempio $1$, $-25$, $123456$) è vero.
+
+\begin{codice}
+if (3)                      if (0)
+    printf("YES\n");            printf("YES\n");
+else                        else
+    printf("NO\n");             printf("NO\n");
+\end{codice}
+
+Il primo \lstinline|if| stampa \texttt{YES}, il secondo \texttt{NO}.
+
+C99 ha introdotto il tipo intero senza segno \lstinline|_Bool|: \emph{vero} è
+codificato come $1$, \emph{falso} come $0$. Includendo l'header
+\lstinline|stdbool.h| si possono usare anche \lstinline|bool|, \lstinline|true| e
+\lstinline|false|: \lstinline|bool| è sinonimo di \lstinline|_Bool| e
+\lstinline|true|, \lstinline|false| sono costanti uguali a $1$ e $0$.
+
+\subsection{Caratteri}
+
+Anche \lstinline|char| è un tipo intero standard, ma il nome \lstinline|char| è
+sinonimo di \lstinline|signed char| oppure di \lstinline|unsigned char| a seconda
+del compilatore. Occupa 1 byte e i caratteri corrispondono ai codici della
+tabella ASCII.
+
+Con le variabili \lstinline|char| si può fare aritmetica: sta al programmatore
+decidere se il numero contenuto è un codice di carattere o altro.
+
+\begin{codice}
+char ch = 'A';       // variabile di tipo char
+printf("The character %c has the character code %d.\n", ch, ch);
+printf("%c", ch + 1);
+\end{codice}
+\begin{risultato}
+The character A has the character code 65.
+B
+\end{risultato}
+
+\section{Sistemi di numerazione}
+
+\begin{definizione}
+Il sistema \emph{binario} (base 2) rappresenta i numeri con due soli simboli,
+$0$ e $1$; ogni cifra è un \emph{bit}. Quasi tutti i calcolatori lo usano
+internamente perché è semplice da realizzare con circuiti a porte logiche.
+\end{definizione}
+
+\begin{definizione}
+Il sistema \emph{esadecimale} (base 16) usa sedici simboli: le cifre $0$--$9$ per
+i valori da zero a nove e le lettere \texttt{A, B, C, D, E, F} (o minuscole) per
+i valori da dieci a quindici. Ogni cifra esadecimale corrisponde a 4 bit (un
+\emph{nibble}, metà di un byte da 8 bit): è una rappresentazione più
+leggibile dei valori binari. Il sistema \emph{ottale} (base 8) usa le cifre
+$0$--$7$.
+\end{definizione}
+
+\begin{center}
+\begin{tabular}{rcc @{\qquad} rcc}
+\toprule
+\textbf{Bin.} & \textbf{Esa.} & \textbf{Dec.} &
+\textbf{Bin.} & \textbf{Esa.} & \textbf{Dec.} \\
+\midrule
+0    & 0 & 0  & 1000 & 8 & 8 \\
+1    & 1 & 1  & 1001 & 9 & 9 \\
+10   & 2 & 2  & 1010 & A & 10 \\
+11   & 3 & 3  & 1011 & B & 11 \\
+100  & 4 & 4  & 1100 & C & 12 \\
+101  & 5 & 5  & 1101 & D & 13 \\
+110  & 6 & 6  & 1110 & E & 14 \\
+111  & 7 & 7  & 1111 & F & 15 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Da binario/esadecimale a decimale}
+
+Un numero con cifre $d_n \dots d_1 d_0$ in base $b$ vale
+$d_n b^n + d_{n-1} b^{n-1} + \dots + d_1 b^1 + d_0 b^0$ (in base 2:
+$d_n 2^n + \dots + d_1 2^1 + d_0 2^0 = N_{10}$).
+
+\begin{esempio}
+$1001_2 = 1 \cdot 2^3 + 0 \cdot 2^2 + 0 \cdot 2^1 + 1 \cdot 2^0 = 9$ \quad e \quad
+$\texttt{002B}_{16} = 2 \cdot 16 + 11 = 43$.
+\end{esempio}
+
+\subsection{Da decimale a binario/esadecimale}
+
+Si divide ripetutamente il numero per la base e si leggono i resti
+\emph{dal basso verso l'alto}. Per l'ottale si usa lo stesso algoritmo con base 8.
+
+\begin{esempio}
+$156$ in binario (divisioni per 2): i quozienti successivi sono
+$78, 39, 19, 9, 4, 2, 1, 0$ e i resti $0, 0, 1, 1, 1, 0, 0, 1$. Letti dal basso:
+$156 = 10011100_2$.
+
+$1565$ in esadecimale (divisioni per 16): $1565 = 97 \cdot 16 + 13$ (resto
+$13 = \texttt{d}$), $97 = 6 \cdot 16 + 1$ (resto $1$), $6 = 0 \cdot 16 + 6$
+(resto $6$). Quindi $1565 = \texttt{61d}_{16}$.
+\end{esempio}
+
+Con $N$ bit si rappresentano i numeri da $0$ a $2^N - 1$; con 8 bit (un byte)
+da $0$ a $255$ (da \texttt{0000 0000} a \texttt{1111 1111}). Servono però anche i
+numeri negativi, e per questo esistono rappresentazioni diverse: segno e modulo,
+complemento a due.
+
+\section{Rappresentazione degli interi in memoria}
+
+\subsection{Segno e modulo}
+
+Un bit (di solito il più a sinistra) indica il segno: $0$ per i positivi, $1$ per
+i negativi; i bit restanti rappresentano il modulo. Ad esempio \texttt{1001 1000}
+vale $-24$ (mentre se si usasse solo per numeri positivi varrebbe $152$).
+
+Con $n$ bit si rappresentano i valori da $-(2^{n-1} - 1)$ a $2^{n-1} - 1$, e
+$\pm 0$: con 8 bit da $-127$ a $+127$.
+
+\begin{osservazione}
+Problema: lo zero ha due rappresentazioni, \texttt{0000 0000} ($+0$) e
+\texttt{1000 0000} ($-0$). Una soluzione è il complemento a due.
+\end{osservazione}
+
+\subsection{Complemento a due}
+
+\begin{center}
+\begin{tabular}{ccc}
+\toprule
+\textbf{Valore binario} & \textbf{Complemento a due} & \textbf{Senza segno} \\
+\midrule
+\texttt{00000000} & $0$    & $0$   \\
+\texttt{00000001} & $1$    & $1$   \\
+$\vdots$ & $\vdots$ & $\vdots$ \\
+\texttt{01111110} & $126$  & $126$ \\
+\texttt{01111111} & $127$  & $127$ \\
+\texttt{10000000} & $-128$ & $128$ \\
+\texttt{10000001} & $-127$ & $129$ \\
+\texttt{10000010} & $-126$ & $130$ \\
+$\vdots$ & $\vdots$ & $\vdots$ \\
+\texttt{11111110} & $-2$   & $254$ \\
+\texttt{11111111} & $-1$   & $255$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Nel complemento a due esiste un solo zero, \texttt{00000000}. Per cambiare segno a
+un numero (positivo o negativo) si \textbf{invertono tutti i bit e poi si somma 1}.
+
+\begin{esempio}
+\begin{itemize}
+    \item \texttt{0000 0101} (valore $5$); invertendo: \texttt{1111 1010};
+          sommando $1$: \texttt{1111 1011}, che vale $-5$.
+    \item Da \texttt{1111 1011}: invertendo \texttt{0000 0100}, sommando $1$
+          \texttt{0000 0101}, cioè di nuovo $5$.
+\end{itemize}
+\end{esempio}
+
+Con $n$ bit si rappresentano i valori da $-2^{n-1}$ a $2^{n-1} - 1$: non c'è
+``$-0$'', quindi si rappresenta un numero negativo in più. Con 8 bit, da $-128$
+(\texttt{1000 0000}) a $+127$ (\texttt{0111 1111}).
+
+\begin{osservazione}
+La regola ``inverti e somma 1'' non funziona per $-128$, perché $128$ non è
+rappresentabile con 8 bit in complemento a due. D'ora in poi si usa il complemento
+a due.
+\end{osservazione}
+
+\subsection{Endianness}
+
+\begin{definizione}
+L'\emph{endianness} indica l'ordine usato per interpretare numericamente una
+sequenza di byte della memoria come una parola più grande (e l'ordine di
+trasmissione dei byte su un collegamento digitale). Le parole possono essere in
+formato \emph{big-endian} o \emph{little-endian}, a seconda che si parta
+dall'estremità più significativa (big end) o meno significativa (little end).
+\end{definizione}
+
+Esempi: i mainframe IBM z/Architecture e i Motorola 68000 usano big-endian, i
+processori Intel x86 little-endian.
+
+La memoria è un array di byte; ogni byte ha il suo \emph{indirizzo logico}
+(un numero positivo), cioè l'indirizzo al quale un elemento appare risiedere dal
+punto di vista di un programma in esecuzione. Per architetture a 64 bit il limite
+superiore è $2^{64} - 1$.
+
+\begin{esempio}
+Il numero $2$ scritto su 4 byte, a partire dall'indirizzo $1500$:
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+ & 1500 & 1501 & 1502 & 1503 \\
+\midrule
+big-endian    & \texttt{00} & \texttt{00} & \texttt{00} & \texttt{02} \\
+little-endian & \texttt{02} & \texttt{00} & \texttt{00} & \texttt{00} \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{esempio}
+
+\begin{esempio}
+Sulla stringa di 4 bit \texttt{0010}, in complemento a due: in big-endian vale $2$;
+in little-endian si leggono i bit in ordine inverso (\texttt{0100}) e vale $4$.
+Sulla stringa \texttt{1010}: in big-endian vale $-6$, in little-endian
+(\texttt{0101}) vale $5$.
+\end{esempio}
+
+\section{Dimensione e limiti dei tipi}
+
+L'operatore \lstinline|sizeof| restituisce la dimensione esatta in byte di un tipo
+o di una variabile: \lstinline|sizeof(tipo)| oppure \lstinline|sizeof espressione|
+(in questo caso conta il tipo dell'espressione).
+
+\begin{codice}
+int iIndex;
+iIndex = 1000;
+// sizeof(int) e sizeof(iIndex) valgono entrambi 4
+\end{codice}
+
+I limiti dei tipi interi per il proprio compilatore sono nell'header
+\lstinline|limits.h|, che definisce macro come \lstinline|INT_MIN|,
+\lstinline|INT_MAX|, \lstinline|UINT_MAX|, \lstinline|CHAR_MIN|,
+\lstinline|CHAR_MAX|.
+
+\begin{codice}
+#include <stdio.h>
+#include <limits.h>
+
+int main() {
+    printf(" char %zu %d %d\n", sizeof(char), CHAR_MIN, CHAR_MAX);
+    printf(" int %zu %d %d\n", sizeof(int), INT_MIN, INT_MAX);
+    return 0;
+}
+\end{codice}
+\begin{risultato}
+ char 1 -128 127
+ int 4 -2147483648 2147483647
+\end{risultato}
+
+\begin{osservazione}
+Il risultato di \lstinline|sizeof| ha tipo \lstinline|size_t|: per stamparlo è
+corretto \lstinline|%zu| (nelle slide compare \lstinline|%d|). I valori stampati
+dipendono dalla piattaforma (qui un caso tipico).
+\end{osservazione}
+
+\section{Numeri in virgola mobile}
+
+Per rappresentare i non interi, con la virgola in qualsiasi posizione, C ha tre
+tipi floating-point standard:
+\begin{itemize}
+    \item \lstinline|float|: precisione singola;
+    \item \lstinline|double|: precisione doppia;
+    \item \lstinline|long double|: precisione estesa.
+\end{itemize}
+
+\subsection{Precisione}
+
+Un valore in virgola mobile si memorizza solo con una \emph{precisione} limitata,
+determinata dal formato binario e dalla memoria usata. La precisione si esprime in
+cifre significative: ad esempio con sei cifre significative la conversione in un
+numero decimale di sei cifre restituisce le sei cifre originali. La posizione della
+virgola e gli zeri iniziali o finali non contano: $123\,456\,000$ e
+$0{,}00123456$ si possono entrambi memorizzare in un tipo con precisione a sei
+cifre.
+
+In C le operazioni aritmetiche tra numeri in virgola mobile sono eseguite
+internamente con precisione double o superiore.
+
+\begin{codice}
+float height = 1.2345, width = 2.3456;   // precisione singola
+double area = height * width;            // il calcolo è fatto in double
+\end{codice}
+
+Se il risultato è assegnato a una variabile \lstinline|float|, viene arrotondato
+se necessario. L'header \lstinline|float.h| definisce macro come
+\lstinline|FLT_MIN|, \lstinline|FLT_MAX| e \lstinline|FLT_DIG|, che indicano
+intervallo di valori e precisione del tipo \lstinline|float|.
+
+\subsection{Notazione E e formato IEEE 754}
+
+La \emph{notazione E} è la rappresentazione testuale della notazione scientifica:
+\texttt{1.234e+56} significa $1{,}234 \times 10^{56}$.
+
+Nel formato \emph{IEEE 754} ogni numero finito è descritto da tre interi: un segno
+$s$ (zero o uno), un \emph{significando} (o mantissa) $c$ e un esponente $q$. Il
+valore è
+\[
+  (-1)^s \times c \times b^q ,
+\]
+dove $b$ è la base (2 o 10). Ad esempio con base 10, segno $1$ (negativo),
+significando $12345$ ed esponente $-3$ il valore è $-12{,}345$.
+
+Il formato 754 a \emph{precisione singola} usa: 1 bit di segno, 8 bit di esponente,
+23 bit di significando. Il valore è
+\[
+  (-1)^{\text{segno}} \times \Bigl( 1 + \sum_{i=1}^{23} b_{23-i}\, 2^{-i} \Bigr)
+  \times 2^{(e - 127)} .
+\]
+
+\begin{esempio}
+Con segno $0$, esponente \texttt{01111100} ($e = 124$) e frazione
+\texttt{010\dots0} (cioè $b_{21} = 1$, tutti gli altri bit nulli) si ha
+$1 + 2^{-2} = 1{,}25$ e $2^{124 - 127} = 2^{-3}$, quindi
+\[
+  \text{valore} = (+1) \times 1{,}25 \times 2^{-3} = +0{,}15625 .
+\]
+\end{esempio}
+
+Con la \emph{precisione doppia} (\lstinline|double|) si usano 1 bit di segno,
+11 di esponente e 52 di frazione; la \emph{precisione estesa}
+(\lstinline|long double|, 80 bit) ha 1 bit di segno, 15 di esponente, 1 bit di
+parte intera e 63 di frazione.
+
+\subsection{Errori di arrotondamento}
+
+L'errore di arrotondamento è intrinseco nel calcolo in virgola mobile.
+
+\begin{codice}
+#include <stdio.h>
+
+int main() {
+    int a = 16777217;
+    float b = a;
+    printf("%f\n", b);
+}
+\end{codice}
+\begin{risultato}
+16777216.000000
+\end{risultato}
+
+Il valore $16777217 = 2^{24} + 1$ non è rappresentabile esattamente con un
+\lstinline|float|. Allo stesso modo conviene tenere in \lstinline|double| anche
+il risultato di un prodotto come \lstinline|height * width|: salvarlo in un
+\lstinline|float| fa perdere precisione.
+
+\begin{osservazione}
+Il modo più semplice per evitare di accumulare errori è usare numeri in virgola
+mobile ad alta precisione, cioè \lstinline|double| al posto di \lstinline|float|.
+Sulle CPU moderne non c'è (quasi) penalizzazione di tempo, ma un \lstinline|double|
+occupa il doppio della memoria.
+\end{osservazione}
+
+\section{Tipi enumerati}
+
+Le \emph{enumerazioni} sono tipi interi definiti dal programmatore. La definizione
+inizia con la parola chiave \lstinline|enum|, eventualmente seguita da un
+identificatore, e contiene l'elenco dei possibili valori con un nome per ciascuno:
+\begin{codice}
+enum [identificatore] { lista-enumeratori };
+\end{codice}
+
+\begin{esempio}
+\begin{codice}
+enum color { black, red, green, yellow, blue, white = 7, gray };
+\end{codice}
+Le costanti elencate valgono $0, 1, 2, 3, 4, 7, 8$ (se non si assegna un valore,
+si continua dal precedente più uno).
+\end{esempio}
+
+\begin{codice}
+enum color fgColor = blue,          // due variabili
+           bgColor = yellow;        // di tipo enum color
+
+void setFgColor(enum color fgc);    // funzione con parametro enum color
+\end{codice}
+
+Con le variabili di tipo enumerato si può fare aritmetica ordinaria
+(\lstinline|red + red| vale $2$). Costanti diverse della stessa enumerazione
+possono avere lo stesso valore:
+\begin{codice}
+enum signals { OFF, ON, STOP = 0, GO = 1, CLOSED = 0, OPEN = 1 };
+\end{codice}
+
+\begin{esempio}
+\begin{codice}
+#include <stdio.h>
+
+enum week { sunday, monday, tuesday, wednesday, thursday, friday, saturday };
+
+int main() {
+    enum week today;
+    today = wednesday;
+    printf("Day %d", today + 1);
+    return 0;
+}
+\end{codice}
+\begin{risultato}
+Day 4
+\end{risultato}
+\end{esempio}
+
+\begin{osservazione}
+Conviene usare sempre un'enumerazione quando una variabile (in particolare un
+parametro di funzione) può assumere solo uno tra pochi valori possibili: si evitano
+errori dovuti a costanti non valide, si documentano i valori ammessi ed è più
+mnemonico degli interi.
+\end{osservazione}
+
+\section{Il tipo void}
+
+Il tipo \lstinline|void| indica che non è disponibile alcun valore. Non si possono
+dichiarare variabili o costanti di questo tipo, ma si usa:
+\begin{itemize}
+    \item nelle dichiarazioni di funzioni;
+    \item nelle espressioni \lstinline|void|;
+    \item nei puntatori a \lstinline|void| (si vedranno con i puntatori).
+\end{itemize}
+
+Una funzione che non restituisce nulla ha tipo \lstinline|void|:
+\lstinline|void error(int a) {}|. \lstinline|void| nella lista dei parametri di un
+prototipo indica che la funzione non ha parametri:
+\lstinline|void printMenu(void) {}|. Il compilatore segnala un errore se si
+chiama \lstinline|printMenu(3)|.
+
+\end{document}

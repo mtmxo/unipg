@@ -1,0 +1,216 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\newrunin{osservazione}{Osservazione}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Esempi di funzioni e curve parametriche}
+\author{Marco Cerbella}
+\date{Lezione 3 -- 1 ottobre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Alcuni esempi di funzioni}
+
+\begin{esempio}[$f_1(x) = x^2$]
+$f_1 : \mathbb{R} \to \mathbb{R}$, $f_1(x) = x^2$. L'immagine è $f_1(\mathbb{R}) = [0, +\infty)$: la funzione è limitata inferiormente ma non superiormente. Il grafico
+\[
+\mathrm{Gr}(f_1) = \{(x, x^2) \mid x \in \mathbb{R}\}
+\]
+è una parabola con vertice nell'origine e asse coincidente con l'asse $y$.
+\end{esempio}
+
+\begin{esempio}[$f_2(x) = 1/x$]
+$f_2 : \mathbb{R} \setminus \{0\} \to \mathbb{R}$, $f_2(x) = \dfrac1x$. Il grafico
+\[
+\mathrm{Gr}(f_2) = \left\{\left(x, \tfrac1x\right) \mid x \in \mathbb{R},\ x \neq 0\right\}
+\]
+è un'iperbole equilatera.
+\end{esempio}
+
+\begin{center}
+\begin{tikzpicture}[scale=0.9]
+  % parabola
+  \draw[->] (-2,0) -- (2,0) node[right] {$x$};
+  \draw[->] (0,-0.5) -- (0,3.2) node[above] {$y$};
+  \draw[thick, domain=-1.7:1.7, smooth, variable=\x] plot ({\x},{\x*\x});
+  \node at (0,-1) {$f_1(x) = x^2$};
+  % iperbole
+  \begin{scope}[xshift=6cm]
+    \draw[->] (-2.5,0) -- (2.5,0) node[right] {$x$};
+    \draw[->] (0,-2.5) -- (0,2.5) node[above] {$y$};
+    \draw[thick, domain=0.4:2.4, smooth, variable=\x] plot ({\x},{1/\x});
+    \draw[thick, domain=-2.4:-0.4, smooth, variable=\x] plot ({\x},{1/\x});
+    \node at (0,-3) {$f_2(x) = 1/x$};
+  \end{scope}
+\end{tikzpicture}
+\end{center}
+
+\section{Funzioni definite a tratti}
+
+\begin{esempio}[Valore assoluto]
+\[
+f_3(x) = |x| = \begin{cases} x & \text{se } x \geq 0, \\ -x & \text{se } x < 0. \end{cases}
+\]
+Per $x \geq 0$ il grafico coincide con quello di $g(x) = x$ (bisettrice del I e III quadrante); per $x < 0$ con quello di $h(x) = -x$ (bisettrice del II e IV quadrante). Il grafico di $|x|$ è quindi formato dalle due semirette uscenti dall'origine nel I e II quadrante.
+\end{esempio}
+
+\begin{esempio}
+$f_4 : [0, 3] \to \mathbb{R}$,
+\[
+f_4(x) = \begin{cases}
+3x & \text{se } 0 \leq x \leq 1, \\
+4 - x & \text{se } 1 < x \leq 2, \\
+x - 1 & \text{se } 2 < x \leq 3.
+\end{cases}
+\]
+Il grafico è formato da tre segmenti: da $(0, 0)$ a $(1, 3)$; da $(1, 3)$ (escluso) a $(2, 2)$; da $(2, 1)$ (escluso) a $(3, 2)$.
+\end{esempio}
+
+\begin{center}
+\begin{tikzpicture}[scale=1]
+  \draw[->] (-2,0) -- (2,0) node[right] {$x$};
+  \draw[->] (0,-0.3) -- (0,2.2) node[above] {$y$};
+  \draw[thick] (-1.8,1.8) -- (0,0) -- (1.8,1.8);
+  \node at (0,-0.9) {$|x|$};
+  \begin{scope}[xshift=6cm]
+    \draw[->] (-0.5,0) -- (3.7,0) node[right] {$x$};
+    \draw[->] (0,-0.3) -- (0,3.5) node[above] {$y$};
+    \foreach \x in {1,2,3} \draw (\x,0.05) -- (\x,-0.05) node[below] {$\x$};
+    \draw[thick] (0,0) -- (1,3);
+    \draw[thick] (1,3) -- (2,2);
+    \draw[thick] (2,1) -- (3,2);
+    \fill (0,0) circle (1.5pt); \fill (1,3) circle (1.5pt); \fill (2,2) circle (1.5pt); \fill (3,2) circle (1.5pt);
+    \draw[fill=white] (2,1) circle (1.5pt);
+    \node at (1.5,-0.9) {$f_4(x)$};
+  \end{scope}
+\end{tikzpicture}
+\end{center}
+
+\section{Funzioni a valori vettoriali}
+
+\begin{definizione}
+Si dice \emph{funzione a valori vettoriali} una applicazione che ha come codominio un sottoinsieme di $\mathbb{R}^2$ oppure $\mathbb{R}^3$, più in generale di $\mathbb{R}^n$. Un esempio sono le curve parametriche:
+\[
+f : D \subseteq \mathbb{R} \to \mathbb{R}^2, \qquad t \mapsto f(t).
+\]
+\end{definizione}
+
+\section{Curve parametriche}
+
+\begin{definizione}
+Una \emph{curva parametrica piana} è una funzione $c : [a, b] \to \mathbb{R}^2$,
+\[
+c(t) = \big(x(t), y(t)\big);
+\]
+una \emph{curva parametrica nello spazio} è una funzione $c : [a, b] \to \mathbb{R}^3$.
+\end{definizione}
+
+\begin{definizione}
+Il \emph{supporto} (o \emph{sostegno}) di una curva parametrica è l'insieme di tutti i punti $P = c(t)$ al variare del parametro $t \in [a, b]$.
+\end{definizione}
+
+\begin{esempio}[La retta in forma parametrica]
+Data una retta $r$ nel piano si scelgono due punti $P_1$ e $P_2$ su di essa. Si individua così un vettore $\vec v = \overrightarrow{P_1P_2}$, detto \emph{vettore direttore} di $r$. Una condizione necessaria e sufficiente affinché un generico punto $P = (x, y)$ appartenga a $r$ è che il vettore $\overrightarrow{P_1P}$ sia parallelo a $\vec v$. Quindi, posto $P_1 = (a, b)$ e $\vec v = (v_1, v_2)$, si ottengono le \emph{equazioni parametriche della retta}:
+\[
+\begin{cases} x(t) = a + t v_1 \\ y(t) = b + t v_2 \end{cases} \quad t \in \mathbb{R}.
+\]
+\end{esempio}
+
+\end{document}

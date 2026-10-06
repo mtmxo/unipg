@@ -1,0 +1,1839 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\newrunin{osservazione}{Osservazione}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Analisi matematica\\[0.4em]\large Appunti}
+\author{Marco Cerbella}
+\date{Università degli Studi di Perugia -- A.A. 2026/2027\\ Aggiornato al \today}
+
+\begin{document}
+\maketitle
+\setcounter{tocdepth}{1}
+\tableofcontents
+\clearpage
+
+\section[Teoria degli insiemi (Lezione 1 -- 24 settembre 2026)]{Teoria degli insiemi}
+\noindent\emph{Lezione 1 -- 24 settembre 2026}
+\subsection{Insiemi e loro costruzione}
+
+\begin{definizione}
+Un \emph{insieme} è una collezione di oggetti, detti \emph{elementi},
+accomunati da qualche proprietà.
+\end{definizione}
+
+Un insieme può essere definito nei seguenti modi:
+\begin{enumerate}
+    \item \textbf{per caratteristica}: $\{n \in \mathbb{N} \mid n \leq 4\}$;
+    \item \textbf{per elencazione}: $\{0, 1, 2, 3, 4\}$;
+    \item \textbf{con i diagrammi di Eulero-Venn}.
+\end{enumerate}
+
+Tutti gli insiemi che si considerano sono sottoinsiemi di un insieme più
+vasto, detto \emph{universo} e indicato con $U$. Due insiemi appartenenti
+allo stesso universo si possono sempre confrontare tra loro.
+
+\begin{definizione}
+Dati due insiemi $A$ e $B$, si dice che $A$ è un \emph{sottoinsieme} di $B$,
+e si scrive $A \subseteq B$, se ogni elemento di $A$ è anche elemento di $B$.
+\end{definizione}
+
+Se esiste $b \in B$ con $b \notin A$ (cioè $A \subseteq B$ ma $A \neq B$) si dice che $A$ è un \emph{sottoinsieme proprio} di $B$ e si scrive $A \subsetneq B$.
+
+Due insiemi sono uguali, $A = B$, se $A \subseteq B$ e $B \subseteq A$,
+cioè se hanno esattamente gli stessi elementi.
+
+Tra i sottoinsiemi di un insieme $A$ si considera anche l'\emph{insieme vuoto},
+cioè l'insieme privo di elementi, indicato con il simbolo $\emptyset$.
+
+\subsection{Intersezione}
+
+\begin{definizione}
+L'\emph{intersezione} di $A$ e $B$ è l'insieme degli elementi che
+appartengono sia ad $A$ sia a $B$:
+\[
+A \cap B = \{x \mid x \in A \text{ e } x \in B\}.
+\]
+\end{definizione}
+
+\begin{esempio}
+Se $A = \{a, b, c, d\}$ e $B = \{b, d, f\}$, allora $A \cap B = \{b, d\}$.
+\end{esempio}
+
+L'intersezione gode della proprietà commutativa: $A \cap B = B \cap A$.
+Altre proprietà:
+\begin{enumerate}
+    \item se $A = B$ allora $A \cap B = A = B$;
+    \item se $A$ e $B$ non hanno elementi in comune allora $A \cap B = \emptyset$ ($A$ e $B$ si dicono \emph{disgiunti});
+    \item se $A \subseteq B$ allora $A \cap B = A$;
+    \item $A \cap \emptyset = \emptyset$ e $A \cap U = A$.
+\end{enumerate}
+\subsection{Unione}
+
+\begin{definizione}
+L'\emph{unione} di $A$ e $B$ è l'insieme degli elementi che appartengono
+ad $A$, a $B$ o a entrambi:
+\[
+A \cup B = \{x \mid x \in A \text{ o } x \in B\}.
+\]
+\end{definizione}
+
+\begin{esempio}
+Se $A = \{a, b, c, d\}$ e $B = \{b, d, f\}$, allora
+$A \cup B = \{a, b, c, d, f\}$.
+\end{esempio}
+
+Anche l'unione gode della proprietà commutativa: $A \cup B = B \cup A$.
+Altre proprietà:
+\begin{enumerate}
+    \item se $A = B$ allora $A \cup B = A = B$;
+    \item se $A \neq \emptyset$ oppure $B \neq \emptyset$ allora $A \cup B \neq \emptyset$;
+    \item se $A \subseteq B$ allora $A \cup B = B$;
+    \item $A \cup \emptyset = A$ e $A \cup U = U$.
+\end{enumerate}
+
+\begin{esempio}
+Se $A \subseteq B$ allora $A \cup B = B$: tutti gli elementi di $A$ sono già in $B$, quindi unirli non aggiunge nulla.
+\end{esempio}
+
+\subsection{Differenza tra insiemi}
+
+\begin{definizione}
+La \emph{differenza} tra $A$ e $B$ è l'insieme degli elementi che
+stanno in $A$ ma non in $B$:
+\[
+A \setminus B = \{x \mid x \in A \text{ e } x \notin B\}.
+\]
+\end{definizione}
+
+\begin{esempio}
+Se $A = \{a, b, c, d\}$ e $B = \{b, d, f\}$, allora
+$A \setminus B = \{a, c\}$ e $B \setminus A = \{f\}$.
+\end{esempio}
+
+La differenza \textbf{non} gode della proprietà commutativa: in generale
+$A \setminus B \neq B \setminus A$ (lo mostra l'esempio precedente).
+
+Note utili:
+\begin{enumerate}
+    \item $A \setminus A = \emptyset$;
+    \item $A \setminus \emptyset = A$;
+    \item se $A \subseteq B$, allora $A \setminus B = \emptyset$
+          (tutti gli elementi di $A$ stanno anche in $B$, quindi non ne
+          resta nessuno);
+    \item $A \setminus B = A \cap B^c$ (togliere $B$ da $A$ equivale a
+          intersecare $A$ con il complementare di $B$).
+\end{enumerate}
+
+\subsection{Complementare}
+
+\begin{definizione}
+Il \emph{complementare} di $A$ è l'insieme di tutti gli elementi di $U$
+che non appartengono ad $A$:
+\[
+A^c = \{x \in U \mid x \notin A\} = U \setminus A.
+\]
+\end{definizione}
+
+\begin{esempio}
+Se $U = \{a, b, c, d, e, f\}$, $A = \{a, b, c, d\}$ e $B = \{b, d, f\}$,
+allora $A^c = \{e, f\}$ e $B^c = \{a, c, e\}$.
+\end{esempio}
+
+Il \emph{complementare di $A$ rispetto a $B$}, con $A \subseteq B$, si
+ottiene usando $B$ al posto dell'universo $U$:
+\[
+\complement_B A = B \setminus A.
+\]
+Va sempre indicato esplicitamente: $A^c$ senza altre indicazioni è sempre
+il complementare rispetto a $U$.
+
+\begin{esempio}
+Se $U = \{1, 2, \dots, 10\}$, $B = \{1, 2, 3, 4, 5\}$ e $A = \{2, 4\}$
+(quindi $A \subseteq B$), allora
+\[
+\complement_B A = \{1, 3, 5\}, \qquad A^c = \{1, 3, 5, 6, 7, 8, 9, 10\}.
+\]
+\end{esempio}
+
+Proprietà: $(A^c)^c = A$, \quad $A \cup A^c = U$, \quad
+$A \cap A^c = \emptyset$, \quad $U^c = \emptyset$, \quad $\emptyset^c = U$.
+
+\begin{teorema}[Leggi di De Morgan]
+\begin{enumerate}
+    \item $(A \cup B)^c = A^c \cap B^c$: il complementare dell'unione
+          è l'intersezione dei complementari;
+    \item $(A \cap B)^c = A^c \cup B^c$: il complementare
+          dell'intersezione è l'unione dei complementari.
+\end{enumerate}
+\end{teorema}
+
+Regola pratica: il complementare ``entra'' nella parentesi e unione e
+intersezione si scambiano.
+
+\begin{esempio}
+Con $U = \{a, b, c, d, e, f\}$, $A = \{a, b, c, d\}$, $B = \{b, d, f\}$:
+$(A \cup B)^c = \{a,b,c,d,f\}^c = \{e\}$ e
+$A^c \cap B^c = \{e, f\} \cap \{a, c, e\} = \{e\}$.
+\end{esempio}
+
+\subsection{Prodotto cartesiano}
+
+\begin{definizione}
+Una \emph{coppia ordinata} $(a, b)$ è formata da due componenti prese in un
+ordine preciso. Due coppie sono uguali se hanno le stesse componenti nello
+stesso ordine:
+\[
+(a, b) = (c, d) \iff a = c \text{ e } b = d.
+\]
+Ad esempio $(1, 2) \neq (2, 1)$, mentre $\{1, 2\} = \{2, 1\}$.
+\end{definizione}
+
+\begin{definizione}
+Il \emph{prodotto cartesiano} di $A$ e $B$ è l'insieme di tutte e sole le
+coppie ordinate con la prima componente in $A$ e la seconda componente
+in $B$:
+\[
+A \times B = \{(a, b) \mid a \in A \text{ e } b \in B\}.
+\]
+\end{definizione}
+
+\begin{esempio}
+Se $A = \{1, 2, 3\}$ e $B = \{4, 5, 6\}$, allora
+\[
+A \times B = \{(1,4), (1,5), (1,6), (2,4), (2,5), (2,6), (3,4), (3,5), (3,6)\}.
+\]
+\end{esempio}
+
+Il prodotto cartesiano \textbf{non} gode della proprietà commutativa:
+in generale $A \times B \neq B \times A$.
+
+Note utili:
+\begin{enumerate}
+    \item se $A$ ha $m$ elementi e $B$ ha $n$ elementi, allora
+          $A \times B$ ha $m \cdot n$ elementi (nell'esempio $3 \cdot 3 = 9$);
+    \item $A \times \emptyset = \emptyset$;
+    \item $A \times A$ si scrive direttamente $A^2$.
+\end{enumerate}
+
+\textbf{Il piano cartesiano}: $\mathbb{R}^2 = \mathbb{R} \times \mathbb{R}$
+è l'insieme di tutte le coppie $(x, y)$ di numeri reali. Ogni coppia
+individua un punto del piano ($x$ ascissa, $y$ ordinata).
+
+\section[Logica (Lezione 1 -- 24 settembre 2026)]{Logica}
+\noindent\emph{Lezione 1 -- 24 settembre 2026}
+\subsection{Il calcolo delle proposizioni}
+
+\begin{definizione}
+Si chiama \emph{proposizione} un enunciato di cui si può stabilire con
+certezza se è vero o falso.
+\end{definizione}
+
+\begin{esempio}
+``$7$ è un numero primo'' è una proposizione (vera);
+``$4 > 9$'' è una proposizione (falsa);
+``che bella giornata!'' e ``$x > 3$'' \textbf{non} sono proposizioni:
+la prima non è né vera né falsa, la seconda dipende da $x$.
+\end{esempio}
+
+Le proposizioni si indicano con lettere maiuscole $P, Q, R, \dots$ e il loro
+\emph{valore di verità} è \V\ (vero) oppure \F\ (falso).
+
+I concetti che non si definiscono, perché si ritengono noti, vengono detti
+\emph{primitivi} (ad esempio ``insieme'', ``elemento'', ``vero'', ``falso'').
+
+La logica classica si basa su due principi:
+\begin{enumerate}
+    \item \textbf{principio di non contraddizione}: una proposizione non può
+          essere contemporaneamente vera e falsa;
+    \item \textbf{principio del terzo escluso}: una proposizione è vera
+          oppure falsa, non esiste una terza possibilità.
+\end{enumerate}
+
+\subsection{Proposizioni composte e connettivi logici}
+
+Le proposizioni semplici si combinano tramite i \emph{connettivi logici}
+per formare proposizioni composte. Il valore di verità di una proposizione
+composta dipende solo dai valori delle proposizioni che la compongono, e si
+riassume in una \emph{tavola di verità}.
+
+\subsubsection{Negazione $\neg$}
+
+\begin{definizione}
+La \emph{negazione} di $P$, indicata con $\neg P$ (``non $P$''), è vera
+quando $P$ è falsa e falsa quando $P$ è vera.
+\end{definizione}
+
+\begin{center}
+\begin{tabular}{c|c}
+$P$ & $\neg P$ \\ \hline
+\V & \F \\
+\F & \V
+\end{tabular}
+\end{center}
+
+\begin{esempio}
+$P$: ``$5$ è pari'' (\F). \quad $\neg P$: ``$5$ non è pari'' (\V).
+\end{esempio}
+
+Vale $\neg(\neg P) = P$: negare due volte riporta alla proposizione di
+partenza.
+
+\subsubsection{Congiunzione $\land$ e disgiunzione $\lor$}
+
+\begin{definizione}
+La \emph{congiunzione} $P \land Q$ (``$P$ e $Q$'') è vera solo se $P$ e $Q$
+sono entrambe vere.
+
+La \emph{disgiunzione inclusiva} $P \lor Q$ (``$P$ o $Q$'') è vera se
+almeno una tra $P$ e $Q$ è vera; è falsa solo se sono entrambe false.
+\end{definizione}
+
+\begin{center}
+\begin{tabular}{cc|c|c}
+$P$ & $Q$ & $P \land Q$ & $P \lor Q$ \\ \hline
+\V & \V & \V & \V \\
+\V & \F & \F & \V \\
+\F & \V & \F & \V \\
+\F & \F & \F & \F
+\end{tabular}
+\end{center}
+
+\begin{osservazione}
+Il ``$\lor$'' è \emph{inclusivo} (come il latino \emph{vel}): è vero anche
+quando $P$ e $Q$ sono vere tutte e due. Nel linguaggio comune ``o'' è spesso
+esclusivo (``o mangi o esci''), ma in matematica si intende sempre quello
+inclusivo, salvo indicazione contraria.
+\end{osservazione}
+
+\textbf{Collegamento con gli insiemi.}
+$\land$ corrisponde all'intersezione, $\lor$ all'unione e $\neg$ al
+complementare:
+\[
+x \in A \cap B \iff (x \in A) \land (x \in B), \qquad
+x \in A \cup B \iff (x \in A) \lor (x \in B).
+\]
+
+\begin{teorema}[Leggi di De Morgan]
+\[
+\neg(P \land Q) \iff \neg P \lor \neg Q, \qquad
+\neg(P \lor Q) \iff \neg P \land \neg Q.
+\]
+\end{teorema}
+
+Sono le stesse leggi viste per gli insiemi: la negazione ``entra'' nella
+parentesi e $\land$ e $\lor$ si scambiano.
+
+\begin{esempio}
+La negazione di ``piove \textbf{e} fa freddo'' è ``non piove \textbf{o} non
+fa freddo'' (basta che una delle due sia falsa).
+\end{esempio}
+
+\subsubsection{Implicazione $\Rightarrow$}
+
+\begin{definizione}
+L'\emph{implicazione} $P \Rightarrow Q$ (``se $P$ allora $Q$'', ``$P$ implica
+$Q$'') è falsa \textbf{solo} quando $P$ è vera e $Q$ è falsa. In tutti gli
+altri casi è vera. $P$ si chiama \emph{ipotesi} (o antecedente), $Q$
+\emph{tesi} (o conseguente).
+\end{definizione}
+
+\begin{center}
+\begin{tabular}{cc|c}
+$P$ & $Q$ & $P \Rightarrow Q$ \\ \hline
+\V & \V & \V \\
+\V & \F & \F \\
+\F & \V & \V \\
+\F & \F & \V
+\end{tabular}
+\end{center}
+
+\textbf{Perché è vera quando $P$ è falsa?} Pensa a una promessa: ``se
+prendi 30, ti regalo la bici''. L'unico modo in cui la promessa viene
+\emph{tradita} è prendere 30 e non ricevere la bici (\V$\Rightarrow$\F).
+Se non prendi 30, la promessa non è stata violata, qualunque cosa succeda
+alla bici: per questo l'implicazione è vera.
+
+\begin{esempio}
+``Se $n$ è multiplo di $4$, allora $n$ è pari'' è vera per ogni $n$.
+Per $n = 6$ l'ipotesi è falsa e la tesi vera; per $n = 7$ entrambe false:
+in nessun caso l'implicazione viene violata.
+\end{esempio}
+
+\textbf{Condizione necessaria e sufficiente.} Se $P \Rightarrow Q$ è vera:
+\begin{enumerate}
+    \item $P$ è \emph{condizione sufficiente} per $Q$: basta che valga $P$
+          perché valga $Q$;
+    \item $Q$ è \emph{condizione necessaria} per $P$: se non vale $Q$, non
+          può valere nemmeno $P$.
+\end{enumerate}
+Ad esempio ``essere multiplo di $4$'' è sufficiente per ``essere pari'', ed
+``essere pari'' è necessario per ``essere multiplo di $4$'' (ma non
+sufficiente: $6$ è pari ma non multiplo di $4$).
+
+\textbf{Implicazioni collegate.} Data $P \Rightarrow Q$:
+\begin{center}
+\begin{tabular}{l|l|l}
+nome & forma & equivalente a $P \Rightarrow Q$? \\ \hline
+inversa (o reciproca) & $Q \Rightarrow P$ & no \\
+contraria & $\neg P \Rightarrow \neg Q$ & no \\
+\textbf{contronominale} & $\neg Q \Rightarrow \neg P$ & \textbf{sì}
+\end{tabular}
+\end{center}
+
+\begin{teorema}[Contronominale]
+$(P \Rightarrow Q) \iff (\neg Q \Rightarrow \neg P)$.
+\end{teorema}
+
+Su questo si basa la \emph{dimostrazione per assurdo}: invece di dimostrare
+$P \Rightarrow Q$, si suppone che $Q$ sia falsa e si arriva a negare $P$
+(o a una contraddizione). Anche la dimostrazione di $\sqrt{2} \notin
+\mathbb{Q}$ funziona così.
+
+Vale inoltre $(P \Rightarrow Q) \iff (\neg P \lor Q)$, da cui si ricava la
+negazione dell'implicazione:
+\[
+\neg(P \Rightarrow Q) \iff P \land \neg Q.
+\]
+Cioè: per smentire ``se $P$ allora $Q$'' bisogna trovare un caso in cui
+$P$ è vera e $Q$ è falsa.
+
+\subsubsection{Doppia implicazione $\Leftrightarrow$}
+
+\begin{definizione}
+La \emph{doppia implicazione} (o \emph{equivalenza}) $P \Leftrightarrow Q$
+(``$P$ se e solo se $Q$'') è vera quando $P$ e $Q$ hanno lo stesso valore
+di verità, cioè sono entrambe vere o entrambe false.
+\end{definizione}
+
+\begin{center}
+\begin{tabular}{cc|c}
+$P$ & $Q$ & $P \Leftrightarrow Q$ \\ \hline
+\V & \V & \V \\
+\V & \F & \F \\
+\F & \V & \F \\
+\F & \F & \V
+\end{tabular}
+\end{center}
+
+Equivale a $(P \Rightarrow Q) \land (Q \Rightarrow P)$: $P$ è condizione
+\emph{necessaria e sufficiente} per $Q$. Per questo, per dimostrare un
+``se e solo se'' si dimostrano le due implicazioni separatamente.
+
+\begin{esempio}
+``$n$ è pari $\Leftrightarrow$ $n^2$ è pari'' è vera per ogni
+$n \in \mathbb{Z}$.
+\end{esempio}
+
+\subsubsection{Tautologie e contraddizioni}
+
+\begin{definizione}
+Una \emph{tautologia} è una proposizione composta sempre vera, qualunque
+siano i valori delle proposizioni che la compongono.
+
+Una \emph{contraddizione} è una proposizione composta sempre falsa.
+\end{definizione}
+
+\begin{esempio}
+$P \lor \neg P$ è una tautologia (terzo escluso);
+$P \land \neg P$ è una contraddizione (non contraddizione).
+\begin{center}
+\begin{tabular}{c|c|c|c}
+$P$ & $\neg P$ & $P \lor \neg P$ & $P \land \neg P$ \\ \hline
+\V & \F & \V & \F \\
+\F & \V & \V & \F
+\end{tabular}
+\end{center}
+\end{esempio}
+
+Tutte le leggi viste (De Morgan, contronominale, \dots) sono tautologie: si
+verificano costruendo la tavola di verità e controllando che l'ultima
+colonna contenga solo \V.
+
+
+\subsection{Esempi dalla lezione}
+
+\begin{esempio}[Proposizioni e non proposizioni]
+Sono proposizioni: ``Anna e Mario sono figli di Luigi'', ``Francesco Guccini è morto quest'anno''. Non sono proposizioni: ``che tempo fa?'' (interrogativa), ``è molto tardi'' (giudizio personale).
+\end{esempio}
+
+\begin{esempio}[Negazione]
+``Roma è una città'' (\V) $\to$ ``Roma non è una città'' (\F).
+``Il Po è un lago'' (\F) $\to$ ``Il Po non è un lago'' (\V).
+\end{esempio}
+
+\begin{esempio}[Congiunzione]
+\begin{itemize}
+    \item ``Roma è la capitale d'Italia e Roma è la sede del governo'': \V;
+    \item ``$4$ è positivo e $4$ è dispari'': \F;
+    \item ``$20$ è maggiore di $30$ e $20$ è multiplo di $3$'': \F.
+\end{itemize}
+\end{esempio}
+
+\begin{esempio}[Disgiunzione]
+\begin{itemize}
+    \item ``Firenze è una città o l'Arno è un lago'': \V;
+    \item ``$10$ è multiplo di $3$ o $-10$ è un numero negativo'': \V\ (basta che una delle due sia vera);
+    \item ``Roma è la capitale della Francia o l'Italia è una città'': \F.
+\end{itemize}
+\end{esempio}
+
+\begin{esempio}[Implicazione ed equivalenza]
+``Se oggi è sabato allora domani è domenica''; ``se $a$ è divisibile per $6$ allora $a$ è divisibile per $3$''.
+
+``Se Anna è milanese allora Anna è italiana'': vale $P \Rightarrow Q$ ma non $Q \Rightarrow P$, quindi $P$ e $Q$ \textbf{non} sono equivalenti. Invece ``un numero è divisibile per $2$ se e solo se è pari'': valgono $P \Rightarrow Q$ e $Q \Rightarrow P$, quindi $P \Leftrightarrow Q$.
+\end{esempio}
+
+\subsection{Predicati}
+
+Il calcolo delle proposizioni vale solo per enunciati che hanno un valore
+di verità. Un enunciato come
+\[
+P(x):\ \text{``$x$ è un numero maggiore di $100$''}
+\]
+non è una proposizione: non si può dire se è vero o falso finché non si
+sceglie $x$.
+
+\begin{definizione}
+Un \emph{predicato} (o \emph{enunciato aperto}) è un enunciato $P(x)$ che
+contiene una variabile $x$, appartenente a un insieme $U$ detto
+\emph{dominio}, e che diventa una proposizione quando a $x$ si sostituisce
+un elemento di $U$.
+\end{definizione}
+
+\begin{esempio}
+Con $U = \mathbb{N}$ e $P(x)$: ``$x > 100$'': $P(150)$ è vera,
+$P(3)$ è falsa.
+\end{esempio}
+
+\begin{definizione}
+L'\emph{insieme di verità} di $P(x)$ è l'insieme degli elementi di $U$ che
+rendono vero il predicato:
+\[
+\{x \in U \mid P(x) \text{ è vera}\}.
+\]
+\end{definizione}
+
+È proprio la definizione di un insieme \emph{per caratteristica}. Nell'esempio
+l'insieme di verità è $\{x \in \mathbb{N} \mid x > 100\} = \{101, 102, \dots\}$.
+
+Un predicato può avere più variabili: $P(x, y)$: ``$x < y$''.
+
+\subsubsection{Quantificatori}
+
+Un predicato diventa una proposizione anche \emph{quantificando} la
+variabile, cioè dicendo per quanti elementi di $U$ il predicato è vero.
+
+\begin{definizione}
+\begin{enumerate}
+    \item \textbf{Quantificatore universale} $\forall$ (``per ogni''):
+          $\forall x \in U,\ P(x)$ è vera se $P(x)$ è vera per
+          \textbf{tutti} gli elementi di $U$.
+    \item \textbf{Quantificatore esistenziale} $\exists$ (``esiste''):
+          $\exists\, x \in U : P(x)$ è vera se $P(x)$ è vera per
+          \textbf{almeno un} elemento di $U$.
+\end{enumerate}
+\end{definizione}
+
+Si usa anche $\exists!$ (``esiste ed è unico''): $P(x)$ è vera per
+\textbf{uno e un solo} elemento di $U$.
+
+\begin{esempio}\mbox{}
+\begin{enumerate}
+    \item $\forall x \in \mathbb{R},\ x^2 \geq 0$ \quad è vera;
+    \item $\forall x \in \mathbb{N},\ x > 100$ \quad è falsa (basta
+          $x = 3$);
+    \item $\exists\, x \in \mathbb{N} : x > 100$ \quad è vera (ad esempio
+          $x = 150$);
+    \item $\exists\, x \in \mathbb{Q} : x^2 = 2$ \quad è falsa, mentre
+          $\exists\, x \in \mathbb{R} : x^2 = 2$ è vera.
+\end{enumerate}
+\end{esempio}
+
+L'ultimo esempio mostra che il valore di verità dipende anche dal dominio.
+
+\textbf{Come si verifica o si smentisce.}
+\begin{center}
+\begin{tabular}{l|p{5.2cm}|p{5.2cm}}
+ & per dimostrare che è vera & per dimostrare che è falsa \\ \hline
+$\forall x,\ P(x)$ & serve una dimostrazione valida per ogni $x$ &
+basta \textbf{un} controesempio \\ \hline
+$\exists\, x : P(x)$ & basta \textbf{un} esempio &
+serve mostrare che $P(x)$ è falsa per ogni $x$
+\end{tabular}
+\end{center}
+
+\subsubsection{Negazione dei quantificatori}
+
+\begin{teorema}
+\[
+\neg\big(\forall x,\ P(x)\big) \iff \exists\, x : \neg P(x), \qquad
+\neg\big(\exists\, x : P(x)\big) \iff \forall x,\ \neg P(x).
+\]
+\end{teorema}
+
+Regola pratica: la negazione ``attraversa'' il quantificatore, che si
+scambia ($\forall \leftrightarrow \exists$), e poi nega il predicato.
+
+\begin{esempio}\mbox{}
+\begin{enumerate}
+    \item ``Tutti gli studenti hanno superato l'esame'' si nega con
+          ``\textbf{esiste} almeno uno studente che \textbf{non} ha superato
+          l'esame''. Attenzione: \textbf{non} con ``nessuno studente ha
+          superato l'esame''.
+    \item $\neg(\forall x \in \mathbb{R},\ x > 0) \iff
+          \exists\, x \in \mathbb{R} : x \leq 0$.
+\end{enumerate}
+\end{esempio}
+
+\subsubsection{Più quantificatori: l'ordine conta}
+
+Con più variabili si possono usare più quantificatori. Quantificatori
+\emph{uguali} si possono scambiare, quantificatori \emph{diversi} no.
+
+\begin{esempio}
+Con $U = \mathbb{N}$:
+\begin{enumerate}
+    \item $\forall x\ \exists\, y : y > x$ \quad (``per ogni numero ne
+          esiste uno più grande'') è \textbf{vera}: dato $x$, basta
+          $y = x + 1$;
+    \item $\exists\, y\ \forall x : y > x$ \quad (``esiste un numero più
+          grande di tutti'') è \textbf{falsa}.
+\end{enumerate}
+Nel primo caso $y$ può dipendere da $x$, nel secondo deve essere lo stesso
+per tutti gli $x$.
+\end{esempio}
+
+Per negare più quantificatori si applica la regola uno alla volta:
+\[
+\neg\big(\forall x\ \exists\, y : P(x,y)\big) \iff
+\exists\, x\ \forall y : \neg P(x,y).
+\]
+Questo tipo di negazione servirà spesso in analisi (ad esempio con le
+definizioni di limite).
+
+\section[Gli insiemi numerici (Lezione 1 -- 24 settembre 2026)]{Gli insiemi numerici}
+\noindent\emph{Lezione 1 -- 24 settembre 2026}
+\subsection{Gli insiemi numerici}
+
+Si parte da $\mathbb{N}$ e, ogni volta che un'operazione non è sempre
+possibile, si allarga l'insieme:
+\[
+\mathbb{N} \subset \mathbb{Z} \subset \mathbb{Q} \subset \mathbb{R}.
+\]
+
+Gli insiemi numerici $\mathbb{Q}$ e $\mathbb{R}$ hanno le seguenti proprietà:
+\begin{enumerate}
+    \item[(R1)] è ben definita un'operazione di \textbf{somma};
+    \item[(R2)] è ben definita un'operazione di \textbf{prodotto};
+    \item[(R3)] è ben definita una \textbf{relazione d'ordine}: presi due numeri qualsiasi $a, b$ è sempre possibile confrontarli con ``$\leq$'', cioè vale $a \leq b$ oppure $b \leq a$.
+\end{enumerate}
+L'insieme dei numeri reali ha anche un'altra proprietà (l'assioma di completezza, vedi sotto):
+\begin{enumerate}
+    \item[(R4)] siano $A$ e $B$ due insiemi non vuoti di numeri reali con $a \leq b$ per ogni $a \in A$ e $b \in B$; allora esiste almeno un $c \in \mathbb{R}$ tale che $a \leq c \leq b$ per ogni $a \in A$ e $b \in B$.
+\end{enumerate}
+In particolare $\mathbb{R}$ è \emph{ordinato} (R3) ed è \emph{denso}: presi due reali qualsiasi se ne trova sempre un altro compreso tra loro. Queste proprietà permettono di rappresentare $\mathbb{R}$ come retta orientata, con una corrispondenza biunivoca tra i punti della retta e i numeri reali.
+
+\subsubsection{Numeri naturali $\mathbb{N}$}
+
+\[
+\mathbb{N} = \{0, 1, 2, 3, 4, \dots\}
+\]
+
+In $\mathbb{N}$ sono definite due operazioni \emph{interne}, somma e
+prodotto: sommando o moltiplicando due naturali si ottiene sempre un
+naturale. Per ogni $m, n, p \in \mathbb{N}$ valgono:
+\begin{enumerate}
+    \item \textbf{associativa}: $(m + n) + p = m + (n + p)$ e
+          $(m \cdot n) \cdot p = m \cdot (n \cdot p)$;
+    \item \textbf{commutativa}: $m + n = n + m$ e $m \cdot n = n \cdot m$;
+    \item \textbf{distributiva} del prodotto sulla somma:
+          $m \cdot (n + p) = m \cdot n + m \cdot p$;
+    \item \textbf{esistenza dello zero e dell'unità}: $0$ è elemento neutro
+          della somma ($n + 0 = n$) e $1$ è elemento neutro del prodotto
+          ($n \cdot 1 = n$);
+    \item \textbf{leggi di cancellazione}: se $m + p = n + p$ allora $m = n$;
+          se $m \cdot p = n \cdot p$ con $p \neq 0$ allora $m = n$.
+\end{enumerate}
+
+In $\mathbb{N}$ manca l'\textbf{elemento opposto}: ad esempio non esiste
+$x \in \mathbb{N}$ tale che $5 + x = 0$. Quindi la sottrazione non è
+sempre possibile ($3 - 5 \notin \mathbb{N}$): per questo si passa agli
+interi relativi $\mathbb{Z}$.
+
+
+\subsubsection{Interi relativi $\mathbb{Z}$}
+
+\[
+\mathbb{Z} = \{\dots, -3, -2, -1, 0, 1, 2, 3, \dots\}, \qquad
+\mathbb{N} \subset \mathbb{Z}.
+\]
+
+In $\mathbb{Z}$ vale l'\textbf{esistenza dell'elemento opposto}: per ogni
+$x \in \mathbb{Z}$ esiste $-x \in \mathbb{Z}$, detto \emph{opposto} di $x$,
+tale che $x + (-x) = 0$ (ad esempio $3$ e $-3$). Di conseguenza la
+sottrazione è sempre possibile: $a - b = a + (-b)$.
+
+Continuano a valere tutte le proprietà dei naturali.
+
+In $\mathbb{Z}$ manca però l'\textbf{elemento inverso}: ad esempio non
+esiste $x \in \mathbb{Z}$ tale che $2 \cdot x = 1$. Quindi la divisione
+non è sempre possibile ($1 : 2 \notin \mathbb{Z}$).
+
+\subsubsection{Numeri razionali $\mathbb{Q}$}
+
+\[
+\mathbb{Q} = \left\{ \frac{m}{n} \;\middle|\; m, n \in \mathbb{Z},\ n \neq 0 \right\},
+\qquad \mathbb{N} \subset \mathbb{Z} \subset \mathbb{Q}.
+\]
+Ad esempio $-2,\ 0,\ \frac{3}{2},\ -\frac{7}{4} \in \mathbb{Q}$.
+Frazioni diverse possono indicare lo stesso numero:
+$\frac12 = \frac24 = \frac36$.
+
+In $\mathbb{Q}$ vale l'\textbf{esistenza dell'elemento inverso}: per ogni
+$q \in \mathbb{Q}$ con $q \neq 0$ esiste $\frac{1}{q} \in \mathbb{Q}$ tale
+che $q \cdot \frac{1}{q} = 1$. Quindi la divisione è sempre possibile,
+\textbf{tranne per $0$}: lo zero è l'unico numero che non ha inverso
+(non esiste $x$ con $0 \cdot x = 1$).
+
+Con le sue operazioni e l'ordinamento $\leq$, $\mathbb{Q}$ è un
+\emph{campo ordinato}.
+
+\textbf{Rappresentazione decimale.} Ogni numero razionale ha una
+rappresentazione decimale \textbf{finita} (es.\ $\frac14 = 0{,}25$) oppure
+\textbf{periodica} (es.\ $\frac13 = 0{,}\overline{3}$), e viceversa.
+I decimali infiniti \textbf{non periodici} (es.\ $1{,}41421356\dots$)
+\textbf{non} sono razionali.
+
+\textbf{Densità.} $\mathbb{Q}$ è \emph{denso}: tra due razionali ce n'è
+sempre un altro. Se $a, b \in \mathbb{Q}$ con $a < b$, allora
+\[
+a < \frac{a + b}{2} < b,
+\]
+e ripetendo si trova che tra $a$ e $b$ ci sono infiniti razionali.
+
+\textbf{I ``buchi'' di $\mathbb{Q}$.} Nonostante sia denso, $\mathbb{Q}$
+non riempie la retta. La diagonale del quadrato di lato $1$ misura, per
+Pitagora, $\sqrt{1^2 + 1^2} = \sqrt{2}$: riportandola sulla retta con il
+compasso si ottiene un punto ben preciso, che però non corrisponde a nessun
+numero razionale.
+
+\begin{center}
+\begin{tikzpicture}[scale=2.2]
+  \draw[->] (-0.6,0) -- (2.5,0);
+  \foreach \x in {0,1,2}
+    \draw (\x,0.04) -- (\x,-0.04) node[below] {$\x$};
+  \draw (0,0) rectangle (1,1);
+  \draw (0,0) -- (0,1) node[midway, left] {$1$};
+  \draw[thick] (0,0) -- (1,1) node[midway, above left] {$\sqrt{2}$};
+  \draw[dashed] (1,1) arc[start angle=45, end angle=0, radius={sqrt(2)}];
+  \fill (1.4142,0) circle (0.035);
+  \node[below] at (1.4142,-0.02) {$\sqrt{2}$};
+\end{tikzpicture}
+\end{center}
+
+\begin{teorema}
+$\sqrt{2} \notin \mathbb{Q}$.
+\end{teorema}
+
+\begin{proof}
+Per assurdo, sia $\sqrt{2} = \frac{p}{q}$ con $p, q$ senza fattori comuni
+(frazione ridotta ai minimi termini). Elevando al quadrato,
+$p^2 = 2q^2$: quindi $p^2$ è pari e dunque $p$ è pari, $p = 2k$.
+Sostituendo, $4k^2 = 2q^2$, cioè $q^2 = 2k^2$: quindi anche $q$ è pari.
+Allora $p$ e $q$ hanno il fattore comune $2$, contro l'ipotesi: assurdo.
+\end{proof}
+
+Questo ha portato all'espansione verso i numeri reali $\mathbb{R}$.
+
+
+\subsubsection{Numeri reali $\mathbb{R}$}
+
+\begin{definizione}
+$\mathbb{R}$ è l'insieme degli allineamenti decimali con segno:
+finiti, periodici oppure infiniti non periodici.
+\end{definizione}
+
+I reali che non sono razionali si dicono \emph{irrazionali}: sono i
+decimali infiniti non periodici, ad esempio $\sqrt{2}$, $\pi$, $e$.
+\[
+\mathbb{R} = \mathbb{Q} \cup \{\text{irrazionali}\}, \qquad
+\mathbb{N} \subset \mathbb{Z} \subset \mathbb{Q} \subset \mathbb{R}.
+\]
+
+In $\mathbb{R}$ valgono tutte le proprietà di $\mathbb{Q}$ (è anch'esso un
+campo ordinato). Ciò che lo distingue da $\mathbb{Q}$ è un'ultima
+proprietà: l'assioma di completezza.
+
+\begin{assioma}[di completezza, o di separazione]
+Siano $A, B \subseteq \mathbb{R}$ due insiemi non vuoti tali che
+\[
+a \leq b \quad \text{per ogni } a \in A \text{ e per ogni } b \in B.
+\]
+Allora esiste almeno un $c \in \mathbb{R}$ tale che
+\[
+a \leq c \leq b \quad \text{per ogni } a \in A \text{ e per ogni } b \in B.
+\]
+Il numero $c$ si chiama \emph{elemento separatore} di $A$ e $B$.
+\end{assioma}
+
+In parole: se un insieme sta tutto ``a sinistra'' di un altro, tra i due
+c'è sempre un numero reale che li separa.
+
+\begin{center}
+\begin{tikzpicture}[scale=1.5]
+  \draw[->] (-0.3,0) -- (6.4,0) node[right] {$\mathbb{R}$};
+  \foreach \x in {0.3, 0.9, 1.6, 2.2, 2.7}
+    \fill (\x,0) circle (1.6pt);
+  \foreach \x in {3.4, 3.9, 4.6, 5.3, 6.0}
+    \draw[fill=white] (\x,0) circle (1.6pt);
+  \draw[decorate, decoration={brace, amplitude=5pt}]
+    (0.3,0.2) -- (2.7,0.2) node[midway, above=6pt] {$A$};
+  \draw[decorate, decoration={brace, amplitude=5pt}]
+    (3.4,0.2) -- (6.0,0.2) node[midway, above=6pt] {$B$};
+  \draw[thick] (3.05,0.15) -- (3.05,-0.15) node[below] {$c$};
+\end{tikzpicture}
+\end{center}
+
+
+\begin{esempio}[Elemento separatore]
+Siano $A = \{x \in \mathbb{R} \mid x \leq 3\}$ e $B = \{x \in \mathbb{R} \mid x \geq 5\}$. Ogni elemento di $A$ è minore di ogni elemento di $B$ e un elemento separatore è un qualunque $c \in [3, 5]$: ce ne sono infiniti.
+
+Se invece $A = \{x \in \mathbb{R} \mid x < 4\}$ e $B = \{x \in \mathbb{R} \mid x \geq 4\}$, l'unico elemento separatore è $c = 4$.
+\end{esempio}
+
+\textbf{Perché in $\mathbb{Q}$ non vale.} Consideriamo i due insiemi di
+razionali
+\[
+A = \{q \in \mathbb{Q} \mid q > 0,\ q^2 < 2\}, \qquad
+B = \{q \in \mathbb{Q} \mid q > 0,\ q^2 > 2\}.
+\]
+Ogni elemento di $A$ è minore di ogni elemento di $B$. Gli elementi di $A$
+si avvicinano a $\sqrt{2}$ da sinistra ($1;\ 1{,}4;\ 1{,}41;\ 1{,}414;
+\dots$), quelli di $B$ da destra ($2;\ 1{,}5;\ 1{,}42;\ 1{,}415; \dots$).
+L'unico numero che potrebbe separarli è $\sqrt{2}$, che però non è
+razionale: \textbf{in $\mathbb{Q}$ non esiste un elemento separatore}.
+In $\mathbb{R}$ invece l'assioma garantisce che esiste $c$, e si dimostra
+che $c^2 = 2$, cioè $c = \sqrt{2}$.
+
+\paragraph*{Perché l'assioma di completezza è così importante}
+
+\begin{enumerate}
+    \item \textbf{La retta non ha buchi.} Grazie alla completezza, a ogni
+          numero reale corrisponde un punto della retta e a ogni punto
+          della retta corrisponde un numero reale (corrispondenza
+          biunivoca). Per questo si parla di \emph{retta reale}, e per lo
+          stesso motivo $\mathbb{R}^2$ descrive tutti i punti del piano.
+    \item \textbf{Garantisce l'esistenza di numeri.} Senza completezza
+          non potremmo nemmeno dire che $\sqrt{2}$ esiste. Con essa si
+          dimostra che esistono le radici dei numeri positivi, $\pi$, $e$,
+          i logaritmi, e che ogni allineamento decimale infinito
+          rappresenta davvero un numero.
+    \item \textbf{È la base di tutta l'analisi.} Limiti, continuità,
+          derivate e integrali funzionano solo perché la retta è
+          ``continua''. Esempio: la funzione $f(x) = x^2 - 2$ vale
+          $f(1) = -1 < 0$ e $f(2) = 2 > 0$, quindi passando da negativa a
+          positiva ci aspettiamo che si annulli da qualche parte. In
+          $\mathbb{R}$ lo fa, in $x = \sqrt{2}$. In $\mathbb{Q}$ invece
+          non si annulla mai. Teoremi come quello degli zeri, dei valori
+          intermedi e di Weierstrass sono falsi in $\mathbb{Q}$ e veri in
+          $\mathbb{R}$ proprio grazie alla completezza.
+    \item \textbf{Forma equivalente: l'estremo superiore.} L'assioma si
+          può enunciare anche così: ogni insieme non vuoto e limitato
+          superiormente ha un estremo superiore in $\mathbb{R}$. È la forma
+          che si usa più spesso nei teoremi di analisi.
+\end{enumerate}
+
+\textbf{Densità e completezza non sono la stessa cosa.}
+\begin{center}
+\begin{tabular}{l|c|c}
+                & denso & completo \\ \hline
+$\mathbb{Q}$    & sì    & no       \\
+$\mathbb{R}$    & sì    & sì
+\end{tabular}
+\end{center}
+Densità: tra due numeri ce n'è sempre un altro. Completezza: non ci sono
+buchi. Inoltre $\mathbb{Q}$ è denso in $\mathbb{R}$: tra due numeri reali
+qualsiasi c'è sempre un razionale (e anche un irrazionale).
+
+\paragraph*{La retta reale}
+
+Fissati un punto $O$ (lo $0$), un verso e un'unità di misura, ogni numero
+reale corrisponde a un punto della retta e viceversa.
+
+\begin{center}
+\begin{tikzpicture}[scale=1.6]
+  \draw[->] (-3.5,0) -- (3.7,0) node[right] {$\mathbb{R}$};
+  \foreach \x in {-3,...,3}
+    \draw (\x,0.06) -- (\x,-0.06) node[below] {$\x$};
+  \foreach \x/\l in {-1.5/{-\frac{3}{2}}, 0.5/{\frac{1}{2}},
+                     1.4142/{\sqrt{2}}, 3.1416/{\pi}}
+    {\fill (\x,0) circle (1.4pt);
+     \node[above] at (\x,0.05) {$\l$};}
+\end{tikzpicture}
+\end{center}
+
+I punti $-\frac32$ e $\frac12$ sono razionali; $\sqrt{2}$ e $\pi$ sono
+irrazionali, ma hanno anch'essi il loro posto sulla retta: in $\mathbb{R}$
+non manca nessun punto.
+
+\section[Massimi, minimi, maggioranti e minoranti (Lezione 2 -- 28 settembre 2026)]{Massimi, minimi, maggioranti e minoranti}
+\noindent\emph{Lezione 2 -- 28 settembre 2026}
+\subsection{Massimi e minimi}
+
+\begin{definizione}
+Sia $A \subseteq \mathbb{R}$. Un numero $M$ si dice \emph{massimo} di $A$,
+e si scrive $M = \max A$, se
+\[
+M \in A \quad \text{e} \quad a \leq M \ \text{ per ogni } a \in A.
+\]
+Analogamente, $m$ si dice \emph{minimo} di $A$, e si scrive $m = \min A$, se
+\[
+m \in A \quad \text{e} \quad m \leq a \ \text{ per ogni } a \in A.
+\]
+\end{definizione}
+
+Il massimo è quindi l'elemento più grande dell'insieme, il minimo il più
+piccolo. La condizione $M \in A$ è essenziale: il massimo deve
+\textbf{appartenere} all'insieme.
+
+Se esiste, il massimo è \textbf{unico}: se $M$ e $M'$ fossero entrambi
+massimi di $A$, si avrebbe $M \leq M'$ (perché $M'$ è massimo e $M \in A$) e
+$M' \leq M$ (per lo stesso motivo), quindi $M = M'$. Lo stesso vale per il
+minimo.
+
+\begin{esempio}
+\leavevmode
+\begin{enumerate}
+    \item $A = \{1, 3, 7\}$: $\max A = 7$, $\min A = 1$. Ogni insieme
+          \textbf{finito} e non vuoto ha sempre massimo e minimo.
+    \item $A = [0, 1] = \{x \in \mathbb{R} \mid 0 \leq x \leq 1\}$:
+          $\min A = 0$, $\max A = 1$.
+\end{enumerate}
+\end{esempio}
+
+\textbf{Non tutti gli insiemi di numeri reali hanno massimo o minimo.}
+
+\begin{esempio}
+\leavevmode
+\begin{enumerate}
+    \item $\mathbb{N}$ ha minimo $0$ ma non ha massimo: per ogni $n$ c'è
+          $n + 1$, più grande.
+    \item $\mathbb{Z}$ non ha né massimo né minimo.
+    \item $A = [0, 1) = \{x \in \mathbb{R} \mid 0 \leq x < 1\}$ ha minimo
+          $0$ ma \textbf{non ha massimo}. Il candidato sarebbe $1$, che però
+          non appartiene ad $A$. E nessun $x \in A$ è il massimo, perché
+          $\frac{x + 1}{2}$ sta ancora in $A$ ed è più grande di $x$.
+\end{enumerate}
+\end{esempio}
+
+
+\begin{esempio}[Cinque insiemi di $\mathbb{R}$]
+Consideriamo
+\[
+A = [1, 2], \quad B = \,]3, 7], \quad C = [1, 8] \cup [10, 25[, \quad
+D = [1, 2[ \,\cup \{7\}, \quad E = \,]0, 5[.
+\]
+Sono tutti \textbf{limitati}. Verifichiamo caso per caso.
+\begin{itemize}
+    \item $A$: $1 \in A$ e $1 \leq x$ per ogni $x \in A$, quindi $1 = \min A$.
+          $2 \in A$ e $2 \geq x$ per ogni $x \in A$, quindi $2 = \max A$.
+          $A$ ha sia minimo sia massimo.
+    \item $B$: $7 \in B$ e $7 \geq x$ per ogni $x \in B$, quindi $7 = \max B$.
+          Invece $3 \notin B$, quindi $3$ \textbf{non} è il minimo (e nessun altro
+          numero lo è): $B$ ha massimo ma non ha minimo.
+    \item $C$: $1 = \min C$, ma $C$ non ha massimo (il candidato $25$ non
+          appartiene a $C$): ha minimo ma non massimo.
+    \item $D$: $7 \in D$ e $7 \geq x$ per ogni $x \in D$, quindi $7 = \max D$;
+          $1 \in D$ e $1 \leq x$ per ogni $x \in D$, quindi $1 = \min D$.
+    \item $E$: né minimo né massimo ($0$ e $5$ non appartengono a $E$).
+\end{itemize}
+\end{esempio}
+
+Il terzo esempio dei casi precedenti mostra che un insieme può ``avvicinarsi'' a un valore senza
+raggiungerlo. Per descrivere questa situazione servono i concetti di
+maggiorante, minorante ed estremo superiore/inferiore.
+
+\subsubsection{Maggioranti e minoranti}
+
+\begin{definizione}
+Sia $A \subseteq \mathbb{R}$. Un numero $k \in \mathbb{R}$ si dice
+\emph{maggiorante} di $A$ se
+\[
+a \leq k \quad \text{per ogni } a \in A,
+\]
+e si dice \emph{minorante} di $A$ se
+\[
+k \leq a \quad \text{per ogni } a \in A.
+\]
+\end{definizione}
+
+Differenza con massimo e minimo: un maggiorante \textbf{non deve
+appartenere} ad $A$. Inoltre, se $k$ è un maggiorante, lo è anche ogni
+numero più grande di $k$: i maggioranti, se esistono, sono infiniti.
+
+\begin{esempio}
+Per $A = [0, 1)$:
+\begin{itemize}
+    \item i maggioranti sono tutti i $k \geq 1$, cioè l'insieme $[1, +\infty)$;
+    \item i minoranti sono tutti i $k \leq 0$, cioè l'insieme $(-\infty, 0]$.
+\end{itemize}
+Né $1$ né $2$ appartengono ad $A$, ma sono entrambi maggioranti.
+\end{esempio}
+
+
+\begin{esempio}
+Sia $A = [1, 2]$.
+\begin{itemize}
+    \item $2$ è un maggiorante ($2 \geq x$ per ogni $x \in A$); anche $27$ e
+          $15\,000$ sono maggioranti;
+    \item $1$ è un minorante ($1 \leq x$ per ogni $x \in A$); anche $-16$ e $0$
+          sono minoranti.
+\end{itemize}
+In generale i maggioranti e i minoranti di un insieme o non ci sono o sono
+infiniti.
+\end{esempio}
+
+\begin{definizione}
+Un insieme $A \subseteq \mathbb{R}$ si dice:
+\begin{itemize}
+    \item \emph{limitato superiormente} se ammette almeno un maggiorante;
+    \item \emph{limitato inferiormente} se ammette almeno un minorante;
+    \item \emph{limitato} se è limitato sia superiormente sia inferiormente.
+\end{itemize}
+\end{definizione}
+
+\begin{esempio}
+\leavevmode
+\begin{enumerate}
+    \item $[0, 1)$ è limitato.
+    \item $\mathbb{N}$ è limitato inferiormente (ad esempio da $0$) ma non
+          superiormente.
+    \item $\mathbb{Z}$ non è limitato né inferiormente né superiormente.
+\end{enumerate}
+\end{esempio}
+
+Se $A$ ha massimo, allora $\max A$ è un maggiorante di $A$ (ed è l'unico
+maggiorante che appartiene ad $A$). Quindi un insieme che ha massimo è
+limitato superiormente. Il viceversa è falso: $[0, 1)$ è limitato
+superiormente ma non ha massimo.
+
+\section[Estremo superiore ed estremo inferiore (Lezione 2 -- 28 settembre 2026)]{Estremo superiore ed estremo inferiore}
+\noindent\emph{Lezione 2 -- 28 settembre 2026}
+\subsection{Estremo superiore ed estremo inferiore}
+
+In $[0, 1)$ i maggioranti sono $[1, +\infty)$, e il più piccolo di essi è
+$1$: è proprio il valore a cui l'insieme ``si avvicina''. Questo suggerisce
+la definizione seguente.
+
+\begin{definizione}
+Sia $A \subseteq \mathbb{R}$ non vuoto e limitato superiormente.
+L'\emph{estremo superiore} di $A$, indicato con $\sup A$, è il
+\textbf{minimo dei maggioranti} di $A$.
+
+Analogamente, se $A$ è non vuoto e limitato inferiormente, l'\emph{estremo
+inferiore} di $A$, indicato con $\inf A$, è il \textbf{massimo dei
+minoranti} di $A$.
+\end{definizione}
+
+\begin{center}
+\begin{tikzpicture}[scale=1.5]
+  \draw[->] (-0.3,0) -- (7,0) node[right] {$\mathbb{R}$};
+  \draw[line width=3pt, black!25] (0.5,0) -- (3.5,0);
+  \fill (0.5,0) circle (1.8pt);
+  \draw[fill=white] (3.5,0) circle (1.8pt);
+  \draw[decorate, decoration={brace, amplitude=5pt}]
+    (0.5,0.2) -- (3.5,0.2) node[midway, above=6pt] {$A$};
+  \draw[line width=3pt, black!60] (3.5,-0.35) -- (6.8,-0.35);
+  \node[below] at (5.2,-0.45) {maggioranti};
+  \draw[thick] (3.5,0.15) -- (3.5,-0.6);
+  \node[above] at (3.5,0.55) {$\sup A$};
+\end{tikzpicture}
+\end{center}
+
+\begin{esempio}
+\leavevmode
+\begin{enumerate}
+    \item $A = [0, 1)$: $\sup A = 1$ (che non è massimo, perché $1 \notin A$)
+          e $\inf A = \min A = 0$.
+    \item $A = \left\{ 1 - \frac{1}{n} \;\middle|\; n \in \mathbb{N},\
+          n \geq 1 \right\} = \left\{ 0, \frac12, \frac23, \frac34, \dots
+          \right\}$: gli elementi crescono avvicinandosi a $1$ senza mai
+          raggiungerlo. Quindi $\sup A = 1$, ma $A$ non ha massimo;
+          $\inf A = \min A = 0$.
+\end{enumerate}
+\end{esempio}
+
+\textbf{Legame con massimo e minimo.}
+\begin{itemize}
+    \item Se $A$ ha massimo, allora $\sup A = \max A$.
+    \item Se $\sup A \in A$, allora $\sup A$ è il massimo di $A$. Se invece
+          $\sup A \notin A$, allora $A$ non ha massimo.
+    \item Lo stesso vale per $\inf A$ e il minimo.
+\end{itemize}
+
+\begin{teorema}[Caratterizzazione dell'estremo superiore]
+Sia $A \subseteq \mathbb{R}$ non vuoto e limitato superiormente. Allora
+$s = \sup A$ se e solo se:
+\begin{enumerate}
+    \item $a \leq s$ per ogni $a \in A$ \quad ($s$ è un maggiorante);
+    \item per ogni $\varepsilon > 0$ esiste $a \in A$ tale che
+          $a > s - \varepsilon$ \quad (nessun numero più piccolo di $s$ è
+          un maggiorante).
+\end{enumerate}
+\end{teorema}
+
+In parole: $s$ sta sopra tutti gli elementi di $A$, ma se lo si abbassa
+anche di pochissimo si trova subito un elemento di $A$ che lo supera. Per
+l'estremo inferiore vale lo stesso con le disuguaglianze rovesciate:
+$i \leq a$ per ogni $a \in A$ e, per ogni $\varepsilon > 0$, esiste
+$a \in A$ con $a < i + \varepsilon$.
+
+\subsection{Esistenza dell'estremo superiore}
+
+Finora abbiamo dato per scontato che il minimo dei maggioranti esista. Non è
+ovvio: l'insieme dei maggioranti potrebbe non avere minimo, come $[0, 1)$ non
+ha massimo. È qui che interviene l'assioma di completezza.
+
+\begin{teorema}[Esistenza dell'estremo superiore]
+Ogni insieme $A \subseteq \mathbb{R}$ non vuoto e limitato superiormente
+ammette estremo superiore in $\mathbb{R}$.
+
+Analogamente, ogni insieme non vuoto e limitato inferiormente ammette
+estremo inferiore in $\mathbb{R}$.
+\end{teorema}
+
+\begin{proof}
+Sia $B$ l'insieme dei maggioranti di $A$. $B$ non è vuoto, perché $A$ è
+limitato superiormente, e per definizione di maggiorante
+\[
+a \leq b \quad \text{per ogni } a \in A \text{ e per ogni } b \in B.
+\]
+Per l'assioma di completezza esiste un elemento separatore $c$:
+\[
+a \leq c \leq b \quad \text{per ogni } a \in A \text{ e per ogni } b \in B.
+\]
+Dalla prima disuguaglianza, $c$ è un maggiorante di $A$, cioè $c \in B$.
+Dalla seconda, $c$ è minore o uguale a ogni maggiorante. Quindi $c$ è il
+minimo di $B$, cioè $c = \sup A$.
+\end{proof}
+
+\textbf{In $\mathbb{Q}$ il teorema è falso.} L'insieme
+$A = \{q \in \mathbb{Q} \mid q > 0,\ q^2 < 2\}$ è limitato superiormente
+(ad esempio da $2$), ma tra i \emph{razionali} non ha estremo superiore:
+l'unico candidato è $\sqrt{2}$, che non è razionale. Per questo l'esistenza
+dell'estremo superiore è una forma equivalente dell'assioma di completezza.
+
+
+\textbf{Convenzione.} Se $A$ non è limitato superiormente si scrive
+$\sup A = +\infty$; se non è limitato inferiormente si scrive
+$\inf A = -\infty$. Ad esempio $\sup \mathbb{N} = +\infty$ e
+$\inf \mathbb{Z} = -\infty$.
+
+\subsection{Esempi}
+
+\begin{esempio}[L'insieme $B$]
+$\max B = \sup B = 7$. Per l'estremo inferiore verifichiamo che $\inf B = 3$:
+\begin{enumerate}
+    \item $3 \leq x$ per ogni $x \in B$: $3$ è un minorante;
+    \item per ogni $\varepsilon > 0$ esiste $x \in B$ con $x < 3 + \varepsilon$:
+          infatti $[3, 3 + \varepsilon[ \,\cap\, ]3, 7] \neq \emptyset$.
+\end{enumerate}
+Il numero $3$ non appartiene a $B$, quindi $B$ non ha minimo. Invece $0$ è
+un minorante ma \textbf{non} è l'estremo inferiore: per $\varepsilon = 2$ non
+esiste nessun $x \in B$ con $x < 0 + 2$ (la condizione 2 fallisce).
+\end{esempio}
+
+\begin{esempio}[$A = \{1/n \mid n \in \mathbb{N} \setminus \{0\}\}$]
+$A = \{1, \frac12, \frac13, \frac14, \dots\} \subseteq [0, 1]$, quindi $A$ è
+limitato.
+\begin{itemize}
+    \item $\max A = \sup A = 1$: infatti $1 \in A$ (è $x_1$) e
+          $x_n = \frac1n \leq 1$ per ogni $n \geq 1$.
+    \item $\inf A = 0$. Si ha $0 \leq x_n$ per ogni $n$. Dimostriamo che per
+          ogni $\varepsilon > 0$ esiste $x_n \in A$ con $x_n < 0 + \varepsilon$.
+          Per assurdo, supponiamo che esista $\varepsilon > 0$ tale che
+          $\frac1n \geq \varepsilon$ per ogni $n \in \mathbb{N} \setminus \{0\}$;
+          allora $n \leq \frac1\varepsilon$ per ogni $n \in \mathbb{N}$, che è
+          assurdo perché $\mathbb{N}$ non è limitato superiormente. Quindi
+          $0 = \inf A$.
+    \item $0 \notin A$, quindi $A$ \textbf{non ha minimo}.
+\end{itemize}
+\end{esempio}
+
+\textbf{Riassunto.}
+\begin{itemize}
+    \item se un insieme ha massimo, allora massimo $=$ estremo superiore;
+    \item se un insieme ha minimo, allora minimo $=$ estremo inferiore;
+    \item un insieme può avere estremo inferiore ma non minimo;
+    \item un insieme può avere estremo superiore ma non massimo.
+\end{itemize}
+
+\section[Esempi sugli estremi e insiemi non limitati (Lezione 3 -- 1 ottobre 2026)]{Esempi sugli estremi e insiemi non limitati}
+\noindent\emph{Lezione 3 -- 1 ottobre 2026}
+\subsection{Un altro esempio: $B = \left\{ \dfrac{n}{n+1} \mid n \in \mathbb{N} \right\}$}
+
+\begin{esempio}
+Sia $B = \{x_n = \frac{n}{n+1},\ n \in \mathbb{N}\} = \{0, \frac12, \frac23, \frac34, \dots\}$. Poiché $x_n \leq 1$ per ogni $n$ (infatti $n \leq n + 1$) e $x_n \geq 0$, si ha $B \subseteq [0, 1]$: $B$ è limitato. In particolare, essendo limitato superiormente, per (R4) esiste $\sup B$.
+
+\textbf{Minimo.} $x_0 = 0 \in B$ e $x_n \geq 0$ per ogni $x_n \in B$: quindi $0 = \min B$.
+
+\textbf{Estremo superiore.} Dimostriamo che $\sup B = 1$, cioè che:
+\begin{enumerate}
+    \item $x_n \leq 1$ per ogni $x_n \in B$ (già visto);
+    \item per ogni $\varepsilon > 0$ esiste $x_n \in B$ tale che $1 - \varepsilon < x_n$.
+\end{enumerate}
+Per assurdo neghiamo la 2: esiste $\bar\varepsilon > 0$ tale che $1 - \bar\varepsilon \geq x_n = \frac{n}{n+1}$ per ogni $n \in \mathbb{N}$. Allora
+\[
+(n+1)(1 - \bar\varepsilon) \geq n \iff n + 1 - \bar\varepsilon n - \bar\varepsilon \geq n
+\iff 1 - \bar\varepsilon \geq \bar\varepsilon n
+\iff n \leq \frac{1 - \bar\varepsilon}{\bar\varepsilon} \quad \forall\, n \in \mathbb{N}.
+\]
+Questo è assurdo, perché $n$ può essere grande a piacere. Quindi $1 = \sup B$.
+
+Poiché $1 \notin B$ (si ha $x_n < 1$ per ogni $n$), $B$ non ha massimo.
+\end{esempio}
+
+\subsection{Insiemi non limitati}
+
+Un insieme $A$ non sempre ammette maggioranti o minoranti.
+
+\begin{definizione}
+Si pone
+\begin{itemize}
+    \item $\sup A = +\infty$ se $A$ non è limitato superiormente, cioè
+          $\forall\, L \ \exists\, x \in A : x > L$;
+    \item $\inf A = -\infty$ se $A$ non è limitato inferiormente, cioè
+          $\forall\, \ell \ \exists\, x \in A : x < \ell$.
+\end{itemize}
+\end{definizione}
+
+\begin{esempio}
+\leavevmode
+\begin{itemize}
+    \item $A = [0, +\infty)$ è limitato inferiormente ma non superiormente;
+    \item $A = (-\infty, 0]$ è limitato superiormente ma non inferiormente;
+    \item $[-2, +\infty)$ è limitato inferiormente ma non superiormente;
+    \item $(-\infty, 5]$ è limitato superiormente ma non inferiormente;
+    \item $\,]2, 1000[$ è limitato: $2 = \inf\,]2, 1000[$ e
+          $1000 = \sup\,]2, 1000[$, ma l'insieme non ha né minimo né massimo
+          (perché $2, 1000 \notin \,]2, 1000[$);
+    \item $\mathbb{N}$ è limitato inferiormente ma non superiormente.
+\end{itemize}
+\end{esempio}
+
+\begin{esercizio}
+Quale tra i seguenti insiemi ha sia massimo sia minimo?
+(1) $]2, 9[$ \qquad (2) $[0, 5[$ \qquad (3) $[0, 1[ \,\cup \{7\}$ \qquad (4) $]0, 2] \cup \{5\}$
+\textbf{Risposta: 3.} $[0, 1[ \,\cup \{7\}$ ha minimo $0$ e massimo $7$. Gli altri: $]2, 9[$ non ha né minimo né massimo; $[0, 5[$ ha minimo $0$ ma non massimo; $]0, 2] \cup \{5\}$ ha massimo $5$ ma non minimo.
+\end{esercizio}
+
+\section[Applicazioni e funzioni numeriche (Lezione 3 -- 1 ottobre 2026)]{Applicazioni e funzioni numeriche}
+\noindent\emph{Lezione 3 -- 1 ottobre 2026}
+\subsection{Applicazioni tra insiemi}
+
+\begin{definizione}
+Siano $A$ e $B$ due insiemi. Si dice \emph{applicazione} da $A$ in $B$ una relazione che ad ogni elemento di $A$ associa \textbf{uno ed un solo} elemento di $B$. In simboli
+\[
+f : A \to B, \qquad a \mapsto f(a) = b.
+\]
+\end{definizione}
+
+\begin{itemize}
+    \item $f(a)$ è l'\emph{immagine} di $a$ tramite $f$;
+    \item $A$ è il \emph{dominio} di $f$;
+    \item $B$ è il \emph{codominio} di $f$;
+    \item $f(A) = \{f(a) \mid a \in A\} \subseteq B$ è l'\emph{immagine di $f$}, indicata con $\mathrm{Im}(f)$;
+    \item il \emph{grafico} di $f$ è
+    $\mathrm{Gr}(f) = \{(a, b) \in A \times B : b = f(a),\ \forall\, a \in A\} = \{(a, f(a)) \mid a \in A\}$.
+\end{itemize}
+
+\begin{osservazione}
+Da ogni elemento del dominio deve partire \textbf{una sola freccia}: non è ammesso che $a$ abbia due immagini diverse $b_1 \neq b_2$. Possono invece esistere elementi del codominio senza freccia in arrivo (non tutto $B$ è immagine), o con più frecce in arrivo.
+\end{osservazione}
+
+\begin{center}
+\begin{tikzpicture}[every node/.style={font=\small}]
+  \draw (0,0) ellipse (0.9 and 1.1);
+  \draw (3.2,0) ellipse (1.2 and 1.1);
+  \node at (0,1.35) {$A$}; \node at (3.2,1.35) {$B$};
+  \fill (0,0.5) circle (1.5pt) node[left=2pt] {$a$};
+  \fill (3.2,0.5) circle (1.5pt) node[right=2pt] {$f(a) = b$};
+  \draw[->] (0,0.5) -- (3.2,0.5);
+  \node at (1.6,0.75) {$f$};
+  % non ammesso
+  \begin{scope}[xshift=7.5cm]
+    \draw (0,0) ellipse (0.9 and 1.1);
+    \draw (3.2,0) ellipse (1.2 and 1.1);
+    \node at (0,1.35) {$A$}; \node at (3.2,1.35) {$B$};
+    \fill (0,-0.1) circle (1.5pt) node[left=2pt] {$a_1$};
+    \fill (3.2,0.5) circle (1.5pt) node[right=2pt] {$b_1$};
+    \fill (3.2,-0.7) circle (1.5pt) node[right=2pt] {$b_2$};
+    \draw[->] (0,-0.1) -- (3.2,0.5);
+    \draw[->] (0,-0.1) -- (3.2,-0.7);
+    \draw[red, thick] (1.3,0.3) -- (1.9,-0.5);
+    \draw[red, thick] (1.3,-0.5) -- (1.9,0.3);
+    \node at (1.6,-1.5) {non è un'applicazione};
+  \end{scope}
+\end{tikzpicture}
+\end{center}
+
+\subsection{Funzioni numeriche}
+
+\begin{definizione}
+Si dice \emph{funzione} (numerica) una applicazione che ha come dominio un sottoinsieme $D$ di $\mathbb{R}$ e come codominio $\mathbb{R}$:
+\[
+f : D \subseteq \mathbb{R} \to \mathbb{R}, \qquad x \mapsto f(x).
+\]
+\end{definizione}
+
+L'immagine è $f(D) = \{f(x) \mid x \in D\} \subseteq \mathbb{R}$ ($\mathrm{Im}(f)$) e il grafico è
+\[
+\mathrm{Gr}(f) = \{(x, y) \in \mathbb{R} \times \mathbb{R} : y = f(x),\ x \in D\}.
+\]
+
+La proprietà fondamentale, che ad ogni ingresso $x \in D$ corrisponde una ed una sola uscita $f(x) \in \mathbb{R}$, ha un significato geometrico: \textbf{ogni retta parallela all'asse delle ordinate che taglia l'asse delle ascisse in un punto $x \in D$ interseca il grafico di $f$ in uno ed un solo punto.} Una curva che viene tagliata da una retta verticale in due o più punti non è il grafico di una funzione.
+
+\subsection{Dominio}
+
+\begin{definizione}
+Il \emph{dominio} di una funzione data da un'espressione è il più grande insieme delle variabili indipendenti per cui le espressioni coinvolte sono ben definite.
+\end{definizione}
+
+Le regole più frequenti per determinarlo:
+\begin{enumerate}
+    \item gli argomenti delle radici di ordine pari devono essere non negativi;
+    \item gli argomenti dei logaritmi devono essere positivi;
+    \item i denominatori devono essere non nulli.
+\end{enumerate}
+
+\begin{esempio}
+$f(x) = \sqrt{x - 2}$ ha dominio $[2, +\infty)$; $f(x) = \ln(x + 1)$ ha dominio $(-1, +\infty)$; $f(x) = \dfrac{1}{x - 3}$ ha dominio $\mathbb{R} \setminus \{3\}$.
+\end{esempio}
+
+\section[Sistemi di riferimento (Lezione 3 -- 1 ottobre 2026)]{Sistemi di riferimento}
+\noindent\emph{Lezione 3 -- 1 ottobre 2026}
+\subsection{Sistemi di riferimento}
+
+Stabilire un sistema di riferimento in uno spazio significa fissare
+\begin{enumerate}
+    \item un punto detto \emph{origine};
+    \item un metodo per determinare univocamente la posizione di tutti gli altri punti rispetto all'origine, associando loro dei numeri reali detti \emph{coordinate}.
+\end{enumerate}
+La \emph{dimensione} dello spazio è il numero di coordinate necessarie a descrivere la posizione di un punto. Si considerano sistemi unidimensionali (1D), bidimensionali (2D) e tridimensionali (3D).
+
+\subsection{Sistema unidimensionale}
+
+Un sistema di riferimento unidimensionale è costituito da:
+\begin{itemize}
+    \item una retta orizzontale detta \emph{asse delle ascisse};
+    \item un'origine, di solito indicata con $O$;
+    \item un verso di percorrenza, solitamente verso destra;
+    \item un punto $U$, distinto da $O$ e situato alla destra di $O$, che fissa come unità di misura la lunghezza del segmento $OU$, indicata con $|OU|$.
+\end{itemize}
+L'\emph{ascissa} è il numero reale associato ad ogni punto $P$; $|x|$ è la lunghezza del segmento $OP$ secondo l'unità di misura stabilita. Se $x > 0$, $P$ è a destra di $O$; se $x < 0$ è a sinistra; se $x = 0$, $P$ coincide con $O$.
+
+\begin{center}
+\begin{tikzpicture}
+  \draw[->] (-3,0) -- (4,0);
+  \fill (0,0) circle (1.5pt) node[below] {$O$};
+  \fill (1,0) circle (1.5pt) node[below] {$U$};
+  \fill (2.7,0) circle (1.5pt) node[below] {$P$};
+  \node[above] at (2.7,0.05) {$x_P$};
+\end{tikzpicture}
+\end{center}
+
+\subsection{Sistema bidimensionale: il piano cartesiano}
+
+Sistema di coordinate cartesiane bidimensionale (piano cartesiano monometrico):
+\begin{enumerate}
+    \item si fissano nel piano due rette perpendicolari che si intersecano in un punto $O$;
+    \item si fissano sulla prima un punto $U$ e sulla seconda un punto $V$, entrambi distinti da $O$, con $|OU| = |OV|$ (unità di misura);
+    \item dato un punto $P$ si indicano con $P_1$ e $P_2$ le sue proiezioni ortogonali sulle due rette;
+    \item ognuna delle due rette è un sistema di coordinate unidimensionale: si indicano con $x_P$ e $y_P$ le coordinate di $P_1$ e $P_2$.
+\end{enumerate}
+Ad ogni punto $P$ del piano è così associata una coppia ordinata $(x_P, y_P)$ di numeri reali, le \emph{coordinate cartesiane bidimensionali} di $P$.
+
+Rappresentando il piano, la prima retta è orizzontale (\emph{asse delle $x$} o delle ascisse) e la seconda verticale (\emph{asse delle $y$} o delle ordinate). Per $P = (x_P, y_P)$: $x_P$ è l'ascissa e $y_P$ è l'ordinata di $P$.
+
+Il piano risulta suddiviso in quattro \emph{quadranti} numerati in senso antiorario a partire da quello in cui entrambe le coordinate sono positive.
+
+\begin{center}
+\begin{tikzpicture}[scale=0.9]
+  \draw[->] (-3.2,0) -- (3.5,0) node[right] {$x$};
+  \draw[->] (0,-2.5) -- (0,3) node[above] {$y$};
+  \fill (2,1.5) circle (1.5pt) node[above right] {$P = (x_P, y_P)$};
+  \draw[dashed] (2,0) -- (2,1.5);
+  \draw[dashed] (0,1.5) -- (2,1.5);
+  \node[below] at (2,0) {$x_P$};
+  \node[left] at (0,1.5) {$y_P$};
+  \node at (1.3,2.4) {I}; \node at (-1.3,2.4) {II};
+  \node at (-1.3,-1.6) {III}; \node at (1.3,-1.6) {IV};
+\end{tikzpicture}
+\end{center}
+
+\subsection{Sistema tridimensionale: lo spazio cartesiano}
+
+Sistema di coordinate cartesiane tridimensionale (spazio cartesiano monometrico):
+\begin{enumerate}
+    \item si fissano nello spazio tre rette perpendicolari che si intersecano in un punto $O$ detto origine;
+    \item si fissano sulla prima un punto $U$, sulla seconda un punto $V$ e sulla terza un punto $W$, tutti distinti da $O$, con $|OU| = |OV| = |OW|$;
+    \item dato un punto $P$ si indicano con $P_1, P_2, P_3$ le proiezioni ortogonali sulle tre rette;
+    \item ognuna delle rette è un sistema di coordinate unidimensionale: si indicano con $x_P, y_P, z_P$ le coordinate di $P_1, P_2, P_3$.
+\end{enumerate}
+Ad ogni punto dello spazio è associata una terna ordinata $(x_P, y_P, z_P)$ di numeri reali, le \emph{coordinate cartesiane tridimensionali} di $P$:
+\begin{itemize}
+    \item \emph{ascissa}: primo numero della terna, sull'asse $x$;
+    \item \emph{ordinata}: secondo numero della terna, sull'asse $y$;
+    \item \emph{quota}: terzo numero della terna, sull'asse $z$.
+\end{itemize}
+
+\begin{center}
+\begin{tikzpicture}[scale=1]
+  \draw[->] (0,0) -- (0,3) node[above] {$z$};
+  \draw[->] (0,0) -- (3.2,0) node[right] {$y$};
+  \draw[->] (0,0) -- (-1.6,-1.2) node[below left] {$x$};
+  \fill (1.6,1.5) circle (1.5pt) node[above right] {$P = (x_P, y_P, z_P)$};
+\end{tikzpicture}
+\end{center}
+
+\section[Geometria analitica: la retta (Lezione 3 -- 1 ottobre 2026)]{Geometria analitica: la retta}
+\noindent\emph{Lezione 3 -- 1 ottobre 2026}
+\subsection{Equazione cartesiana della retta}
+
+Un'equazione algebrica di primo grado in due variabili
+\[
+ax + by + c = 0, \qquad a, b, c \in \mathbb{R} \tag{1}
+\]
+rappresenta una retta in posizione generica nel piano: \emph{equazione cartesiana generale della retta in forma implicita}. Fissati i coefficienti $a, b, c$ è fissata la retta, nel senso che tutti i punti della retta hanno coordinate $(x, y)$ che soddisfano l'equazione.
+
+\begin{esempio}
+I punti della retta $y - x = 0$ devono avere ascissa uguale all'ordinata. $P = (1, 2)$ la soddisfa? No ($2 - 1 \neq 0$). $P = (5, 5)$ la soddisfa? Sì.
+\end{esempio}
+
+\subsection{Forma esplicita}
+
+Se $b \neq 0$ si isola il termine in $y$ e si divide per $b$:
+\[
+ax + by + c = 0 \implies by = -ax - c \implies y = -\frac{a}{b}x - \frac{c}{b}.
+\]
+Si ottiene l'equazione in \emph{forma esplicita}
+\[
+y = mx + q, \qquad m, q \in \mathbb{R}, \tag{2}
+\]
+con $m = -\frac{a}{b}$ e $q = -\frac{c}{b}$ (queste relazioni permettono di passare da una forma all'altra).
+
+L'equazione (1) può rappresentare una qualunque retta del piano. L'equazione (2) rappresenta tutte le rette \textbf{tranne} quelle parallele all'asse delle $y$.
+
+L'equazione (2) è il grafico di una funzione: $f : D \subseteq \mathbb{R} \to \mathbb{R}$, $x \mapsto f(x) = mx + q$ con $D \subseteq \mathbb{R}$ e
+\[
+\mathrm{Gr}(f) = \{(x, f(x)) \mid x \in D\} = \{(x, mx + q) \mid x \in D\}.
+\]
+
+\subsection{Rette parallele agli assi}
+
+\begin{itemize}
+    \item Una retta parallela all'asse delle ordinate ha equazione $x = x_0$, perché è costituita da infiniti punti aventi la stessa ascissa, cioè i punti del tipo $(x_0, y)$, $y \in \mathbb{R}$, con $x_0$ costante. \textbf{Non può essere il grafico di una funzione}: allo stesso $x_0$ corrispondono infiniti valori di $y$.
+    \item Una retta parallela all'asse delle ascisse ha equazione $y = y_0$, perché è costituita da infiniti punti aventi la stessa ordinata, cioè i punti del tipo $(x, y_0)$, $x \in \mathbb{R}$, con $y_0$ costante. È il grafico della funzione costante $f : \mathbb{R} \to \mathbb{R}$, $x \mapsto y_0$.
+\end{itemize}
+
+\subsection{Pendenza e intercetta}
+
+Per la retta $y = mx + q$:
+\begin{itemize}
+    \item $m$ è la \emph{pendenza}: $m = \dfrac{y_2 - y_1}{x_2 - x_1}$, con $(x_1, y_1), (x_2, y_2)$ punti della retta;
+    \item $m = \tan\theta$, dove $\theta$ è l'angolo formato tra l'asse delle ascisse e la retta;
+    \item $m = 0$: la retta è parallela all'asse delle ascisse ($y = q$);
+    \item $q$ è l'intersezione della retta con l'asse delle ordinate;
+    \item $q = 0$: la retta passa per l'origine.
+\end{itemize}
+
+\subsection{Zeri e intersezione con l'asse $x$}
+
+Le soluzioni di $ax + b = 0$, con $a, b \in \mathbb{R}$, $a \neq 0$, sono graficamente le soluzioni del sistema
+\[
+\begin{cases} y = 0 \\ y = ax + b \end{cases}
+\implies \text{soluzione } P = \left(-\frac{b}{a}, 0\right) = (x_0, 0).
+\]
+Cioè, data $f : \mathbb{R} \to \mathbb{R}$, $f(x) = ax + b$, la domanda ``per quali $x \in \mathbb{R}$ si ha $f(x) = 0$?'' ha come risposta l'ascissa del punto in cui il grafico interseca l'asse $x$.
+
+\section[Esempi di funzioni e curve parametriche (Lezione 3 -- 1 ottobre 2026)]{Esempi di funzioni e curve parametriche}
+\noindent\emph{Lezione 3 -- 1 ottobre 2026}
+\subsection{Alcuni esempi di funzioni}
+
+\begin{esempio}[$f_1(x) = x^2$]
+$f_1 : \mathbb{R} \to \mathbb{R}$, $f_1(x) = x^2$. L'immagine è $f_1(\mathbb{R}) = [0, +\infty)$: la funzione è limitata inferiormente ma non superiormente. Il grafico
+\[
+\mathrm{Gr}(f_1) = \{(x, x^2) \mid x \in \mathbb{R}\}
+\]
+è una parabola con vertice nell'origine e asse coincidente con l'asse $y$.
+\end{esempio}
+
+\begin{esempio}[$f_2(x) = 1/x$]
+$f_2 : \mathbb{R} \setminus \{0\} \to \mathbb{R}$, $f_2(x) = \dfrac1x$. Il grafico
+\[
+\mathrm{Gr}(f_2) = \left\{\left(x, \tfrac1x\right) \mid x \in \mathbb{R},\ x \neq 0\right\}
+\]
+è un'iperbole equilatera.
+\end{esempio}
+
+\begin{center}
+\begin{tikzpicture}[scale=0.9]
+  % parabola
+  \draw[->] (-2,0) -- (2,0) node[right] {$x$};
+  \draw[->] (0,-0.5) -- (0,3.2) node[above] {$y$};
+  \draw[thick, domain=-1.7:1.7, smooth, variable=\x] plot ({\x},{\x*\x});
+  \node at (0,-1) {$f_1(x) = x^2$};
+  % iperbole
+  \begin{scope}[xshift=6cm]
+    \draw[->] (-2.5,0) -- (2.5,0) node[right] {$x$};
+    \draw[->] (0,-2.5) -- (0,2.5) node[above] {$y$};
+    \draw[thick, domain=0.4:2.4, smooth, variable=\x] plot ({\x},{1/\x});
+    \draw[thick, domain=-2.4:-0.4, smooth, variable=\x] plot ({\x},{1/\x});
+    \node at (0,-3) {$f_2(x) = 1/x$};
+  \end{scope}
+\end{tikzpicture}
+\end{center}
+
+\subsection{Funzioni definite a tratti}
+
+\begin{esempio}[Valore assoluto]
+\[
+f_3(x) = |x| = \begin{cases} x & \text{se } x \geq 0, \\ -x & \text{se } x < 0. \end{cases}
+\]
+Per $x \geq 0$ il grafico coincide con quello di $g(x) = x$ (bisettrice del I e III quadrante); per $x < 0$ con quello di $h(x) = -x$ (bisettrice del II e IV quadrante). Il grafico di $|x|$ è quindi formato dalle due semirette uscenti dall'origine nel I e II quadrante.
+\end{esempio}
+
+\begin{esempio}
+$f_4 : [0, 3] \to \mathbb{R}$,
+\[
+f_4(x) = \begin{cases}
+3x & \text{se } 0 \leq x \leq 1, \\
+4 - x & \text{se } 1 < x \leq 2, \\
+x - 1 & \text{se } 2 < x \leq 3.
+\end{cases}
+\]
+Il grafico è formato da tre segmenti: da $(0, 0)$ a $(1, 3)$; da $(1, 3)$ (escluso) a $(2, 2)$; da $(2, 1)$ (escluso) a $(3, 2)$.
+\end{esempio}
+
+\begin{center}
+\begin{tikzpicture}[scale=1]
+  \draw[->] (-2,0) -- (2,0) node[right] {$x$};
+  \draw[->] (0,-0.3) -- (0,2.2) node[above] {$y$};
+  \draw[thick] (-1.8,1.8) -- (0,0) -- (1.8,1.8);
+  \node at (0,-0.9) {$|x|$};
+  \begin{scope}[xshift=6cm]
+    \draw[->] (-0.5,0) -- (3.7,0) node[right] {$x$};
+    \draw[->] (0,-0.3) -- (0,3.5) node[above] {$y$};
+    \foreach \x in {1,2,3} \draw (\x,0.05) -- (\x,-0.05) node[below] {$\x$};
+    \draw[thick] (0,0) -- (1,3);
+    \draw[thick] (1,3) -- (2,2);
+    \draw[thick] (2,1) -- (3,2);
+    \fill (0,0) circle (1.5pt); \fill (1,3) circle (1.5pt); \fill (2,2) circle (1.5pt); \fill (3,2) circle (1.5pt);
+    \draw[fill=white] (2,1) circle (1.5pt);
+    \node at (1.5,-0.9) {$f_4(x)$};
+  \end{scope}
+\end{tikzpicture}
+\end{center}
+
+\subsection{Funzioni a valori vettoriali}
+
+\begin{definizione}
+Si dice \emph{funzione a valori vettoriali} una applicazione che ha come codominio un sottoinsieme di $\mathbb{R}^2$ oppure $\mathbb{R}^3$, più in generale di $\mathbb{R}^n$. Un esempio sono le curve parametriche:
+\[
+f : D \subseteq \mathbb{R} \to \mathbb{R}^2, \qquad t \mapsto f(t).
+\]
+\end{definizione}
+
+\subsection{Curve parametriche}
+
+\begin{definizione}
+Una \emph{curva parametrica piana} è una funzione $c : [a, b] \to \mathbb{R}^2$,
+\[
+c(t) = \big(x(t), y(t)\big);
+\]
+una \emph{curva parametrica nello spazio} è una funzione $c : [a, b] \to \mathbb{R}^3$.
+\end{definizione}
+
+\begin{definizione}
+Il \emph{supporto} (o \emph{sostegno}) di una curva parametrica è l'insieme di tutti i punti $P = c(t)$ al variare del parametro $t \in [a, b]$.
+\end{definizione}
+
+\begin{esempio}[La retta in forma parametrica]
+Data una retta $r$ nel piano si scelgono due punti $P_1$ e $P_2$ su di essa. Si individua così un vettore $\vec v = \overrightarrow{P_1P_2}$, detto \emph{vettore direttore} di $r$. Una condizione necessaria e sufficiente affinché un generico punto $P = (x, y)$ appartenga a $r$ è che il vettore $\overrightarrow{P_1P}$ sia parallelo a $\vec v$. Quindi, posto $P_1 = (a, b)$ e $\vec v = (v_1, v_2)$, si ottengono le \emph{equazioni parametriche della retta}:
+\[
+\begin{cases} x(t) = a + t v_1 \\ y(t) = b + t v_2 \end{cases} \quad t \in \mathbb{R}.
+\]
+\end{esempio}
+
+\section[Funzioni in due variabili (Lezione 4 -- 5 ottobre 2026)]{Funzioni in due variabili}
+\noindent\emph{Lezione 4 -- 5 ottobre 2026}
+\subsection{Funzioni in due variabili}
+
+\begin{definizione}
+Si dice \emph{funzione di due variabili} una applicazione che ha come dominio un sottoinsieme di $\mathbb{R}^2$ e come codominio un sottoinsieme di $\mathbb{R}$:
+\[
+f : D \subseteq \mathbb{R}^2 \to \mathbb{R}, \qquad (x, y) \mapsto f(x, y).
+\]
+\end{definizione}
+
+\begin{itemize}
+    \item \emph{Grafico}: $\mathrm{Gr}(f) = \{(x, y, z) \in \mathbb{R}^2 \times \mathbb{R} : z = f(x, y),\ (x, y) \in D\}$ (una superficie nello spazio).
+    \item \emph{Curva di livello} $c$: $\{(x, y) \in D : f(x, y) = c\}$, cioè l'insieme dei punti del dominio in cui la funzione vale $c$.
+\end{itemize}
+
+\begin{esempio}
+\leavevmode
+\begin{itemize}
+    \item \textbf{piano}: $f : \mathbb{R}^2 \to \mathbb{R}$, $f(x, y) = x + y$; le curve di livello $x + y = c$ sono rette;
+    \item \textbf{paraboloide}: $f : \mathbb{R}^2 \to \mathbb{R}$, $f(x, y) = x^2 + y^2$; le curve di livello $x^2 + y^2 = c$ (con $c > 0$) sono circonferenze di raggio $\sqrt c$;
+    \item \textbf{cono}: $f : \mathbb{R}^2 \to \mathbb{R}$, $f(x, y) = \sqrt{x^2 + y^2}$; le curve di livello $\sqrt{x^2 + y^2} = c$ (con $c > 0$) sono circonferenze di raggio $c$.
+\end{itemize}
+\end{esempio}
+
+\section[Operazioni tra funzioni (Lezione 4 -- 5 ottobre 2026)]{Operazioni tra funzioni}
+\noindent\emph{Lezione 4 -- 5 ottobre 2026}
+\subsection{Operazioni aritmetiche tra funzioni}
+
+Date due funzioni $f : D(f) \subseteq \mathbb{R} \to \mathbb{R}$ e $g : D(g) \subseteq \mathbb{R} \to \mathbb{R}$ si definiscono:
+\begin{itemize}
+    \item \emph{somma}: $(f + g)(x) = f(x) + g(x)$;
+    \item \emph{differenza}: $(f - g)(x) = f(x) - g(x)$;
+    \item \emph{prodotto}: $(fg)(x) = f(x)\,g(x)$;
+    \item \emph{quoziente}: $\left(\dfrac{f}{g}\right)(x) = \dfrac{f(x)}{g(x)}$.
+\end{itemize}
+Il dominio delle prime tre funzioni è $D(f) \cap D(g)$. Il dominio del quoziente è
+\[
+D(f) \cap \{x \in D(g) : g(x) \neq 0\}.
+\]
+
+\subsection{Funzione massimo e funzione minimo}
+
+Date $f : D(f) \subseteq \mathbb{R} \to \mathbb{R}$ e $g : D(g) \subseteq \mathbb{R} \to \mathbb{R}$ si definiscono:
+\begin{itemize}
+    \item \emph{massimo}: $\max\{f, g\}(x) = \max\{f(x), g(x)\}$;
+    \item \emph{minimo}: $\min\{f, g\}(x) = \min\{f(x), g(x)\}$.
+\end{itemize}
+Il dominio di queste funzioni è $D(f) \cap D(g)$. Nel grafico, $\max\{f, g\}$ segue in ogni punto la più alta tra le due curve, $\min\{f, g\}$ la più bassa.
+
+\section[Immagine e controimmagine (Lezione 4 -- 5 ottobre 2026)]{Immagine e controimmagine}
+\noindent\emph{Lezione 4 -- 5 ottobre 2026}
+\subsection{Immagine e controimmagine}
+
+Sia $f : D \to \mathbb{R}$ e sia $A$ un sottoinsieme di $D$.
+
+\begin{definizione}
+L'\emph{immagine di $A$ attraverso $f$} è l'insieme di tutte le immagini degli elementi di $A$:
+\[
+f(A) = \{f(x) \mid x \in A\} \subseteq \mathrm{Im}(f).
+\]
+Per $A = D$ si ha $f(D) = \{f(x) \mid x \in D\} \subseteq \mathbb{R}$, l'\emph{immagine di $f$}, $\mathrm{Im}(f)$.
+\end{definizione}
+
+\begin{definizione}
+Sia $y \in \mathbb{R}$. La \emph{controimmagine} di $y$ attraverso $f$ è l'insieme
+\[
+f^{-1}(y) = \{x \in D : f(x) = y\}.
+\]
+Tale insieme è vuoto se e solo se $y \notin \mathrm{Im}(f)$. Sia $B \subseteq \mathbb{R}$: la \emph{controimmagine} di $B$ è
+\[
+f^{-1}(B) = \{x \in D : f(x) \in B\},
+\]
+cioè l'unione di tutte le controimmagini degli elementi di $B$.
+\end{definizione}
+
+\subsection{Esempi}
+
+\begin{esempio}[$f(x) = x^2$]
+Sia $f : \mathbb{R} \to \mathbb{R}$, $f(x) = x^2$. Allora
+\begin{itemize}
+    \item $f([1, 2]) = [1, 4]$;
+    \item $f^{-1}([1, 4]) = [-2, -1] \cup [1, 2]$;
+    \item $f^{-1}([-1, 0[) = \emptyset$, perché $[-1, 0[ \,\cap\, \mathrm{Im}(f) = \emptyset$;
+    \item $f(\mathbb{R}) = [0, +\infty)$.
+\end{itemize}
+\end{esempio}
+
+\begin{esempio}[Funzione segno]
+Sia $g : \mathbb{R} \to \mathbb{R}$,
+\[
+g(x) = \operatorname{sign}(x) = \begin{cases} 1 & \text{se } x > 0, \\ 0 & \text{se } x = 0, \\ -1 & \text{se } x < 0. \end{cases}
+\]
+Allora $g([2, 3]) = \{1\}$; $g^{-1}(1) = \,]0, +\infty[$; $g^{-1}(3) = \emptyset$ (perché $3 \notin \mathrm{Im}(g)$); $g(\mathbb{R}) = \{-1, 0, 1\}$.
+\end{esempio}
+
+\begin{esempio}[Parte intera]
+Sia $h : \mathbb{R} \to \mathbb{R}$, $h(x) = [x]$, la \emph{parte intera} di $x$, cioè il più grande intero $\leq x$. Allora
+\[
+h([0, 1[) = \{0\}, \quad h([1, 2[) = \{1\}, \quad h([-2, -1[) = \{-2\},
+\]
+$h(\mathbb{R}) = \mathbb{Z}$, e $h^{-1}(\tfrac12) = \emptyset$ perché $\frac12 \notin \mathbb{Z}$.
+\end{esempio}
+
+\begin{esempio}[Mantissa]
+Sia $\ell : \mathbb{R} \to \mathbb{R}$, $\ell(x) = x - [x]$, la \emph{mantissa}. Per $x \in [n, n+1[$, con $n \in \mathbb{Z}$, si ha $\ell(x) = x - n$: il grafico è formato da infiniti segmenti paralleli di pendenza $1$, e $\ell(\mathbb{R}) = [0, 1[$. Ad esempio
+\[
+\ell(\tfrac12) = \tfrac12 - 0 = \tfrac12, \qquad
+\ell(-\tfrac14) = -\tfrac14 - [-\tfrac14] = -\tfrac14 + 1 = \tfrac34.
+\]
+Inoltre
+\[
+\ell\big([-\tfrac14, \tfrac14]\big) = [\tfrac34, 1[ \,\cup\, [0, \tfrac14],
+\qquad
+\ell^{-1}\big([0, \tfrac12[\big) = \bigcup_{n \in \mathbb{Z}} \,[n, n + \tfrac12[.
+\]
+\end{esempio}
+
+\section[Estremi di una funzione e funzioni limitate (Lezione 4 -- 5 ottobre 2026)]{Estremi di una funzione e funzioni limitate}
+\noindent\emph{Lezione 4 -- 5 ottobre 2026}
+\subsection{Estremo superiore e inferiore di una funzione}
+
+Sia $f : D \to \mathbb{R}$ e $A \subseteq D$.
+
+\begin{definizione}
+L'\emph{estremo superiore di $f$ su $A$} è l'estremo superiore dell'insieme $f(A)$:
+\[
+\sup_{x \in A} f(x) = \sup f(A).
+\]
+$f$ è \emph{superiormente limitata su $A$} se l'insieme $f(A)$ è superiormente limitato.
+\end{definizione}
+
+Se $\sup_{x \in A} f(x)$ è finito e appartiene a $f(A)$, allora è il \emph{valore massimo} di $f$ su $A$. Cioè, se
+\begin{enumerate}
+    \item per ogni $x \in A$ vale $f(x) \leq M$;
+    \item esiste $x_M \in A$ tale che $f(x_M) = M$,
+\end{enumerate}
+allora $M$ è il valore massimo e $x_M$ è un \emph{punto di massimo}.
+
+\begin{definizione}
+L'\emph{estremo inferiore di $f$ su $A$} è l'estremo inferiore dell'insieme $f(A)$:
+\[
+\inf_{x \in A} f(x) = \inf f(A).
+\]
+$f$ è \emph{inferiormente limitata su $A$} se $f(A)$ è inferiormente limitato.
+\end{definizione}
+
+Se $\inf_{x \in A} f(x)$ è finito e appartiene a $f(A)$, allora è il \emph{valore minimo} di $f$ su $A$. Cioè, se
+\begin{enumerate}
+    \item per ogni $x \in A$ vale $m \leq f(x)$;
+    \item esiste $x_m \in A$ tale che $f(x_m) = m$,
+\end{enumerate}
+allora $m$ è il valore minimo e $x_m$ è un \emph{punto di minimo}.
+
+\subsection{Funzioni limitate}
+
+Sia $f : D \to \mathbb{R}$.
+
+\begin{definizione}
+\begin{itemize}
+    \item $f$ si dice \emph{limitata superiormente} se esiste $M \in \mathbb{R}$ tale che $f(x) \leq M$ per ogni $x \in D$;
+    \item $f$ si dice \emph{limitata inferiormente} se esiste $m \in \mathbb{R}$ tale che $f(x) \geq m$ per ogni $x \in D$;
+    \item $f$ si dice \emph{limitata} se è limitata sia superiormente sia inferiormente.
+\end{itemize}
+\end{definizione}
+
+\begin{esempio}
+\leavevmode
+\begin{enumerate}
+    \item $f(x) = x^2$, $D = \mathbb{R}$, $f(\mathbb{R}) = [0, +\infty)$. La funzione è limitata inferiormente ma non superiormente. $m = 0$ è il valore minimo di $f$ e $x_m = 0$ è il punto di minimo.
+    \item $f(x) = 3$, $D = \mathbb{R}$, $f(\mathbb{R}) = \{3\}$. La funzione è limitata; $3$ è il valore massimo e il valore minimo, e ogni $x \in \mathbb{R}$ è sia punto di massimo sia punto di minimo.
+\end{enumerate}
+\end{esempio}
+
+\end{document}

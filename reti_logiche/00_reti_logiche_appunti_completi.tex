@@ -1,0 +1,331 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+\linespread{0.97}
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\NewTColorBox{osservazione}{}{nota,
+  before upper={\textbf{Osservazione.}\ }}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Reti logiche\\[0.4em]\large Appunti}
+\author{Marco Cerbella}
+\date{Università degli Studi di Perugia -- A.A. 2026/2027\\ Aggiornato al \today}
+
+\begin{document}
+\maketitle
+\setcounter{tocdepth}{1}
+\tableofcontents
+\clearpage
+
+\section[Algebra di Boole e algebra di commutazione (Lezione 1 -- 21 settembre 2026)]{Algebra di Boole e algebra di commutazione}
+\noindent\emph{Lezione 1 -- 21 settembre 2026}
+\subsection*{Cenno storico}
+
+L'algebra di Boole fu introdotta da George Boole (1815--1864) nell'Ottocento per
+dimostrare affermazioni logiche svolgendo calcoli algebrici: per Boole la
+logica va associata alla matematica e non alla filosofia. Nel 1936 Claude
+Shannon (1916--2001), studiando al MIT un circuito di oltre cento relè
+collegato all'analizzatore differenziale di Bush, intuì che l'algebra di Boole
+è un modello formale per l'\emph{analisi} e la \emph{sintesi} di tali sistemi:
+due interruttori in \emph{serie} (\emph{parallelo}) si descrivono con AND (OR),
+mentre il NOT si realizza con il contatto posteriore di un relè. Dalla sua tesi
+(1938) nasce l'algebra di commutazione, base delle reti logiche.
+
+\subsection{Algebra di Boole}
+
+\begin{definizione}
+Un'\emph{algebra di Boole} è una struttura algebrica
+\[
+  \mathcal{B} = \langle A, +, \cdot, ', 0, 1 \rangle
+\]
+dove:
+\begin{itemize}
+    \item $A$ è l'insieme degli elementi su cui l'algebra opera (\emph{supporto});
+    \item $+$ è l'operatore di disgiunzione (OR);
+    \item $\cdot$ è l'operatore di congiunzione (AND);
+    \item $'$ è l'operatore unario di complementazione (NOT);
+    \item $0$ è l'elemento neutro rispetto a $+$, $1$ è l'elemento neutro
+          rispetto a $\cdot$;
+\end{itemize}
+e valgono i seguenti assiomi (\emph{postulati di Huntington}).
+\end{definizione}
+
+\subsubsection{Postulati di Huntington}
+
+\begin{enumerate}
+    \item \textbf{Commutatività}: $\forall a, b \in A$:
+          $a + b = b + a$ \quad e \quad $a \cdot b = b \cdot a$.
+    \item \textbf{Elementi neutri}: esistono $0$ e $1$ tali che, per ogni
+          $a \in A$, $a + 0 = a$ e $a \cdot 1 = a$.
+    \item \textbf{Distributività} (di ciascuna operazione rispetto all'altra):
+          $\forall a, b, c \in A$
+          \begin{align*}
+            a + (b \cdot c) &= (a + b) \cdot (a + c)\\
+            a \cdot (b + c) &= (a \cdot b) + (a \cdot c)
+          \end{align*}
+    \item \textbf{Complemento}: per ogni $a \in A$ esiste ed è unico $a'$ tale
+          che $a + a' = 1$ e $a \cdot a' = 0$.
+\end{enumerate}
+
+\begin{teorema}[Principio di dualità]
+Ogni proposizione derivata dagli assiomi di Huntington resta valida scambiando
+ovunque tra loro le operazioni $+$ e $\cdot$ e gli elementi neutri $0$ e $1$.
+\end{teorema}
+
+\begin{osservazione}
+In particolare se $\langle A, +, \cdot, ', 0, 1 \rangle$ è un'algebra di Boole,
+lo è anche $\langle A, \cdot, +, ', 1, 0 \rangle$.
+\end{osservazione}
+
+\subsubsection{Esempi}
+
+\begin{esempio}[Algebra delle classi]
+Sia $A$ un insieme e $\mathcal{P}(A)$ l'insieme delle sue parti (tutti i
+sottoinsiemi di $A$). La struttura
+$\langle \mathcal{P}(A), \cup, \cap, \overline{\phantom{x}}, \emptyset, A \rangle$
+è un'algebra di Boole:
+\begin{itemize}
+    \item $\cup$ e $\cap$ sono commutative;
+    \item $\emptyset$ è neutro rispetto a $\cup$ e $A$ rispetto a $\cap$:
+          per ogni $X \in \mathcal{P}(A)$, $X \cup \emptyset = X$ e
+          $X \cap A = X$;
+    \item distributività e unicità del complemento si verificano con i
+          diagrammi di Venn.
+\end{itemize}
+È un'algebra di Boole \emph{chiusa}: $\forall X, Y \in \mathcal{P}(A)$,
+$X \cap Y$, $X \cup Y$ e $\overline{X} = A \setminus X$ sono sottoinsiemi di $A$,
+quindi elementi di $\mathcal{P}(A)$.
+\end{esempio}
+
+\begin{teorema}[Rappresentazione di Stone]
+Per ogni algebra di Boole finita $\mathcal{A}$ esiste un insieme finito $X$ tale
+che $\mathcal{A}$ è isomorfa a
+$\langle \mathcal{P}(X), \cup, \cap, \overline{\phantom{x}}, \emptyset, X \rangle$.
+\end{teorema}
+
+Conseguenze:
+\begin{itemize}
+    \item la cardinalità del supporto di un'algebra di Boole finita è sempre una
+          potenza di $2$;
+    \item per dimostrare che le algebre di Boole finite godono di una proprietà
+          basta dimostrarla per l'algebra delle classi (ad esempio con i
+          diagrammi di Venn).
+\end{itemize}
+
+\begin{esempio}[Altre algebre di Boole]
+$\langle \{0,1\}, \min, \max, 1-x, 0, 1 \rangle$ è un'algebra di Boole; così
+come quella ottenuta scambiando le operazioni come nell'osservazione sopra.
+\end{esempio}
+
+\subsubsection{Variabili booleane}
+
+Sia $\mathcal{A} = \langle A, +, \cdot, ', 0, 1 \rangle$ un'algebra di Boole. Una
+\emph{variabile booleana} è un simbolo che indica un qualsiasi elemento del
+supporto $A$; il suo valore è un elemento di $A$. Le variabili si indicano con
+le ultime lettere dell'alfabeto ($x, y, \dots$), gli elementi del supporto con
+le prime ($a, b, \dots$) e con i simboli $0$ e $1$.
+
+\subsubsection{Proprietà dell'algebra di Boole}
+
+\begin{proprieta}
+Per ogni $x, y, z$ valgono:
+\begin{itemize}
+    \item \textbf{associatività}: $x + (y + z) = (x + y) + z$ \ e \
+          $x \cdot (y \cdot z) = (x \cdot y) \cdot z$;
+    \item \textbf{idempotenza}: $x + x = x$ \ e \ $x \cdot x = x$;
+    \item \textbf{elemento nullo}: $x + 1 = 1$ \ e \ $x \cdot 0 = 0$;
+    \item \textbf{unicità del complemento}: $x'$ è unico;
+    \item \textbf{assorbimento}: $x + x \cdot y = x$ \ e \
+          $x \cdot (x + y) = x$;
+    \item \textbf{semplificazione}: $x + x' \cdot y = x + y$ \ e \
+          $x \cdot (x' + y) = x \cdot y$;
+    \item \textbf{involuzione}: $(x')' = x$;
+    \item \textbf{leggi di De Morgan}: $(x + y)' = x' \cdot y'$ \ e \
+          $(x \cdot y)' = x' + y'$;
+    \item \textbf{consenso}:
+          $x \cdot y + x' \cdot z + y \cdot z = x \cdot y + x' \cdot z$ \ e \
+          $(x + y) \cdot (x' + z) \cdot (y + z) = (x + y) \cdot (x' + z)$.
+\end{itemize}
+\end{proprieta}
+
+Ciascuna si può verificare con i diagrammi di Venn, oppure dimostrare dagli
+assiomi.
+
+\begin{esempio}[Dimostrazione dell'idempotenza]
+\begin{align*}
+x \cdot x &= (x \cdot x) + 0            && \text{elemento neutro}\\
+          &= (x \cdot x) + (x \cdot x') && \text{complemento}\\
+          &= x \cdot (x + x')           && \text{distributiva}\\
+          &= x \cdot 1                  && \text{complemento}\\
+          &= x                          && \text{elemento neutro}
+\end{align*}
+L'idempotenza di $+$ ($x + x = x$) segue per dualità.
+\end{esempio}
+
+\subsection{Algebra di commutazione}
+
+\begin{definizione}[Algebra di commutazione (\emph{switching algebra})]
+È l'algebra di Boole il cui supporto è costituito dai soli valori $\{0, 1\}$:
+\[
+  \mathcal{B} = \langle \{0,1\}, +, \cdot, ', 0, 1 \rangle .
+\]
+Ogni variabile può assumere solo i valori $0$ e $1$.
+\end{definizione}
+
+È l'algebra usata da Shannon per l'analisi dei circuiti. I tre operatori sono
+definiti dalle seguenti tabelle di verità.
+
+\begin{center}
+\begin{tabular}{c|cc}
+$+$ & 0 & 1 \\ \midrule
+0 & 0 & 1 \\
+1 & 1 & 1
+\end{tabular}
+\qquad\qquad
+\begin{tabular}{c|cc}
+$\cdot$ & 0 & 1 \\ \midrule
+0 & 0 & 0 \\
+1 & 0 & 1
+\end{tabular}
+\qquad\qquad
+\begin{tabular}{c|c}
+$x$ & $x'$ \\ \midrule
+0 & 1 \\
+1 & 0
+\end{tabular}
+\end{center}
+
+\subsubsection{OR esclusivo}
+
+L'\emph{OR esclusivo} (XOR) è l'operatore $\oplus$ definito da
+\[
+  a \oplus b = a' b + a b' ,
+\]
+cioè vale $1$ quando $a$ e $b$ sono diversi.
+
+\begin{center}
+\begin{tabular}{c|cc}
+$\oplus$ & 0 & 1 \\ \midrule
+0 & 0 & 1 \\
+1 & 1 & 0
+\end{tabular}
+\end{center}
+
+Dalla definizione, applicando le proprietà dell'algebra di Boole, si ricava:
+\begin{align}
+x \oplus 1 &= x' & x \oplus 0 &= x \\
+x \oplus x &= 0 & x \oplus x' &= 1 \\
+x' \oplus y &= x \oplus y' = (x \oplus y)'
+\end{align}
+
+\subsection*{Esercizi per casa}
+
+\begin{esercizio}
+Usare i diagrammi di Venn per dimostrare le proprietà (associatività,
+idempotenza, \dots) dell'algebra booleana su supporto finito.
+\end{esercizio}
+\begin{esercizio}
+Dimostrare che l'algebra di commutazione è un'algebra di Boole, cioè verificare
+i postulati di Huntington.
+\end{esercizio}
+\begin{esercizio}
+Dimostrare, per l'algebra di commutazione, associatività, idempotenza, elemento
+nullo, unicità del complemento, assorbimento, semplificazione, involuzione, De
+Morgan e consenso.
+\end{esercizio}
+
+\end{document}

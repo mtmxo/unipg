@@ -1,0 +1,166 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\newrunin{osservazione}{Osservazione}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Esempi sugli estremi e insiemi non limitati}
+\author{Marco Cerbella}
+\date{Lezione 3 -- 1 ottobre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Un altro esempio: $B = \left\{ \dfrac{n}{n+1} \mid n \in \mathbb{N} \right\}$}
+
+\begin{esempio}
+Sia $B = \{x_n = \frac{n}{n+1},\ n \in \mathbb{N}\} = \{0, \frac12, \frac23, \frac34, \dots\}$. Poiché $x_n \leq 1$ per ogni $n$ (infatti $n \leq n + 1$) e $x_n \geq 0$, si ha $B \subseteq [0, 1]$: $B$ è limitato. In particolare, essendo limitato superiormente, per (R4) esiste $\sup B$.
+
+\textbf{Minimo.} $x_0 = 0 \in B$ e $x_n \geq 0$ per ogni $x_n \in B$: quindi $0 = \min B$.
+
+\textbf{Estremo superiore.} Dimostriamo che $\sup B = 1$, cioè che:
+\begin{enumerate}
+    \item $x_n \leq 1$ per ogni $x_n \in B$ (già visto);
+    \item per ogni $\varepsilon > 0$ esiste $x_n \in B$ tale che $1 - \varepsilon < x_n$.
+\end{enumerate}
+Per assurdo neghiamo la 2: esiste $\bar\varepsilon > 0$ tale che $1 - \bar\varepsilon \geq x_n = \frac{n}{n+1}$ per ogni $n \in \mathbb{N}$. Allora
+\[
+(n+1)(1 - \bar\varepsilon) \geq n \iff n + 1 - \bar\varepsilon n - \bar\varepsilon \geq n
+\iff 1 - \bar\varepsilon \geq \bar\varepsilon n
+\iff n \leq \frac{1 - \bar\varepsilon}{\bar\varepsilon} \quad \forall\, n \in \mathbb{N}.
+\]
+Questo è assurdo, perché $n$ può essere grande a piacere. Quindi $1 = \sup B$.
+
+Poiché $1 \notin B$ (si ha $x_n < 1$ per ogni $n$), $B$ non ha massimo.
+\end{esempio}
+
+\section{Insiemi non limitati}
+
+Un insieme $A$ non sempre ammette maggioranti o minoranti.
+
+\begin{definizione}
+Si pone
+\begin{itemize}
+    \item $\sup A = +\infty$ se $A$ non è limitato superiormente, cioè
+          $\forall\, L \ \exists\, x \in A : x > L$;
+    \item $\inf A = -\infty$ se $A$ non è limitato inferiormente, cioè
+          $\forall\, \ell \ \exists\, x \in A : x < \ell$.
+\end{itemize}
+\end{definizione}
+
+\begin{esempio}
+\leavevmode
+\begin{itemize}
+    \item $A = [0, +\infty)$ è limitato inferiormente ma non superiormente;
+    \item $A = (-\infty, 0]$ è limitato superiormente ma non inferiormente;
+    \item $[-2, +\infty)$ è limitato inferiormente ma non superiormente;
+    \item $(-\infty, 5]$ è limitato superiormente ma non inferiormente;
+    \item $\,]2, 1000[$ è limitato: $2 = \inf\,]2, 1000[$ e
+          $1000 = \sup\,]2, 1000[$, ma l'insieme non ha né minimo né massimo
+          (perché $2, 1000 \notin \,]2, 1000[$);
+    \item $\mathbb{N}$ è limitato inferiormente ma non superiormente.
+\end{itemize}
+\end{esempio}
+
+\begin{esercizio}
+Quale tra i seguenti insiemi ha sia massimo sia minimo?
+(1) $]2, 9[$ \qquad (2) $[0, 5[$ \qquad (3) $[0, 1[ \,\cup \{7\}$ \qquad (4) $]0, 2] \cup \{5\}$
+\textbf{Risposta: 3.} $[0, 1[ \,\cup \{7\}$ ha minimo $0$ e massimo $7$. Gli altri: $]2, 9[$ non ha né minimo né massimo; $[0, 5[$ ha minimo $0$ ma non massimo; $]0, 2] \cup \{5\}$ ha massimo $5$ ma non minimo.
+\end{esercizio}
+
+\end{document}

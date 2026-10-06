@@ -1,0 +1,499 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\newrunin{osservazione}{Osservazione}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Logica}
+\author{Marco Cerbella}
+\date{Lezione 1 -- 24 settembre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Il calcolo delle proposizioni}
+
+\begin{definizione}
+Si chiama \emph{proposizione} un enunciato di cui si può stabilire con
+certezza se è vero o falso.
+\end{definizione}
+
+\begin{esempio}
+``$7$ è un numero primo'' è una proposizione (vera);
+``$4 > 9$'' è una proposizione (falsa);
+``che bella giornata!'' e ``$x > 3$'' \textbf{non} sono proposizioni:
+la prima non è né vera né falsa, la seconda dipende da $x$.
+\end{esempio}
+
+Le proposizioni si indicano con lettere maiuscole $P, Q, R, \dots$ e il loro
+\emph{valore di verità} è \V\ (vero) oppure \F\ (falso).
+
+I concetti che non si definiscono, perché si ritengono noti, vengono detti
+\emph{primitivi} (ad esempio ``insieme'', ``elemento'', ``vero'', ``falso'').
+
+La logica classica si basa su due principi:
+\begin{enumerate}
+    \item \textbf{principio di non contraddizione}: una proposizione non può
+          essere contemporaneamente vera e falsa;
+    \item \textbf{principio del terzo escluso}: una proposizione è vera
+          oppure falsa, non esiste una terza possibilità.
+\end{enumerate}
+
+\section{Proposizioni composte e connettivi logici}
+
+Le proposizioni semplici si combinano tramite i \emph{connettivi logici}
+per formare proposizioni composte. Il valore di verità di una proposizione
+composta dipende solo dai valori delle proposizioni che la compongono, e si
+riassume in una \emph{tavola di verità}.
+
+\subsection{Negazione $\neg$}
+
+\begin{definizione}
+La \emph{negazione} di $P$, indicata con $\neg P$ (``non $P$''), è vera
+quando $P$ è falsa e falsa quando $P$ è vera.
+\end{definizione}
+
+\begin{center}
+\begin{tabular}{c|c}
+$P$ & $\neg P$ \\ \hline
+\V & \F \\
+\F & \V
+\end{tabular}
+\end{center}
+
+\begin{esempio}
+$P$: ``$5$ è pari'' (\F). \quad $\neg P$: ``$5$ non è pari'' (\V).
+\end{esempio}
+
+Vale $\neg(\neg P) = P$: negare due volte riporta alla proposizione di
+partenza.
+
+\subsection{Congiunzione $\land$ e disgiunzione $\lor$}
+
+\begin{definizione}
+La \emph{congiunzione} $P \land Q$ (``$P$ e $Q$'') è vera solo se $P$ e $Q$
+sono entrambe vere.
+
+La \emph{disgiunzione inclusiva} $P \lor Q$ (``$P$ o $Q$'') è vera se
+almeno una tra $P$ e $Q$ è vera; è falsa solo se sono entrambe false.
+\end{definizione}
+
+\begin{center}
+\begin{tabular}{cc|c|c}
+$P$ & $Q$ & $P \land Q$ & $P \lor Q$ \\ \hline
+\V & \V & \V & \V \\
+\V & \F & \F & \V \\
+\F & \V & \F & \V \\
+\F & \F & \F & \F
+\end{tabular}
+\end{center}
+
+\begin{osservazione}
+Il ``$\lor$'' è \emph{inclusivo} (come il latino \emph{vel}): è vero anche
+quando $P$ e $Q$ sono vere tutte e due. Nel linguaggio comune ``o'' è spesso
+esclusivo (``o mangi o esci''), ma in matematica si intende sempre quello
+inclusivo, salvo indicazione contraria.
+\end{osservazione}
+
+\textbf{Collegamento con gli insiemi.}
+$\land$ corrisponde all'intersezione, $\lor$ all'unione e $\neg$ al
+complementare:
+\[
+x \in A \cap B \iff (x \in A) \land (x \in B), \qquad
+x \in A \cup B \iff (x \in A) \lor (x \in B).
+\]
+
+\begin{teorema}[Leggi di De Morgan]
+\[
+\neg(P \land Q) \iff \neg P \lor \neg Q, \qquad
+\neg(P \lor Q) \iff \neg P \land \neg Q.
+\]
+\end{teorema}
+
+Sono le stesse leggi viste per gli insiemi: la negazione ``entra'' nella
+parentesi e $\land$ e $\lor$ si scambiano.
+
+\begin{esempio}
+La negazione di ``piove \textbf{e} fa freddo'' è ``non piove \textbf{o} non
+fa freddo'' (basta che una delle due sia falsa).
+\end{esempio}
+
+\subsection{Implicazione $\Rightarrow$}
+
+\begin{definizione}
+L'\emph{implicazione} $P \Rightarrow Q$ (``se $P$ allora $Q$'', ``$P$ implica
+$Q$'') è falsa \textbf{solo} quando $P$ è vera e $Q$ è falsa. In tutti gli
+altri casi è vera. $P$ si chiama \emph{ipotesi} (o antecedente), $Q$
+\emph{tesi} (o conseguente).
+\end{definizione}
+
+\begin{center}
+\begin{tabular}{cc|c}
+$P$ & $Q$ & $P \Rightarrow Q$ \\ \hline
+\V & \V & \V \\
+\V & \F & \F \\
+\F & \V & \V \\
+\F & \F & \V
+\end{tabular}
+\end{center}
+
+\textbf{Perché è vera quando $P$ è falsa?} Pensa a una promessa: ``se
+prendi 30, ti regalo la bici''. L'unico modo in cui la promessa viene
+\emph{tradita} è prendere 30 e non ricevere la bici (\V$\Rightarrow$\F).
+Se non prendi 30, la promessa non è stata violata, qualunque cosa succeda
+alla bici: per questo l'implicazione è vera.
+
+\begin{esempio}
+``Se $n$ è multiplo di $4$, allora $n$ è pari'' è vera per ogni $n$.
+Per $n = 6$ l'ipotesi è falsa e la tesi vera; per $n = 7$ entrambe false:
+in nessun caso l'implicazione viene violata.
+\end{esempio}
+
+\textbf{Condizione necessaria e sufficiente.} Se $P \Rightarrow Q$ è vera:
+\begin{enumerate}
+    \item $P$ è \emph{condizione sufficiente} per $Q$: basta che valga $P$
+          perché valga $Q$;
+    \item $Q$ è \emph{condizione necessaria} per $P$: se non vale $Q$, non
+          può valere nemmeno $P$.
+\end{enumerate}
+Ad esempio ``essere multiplo di $4$'' è sufficiente per ``essere pari'', ed
+``essere pari'' è necessario per ``essere multiplo di $4$'' (ma non
+sufficiente: $6$ è pari ma non multiplo di $4$).
+
+\textbf{Implicazioni collegate.} Data $P \Rightarrow Q$:
+\begin{center}
+\begin{tabular}{l|l|l}
+nome & forma & equivalente a $P \Rightarrow Q$? \\ \hline
+inversa (o reciproca) & $Q \Rightarrow P$ & no \\
+contraria & $\neg P \Rightarrow \neg Q$ & no \\
+\textbf{contronominale} & $\neg Q \Rightarrow \neg P$ & \textbf{sì}
+\end{tabular}
+\end{center}
+
+\begin{teorema}[Contronominale]
+$(P \Rightarrow Q) \iff (\neg Q \Rightarrow \neg P)$.
+\end{teorema}
+
+Su questo si basa la \emph{dimostrazione per assurdo}: invece di dimostrare
+$P \Rightarrow Q$, si suppone che $Q$ sia falsa e si arriva a negare $P$
+(o a una contraddizione). Anche la dimostrazione di $\sqrt{2} \notin
+\mathbb{Q}$ funziona così.
+
+Vale inoltre $(P \Rightarrow Q) \iff (\neg P \lor Q)$, da cui si ricava la
+negazione dell'implicazione:
+\[
+\neg(P \Rightarrow Q) \iff P \land \neg Q.
+\]
+Cioè: per smentire ``se $P$ allora $Q$'' bisogna trovare un caso in cui
+$P$ è vera e $Q$ è falsa.
+
+\subsection{Doppia implicazione $\Leftrightarrow$}
+
+\begin{definizione}
+La \emph{doppia implicazione} (o \emph{equivalenza}) $P \Leftrightarrow Q$
+(``$P$ se e solo se $Q$'') è vera quando $P$ e $Q$ hanno lo stesso valore
+di verità, cioè sono entrambe vere o entrambe false.
+\end{definizione}
+
+\begin{center}
+\begin{tabular}{cc|c}
+$P$ & $Q$ & $P \Leftrightarrow Q$ \\ \hline
+\V & \V & \V \\
+\V & \F & \F \\
+\F & \V & \F \\
+\F & \F & \V
+\end{tabular}
+\end{center}
+
+Equivale a $(P \Rightarrow Q) \land (Q \Rightarrow P)$: $P$ è condizione
+\emph{necessaria e sufficiente} per $Q$. Per questo, per dimostrare un
+``se e solo se'' si dimostrano le due implicazioni separatamente.
+
+\begin{esempio}
+``$n$ è pari $\Leftrightarrow$ $n^2$ è pari'' è vera per ogni
+$n \in \mathbb{Z}$.
+\end{esempio}
+
+\subsection{Tautologie e contraddizioni}
+
+\begin{definizione}
+Una \emph{tautologia} è una proposizione composta sempre vera, qualunque
+siano i valori delle proposizioni che la compongono.
+
+Una \emph{contraddizione} è una proposizione composta sempre falsa.
+\end{definizione}
+
+\begin{esempio}
+$P \lor \neg P$ è una tautologia (terzo escluso);
+$P \land \neg P$ è una contraddizione (non contraddizione).
+\begin{center}
+\begin{tabular}{c|c|c|c}
+$P$ & $\neg P$ & $P \lor \neg P$ & $P \land \neg P$ \\ \hline
+\V & \F & \V & \F \\
+\F & \V & \V & \F
+\end{tabular}
+\end{center}
+\end{esempio}
+
+Tutte le leggi viste (De Morgan, contronominale, \dots) sono tautologie: si
+verificano costruendo la tavola di verità e controllando che l'ultima
+colonna contenga solo \V.
+
+
+\section{Esempi dalla lezione}
+
+\begin{esempio}[Proposizioni e non proposizioni]
+Sono proposizioni: ``Anna e Mario sono figli di Luigi'', ``Francesco Guccini è morto quest'anno''. Non sono proposizioni: ``che tempo fa?'' (interrogativa), ``è molto tardi'' (giudizio personale).
+\end{esempio}
+
+\begin{esempio}[Negazione]
+``Roma è una città'' (\V) $\to$ ``Roma non è una città'' (\F).
+``Il Po è un lago'' (\F) $\to$ ``Il Po non è un lago'' (\V).
+\end{esempio}
+
+\begin{esempio}[Congiunzione]
+\begin{itemize}
+    \item ``Roma è la capitale d'Italia e Roma è la sede del governo'': \V;
+    \item ``$4$ è positivo e $4$ è dispari'': \F;
+    \item ``$20$ è maggiore di $30$ e $20$ è multiplo di $3$'': \F.
+\end{itemize}
+\end{esempio}
+
+\begin{esempio}[Disgiunzione]
+\begin{itemize}
+    \item ``Firenze è una città o l'Arno è un lago'': \V;
+    \item ``$10$ è multiplo di $3$ o $-10$ è un numero negativo'': \V\ (basta che una delle due sia vera);
+    \item ``Roma è la capitale della Francia o l'Italia è una città'': \F.
+\end{itemize}
+\end{esempio}
+
+\begin{esempio}[Implicazione ed equivalenza]
+``Se oggi è sabato allora domani è domenica''; ``se $a$ è divisibile per $6$ allora $a$ è divisibile per $3$''.
+
+``Se Anna è milanese allora Anna è italiana'': vale $P \Rightarrow Q$ ma non $Q \Rightarrow P$, quindi $P$ e $Q$ \textbf{non} sono equivalenti. Invece ``un numero è divisibile per $2$ se e solo se è pari'': valgono $P \Rightarrow Q$ e $Q \Rightarrow P$, quindi $P \Leftrightarrow Q$.
+\end{esempio}
+
+\section{Predicati}
+
+Il calcolo delle proposizioni vale solo per enunciati che hanno un valore
+di verità. Un enunciato come
+\[
+P(x):\ \text{``$x$ è un numero maggiore di $100$''}
+\]
+non è una proposizione: non si può dire se è vero o falso finché non si
+sceglie $x$.
+
+\begin{definizione}
+Un \emph{predicato} (o \emph{enunciato aperto}) è un enunciato $P(x)$ che
+contiene una variabile $x$, appartenente a un insieme $U$ detto
+\emph{dominio}, e che diventa una proposizione quando a $x$ si sostituisce
+un elemento di $U$.
+\end{definizione}
+
+\begin{esempio}
+Con $U = \mathbb{N}$ e $P(x)$: ``$x > 100$'': $P(150)$ è vera,
+$P(3)$ è falsa.
+\end{esempio}
+
+\begin{definizione}
+L'\emph{insieme di verità} di $P(x)$ è l'insieme degli elementi di $U$ che
+rendono vero il predicato:
+\[
+\{x \in U \mid P(x) \text{ è vera}\}.
+\]
+\end{definizione}
+
+È proprio la definizione di un insieme \emph{per caratteristica}. Nell'esempio
+l'insieme di verità è $\{x \in \mathbb{N} \mid x > 100\} = \{101, 102, \dots\}$.
+
+Un predicato può avere più variabili: $P(x, y)$: ``$x < y$''.
+
+\subsection{Quantificatori}
+
+Un predicato diventa una proposizione anche \emph{quantificando} la
+variabile, cioè dicendo per quanti elementi di $U$ il predicato è vero.
+
+\begin{definizione}
+\begin{enumerate}
+    \item \textbf{Quantificatore universale} $\forall$ (``per ogni''):
+          $\forall x \in U,\ P(x)$ è vera se $P(x)$ è vera per
+          \textbf{tutti} gli elementi di $U$.
+    \item \textbf{Quantificatore esistenziale} $\exists$ (``esiste''):
+          $\exists\, x \in U : P(x)$ è vera se $P(x)$ è vera per
+          \textbf{almeno un} elemento di $U$.
+\end{enumerate}
+\end{definizione}
+
+Si usa anche $\exists!$ (``esiste ed è unico''): $P(x)$ è vera per
+\textbf{uno e un solo} elemento di $U$.
+
+\begin{esempio}\mbox{}
+\begin{enumerate}
+    \item $\forall x \in \mathbb{R},\ x^2 \geq 0$ \quad è vera;
+    \item $\forall x \in \mathbb{N},\ x > 100$ \quad è falsa (basta
+          $x = 3$);
+    \item $\exists\, x \in \mathbb{N} : x > 100$ \quad è vera (ad esempio
+          $x = 150$);
+    \item $\exists\, x \in \mathbb{Q} : x^2 = 2$ \quad è falsa, mentre
+          $\exists\, x \in \mathbb{R} : x^2 = 2$ è vera.
+\end{enumerate}
+\end{esempio}
+
+L'ultimo esempio mostra che il valore di verità dipende anche dal dominio.
+
+\textbf{Come si verifica o si smentisce.}
+\begin{center}
+\begin{tabular}{l|p{5.2cm}|p{5.2cm}}
+ & per dimostrare che è vera & per dimostrare che è falsa \\ \hline
+$\forall x,\ P(x)$ & serve una dimostrazione valida per ogni $x$ &
+basta \textbf{un} controesempio \\ \hline
+$\exists\, x : P(x)$ & basta \textbf{un} esempio &
+serve mostrare che $P(x)$ è falsa per ogni $x$
+\end{tabular}
+\end{center}
+
+\subsection{Negazione dei quantificatori}
+
+\begin{teorema}
+\[
+\neg\big(\forall x,\ P(x)\big) \iff \exists\, x : \neg P(x), \qquad
+\neg\big(\exists\, x : P(x)\big) \iff \forall x,\ \neg P(x).
+\]
+\end{teorema}
+
+Regola pratica: la negazione ``attraversa'' il quantificatore, che si
+scambia ($\forall \leftrightarrow \exists$), e poi nega il predicato.
+
+\begin{esempio}\mbox{}
+\begin{enumerate}
+    \item ``Tutti gli studenti hanno superato l'esame'' si nega con
+          ``\textbf{esiste} almeno uno studente che \textbf{non} ha superato
+          l'esame''. Attenzione: \textbf{non} con ``nessuno studente ha
+          superato l'esame''.
+    \item $\neg(\forall x \in \mathbb{R},\ x > 0) \iff
+          \exists\, x \in \mathbb{R} : x \leq 0$.
+\end{enumerate}
+\end{esempio}
+
+\subsection{Più quantificatori: l'ordine conta}
+
+Con più variabili si possono usare più quantificatori. Quantificatori
+\emph{uguali} si possono scambiare, quantificatori \emph{diversi} no.
+
+\begin{esempio}
+Con $U = \mathbb{N}$:
+\begin{enumerate}
+    \item $\forall x\ \exists\, y : y > x$ \quad (``per ogni numero ne
+          esiste uno più grande'') è \textbf{vera}: dato $x$, basta
+          $y = x + 1$;
+    \item $\exists\, y\ \forall x : y > x$ \quad (``esiste un numero più
+          grande di tutti'') è \textbf{falsa}.
+\end{enumerate}
+Nel primo caso $y$ può dipendere da $x$, nel secondo deve essere lo stesso
+per tutti gli $x$.
+\end{esempio}
+
+Per negare più quantificatori si applica la regola uno alla volta:
+\[
+\neg\big(\forall x\ \exists\, y : P(x,y)\big) \iff
+\exists\, x\ \forall y : \neg P(x,y).
+\]
+Questo tipo di negazione servirà spesso in analisi (ad esempio con le
+definizioni di limite).
+
+\end{document}

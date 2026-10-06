@@ -1,0 +1,163 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\newrunin{osservazione}{Osservazione}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Estremi di una funzione e funzioni limitate}
+\author{Marco Cerbella}
+\date{Lezione 4 -- 5 ottobre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Estremo superiore e inferiore di una funzione}
+
+Sia $f : D \to \mathbb{R}$ e $A \subseteq D$.
+
+\begin{definizione}
+L'\emph{estremo superiore di $f$ su $A$} è l'estremo superiore dell'insieme $f(A)$:
+\[
+\sup_{x \in A} f(x) = \sup f(A).
+\]
+$f$ è \emph{superiormente limitata su $A$} se l'insieme $f(A)$ è superiormente limitato.
+\end{definizione}
+
+Se $\sup_{x \in A} f(x)$ è finito e appartiene a $f(A)$, allora è il \emph{valore massimo} di $f$ su $A$. Cioè, se
+\begin{enumerate}
+    \item per ogni $x \in A$ vale $f(x) \leq M$;
+    \item esiste $x_M \in A$ tale che $f(x_M) = M$,
+\end{enumerate}
+allora $M$ è il valore massimo e $x_M$ è un \emph{punto di massimo}.
+
+\begin{definizione}
+L'\emph{estremo inferiore di $f$ su $A$} è l'estremo inferiore dell'insieme $f(A)$:
+\[
+\inf_{x \in A} f(x) = \inf f(A).
+\]
+$f$ è \emph{inferiormente limitata su $A$} se $f(A)$ è inferiormente limitato.
+\end{definizione}
+
+Se $\inf_{x \in A} f(x)$ è finito e appartiene a $f(A)$, allora è il \emph{valore minimo} di $f$ su $A$. Cioè, se
+\begin{enumerate}
+    \item per ogni $x \in A$ vale $m \leq f(x)$;
+    \item esiste $x_m \in A$ tale che $f(x_m) = m$,
+\end{enumerate}
+allora $m$ è il valore minimo e $x_m$ è un \emph{punto di minimo}.
+
+\section{Funzioni limitate}
+
+Sia $f : D \to \mathbb{R}$.
+
+\begin{definizione}
+\begin{itemize}
+    \item $f$ si dice \emph{limitata superiormente} se esiste $M \in \mathbb{R}$ tale che $f(x) \leq M$ per ogni $x \in D$;
+    \item $f$ si dice \emph{limitata inferiormente} se esiste $m \in \mathbb{R}$ tale che $f(x) \geq m$ per ogni $x \in D$;
+    \item $f$ si dice \emph{limitata} se è limitata sia superiormente sia inferiormente.
+\end{itemize}
+\end{definizione}
+
+\begin{esempio}
+\leavevmode
+\begin{enumerate}
+    \item $f(x) = x^2$, $D = \mathbb{R}$, $f(\mathbb{R}) = [0, +\infty)$. La funzione è limitata inferiormente ma non superiormente. $m = 0$ è il valore minimo di $f$ e $x_m = 0$ è il punto di minimo.
+    \item $f(x) = 3$, $D = \mathbb{R}$, $f(\mathbb{R}) = \{3\}$. La funzione è limitata; $3$ è il valore massimo e il valore minimo, e ogni $x \in \mathbb{R}$ è sia punto di massimo sia punto di minimo.
+\end{enumerate}
+\end{esempio}
+
+\end{document}

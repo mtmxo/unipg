@@ -1,0 +1,372 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\newrunin{osservazione}{Osservazione}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Gli insiemi numerici}
+\author{Marco Cerbella}
+\date{Lezione 1 -- 24 settembre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Gli insiemi numerici}
+
+Si parte da $\mathbb{N}$ e, ogni volta che un'operazione non è sempre
+possibile, si allarga l'insieme:
+\[
+\mathbb{N} \subset \mathbb{Z} \subset \mathbb{Q} \subset \mathbb{R}.
+\]
+
+Gli insiemi numerici $\mathbb{Q}$ e $\mathbb{R}$ hanno le seguenti proprietà:
+\begin{enumerate}
+    \item[(R1)] è ben definita un'operazione di \textbf{somma};
+    \item[(R2)] è ben definita un'operazione di \textbf{prodotto};
+    \item[(R3)] è ben definita una \textbf{relazione d'ordine}: presi due numeri qualsiasi $a, b$ è sempre possibile confrontarli con ``$\leq$'', cioè vale $a \leq b$ oppure $b \leq a$.
+\end{enumerate}
+L'insieme dei numeri reali ha anche un'altra proprietà (l'assioma di completezza, vedi sotto):
+\begin{enumerate}
+    \item[(R4)] siano $A$ e $B$ due insiemi non vuoti di numeri reali con $a \leq b$ per ogni $a \in A$ e $b \in B$; allora esiste almeno un $c \in \mathbb{R}$ tale che $a \leq c \leq b$ per ogni $a \in A$ e $b \in B$.
+\end{enumerate}
+In particolare $\mathbb{R}$ è \emph{ordinato} (R3) ed è \emph{denso}: presi due reali qualsiasi se ne trova sempre un altro compreso tra loro. Queste proprietà permettono di rappresentare $\mathbb{R}$ come retta orientata, con una corrispondenza biunivoca tra i punti della retta e i numeri reali.
+
+\subsection{Numeri naturali $\mathbb{N}$}
+
+\[
+\mathbb{N} = \{0, 1, 2, 3, 4, \dots\}
+\]
+
+In $\mathbb{N}$ sono definite due operazioni \emph{interne}, somma e
+prodotto: sommando o moltiplicando due naturali si ottiene sempre un
+naturale. Per ogni $m, n, p \in \mathbb{N}$ valgono:
+\begin{enumerate}
+    \item \textbf{associativa}: $(m + n) + p = m + (n + p)$ e
+          $(m \cdot n) \cdot p = m \cdot (n \cdot p)$;
+    \item \textbf{commutativa}: $m + n = n + m$ e $m \cdot n = n \cdot m$;
+    \item \textbf{distributiva} del prodotto sulla somma:
+          $m \cdot (n + p) = m \cdot n + m \cdot p$;
+    \item \textbf{esistenza dello zero e dell'unità}: $0$ è elemento neutro
+          della somma ($n + 0 = n$) e $1$ è elemento neutro del prodotto
+          ($n \cdot 1 = n$);
+    \item \textbf{leggi di cancellazione}: se $m + p = n + p$ allora $m = n$;
+          se $m \cdot p = n \cdot p$ con $p \neq 0$ allora $m = n$.
+\end{enumerate}
+
+In $\mathbb{N}$ manca l'\textbf{elemento opposto}: ad esempio non esiste
+$x \in \mathbb{N}$ tale che $5 + x = 0$. Quindi la sottrazione non è
+sempre possibile ($3 - 5 \notin \mathbb{N}$): per questo si passa agli
+interi relativi $\mathbb{Z}$.
+
+
+\subsection{Interi relativi $\mathbb{Z}$}
+
+\[
+\mathbb{Z} = \{\dots, -3, -2, -1, 0, 1, 2, 3, \dots\}, \qquad
+\mathbb{N} \subset \mathbb{Z}.
+\]
+
+In $\mathbb{Z}$ vale l'\textbf{esistenza dell'elemento opposto}: per ogni
+$x \in \mathbb{Z}$ esiste $-x \in \mathbb{Z}$, detto \emph{opposto} di $x$,
+tale che $x + (-x) = 0$ (ad esempio $3$ e $-3$). Di conseguenza la
+sottrazione è sempre possibile: $a - b = a + (-b)$.
+
+Continuano a valere tutte le proprietà dei naturali.
+
+In $\mathbb{Z}$ manca però l'\textbf{elemento inverso}: ad esempio non
+esiste $x \in \mathbb{Z}$ tale che $2 \cdot x = 1$. Quindi la divisione
+non è sempre possibile ($1 : 2 \notin \mathbb{Z}$).
+
+\subsection{Numeri razionali $\mathbb{Q}$}
+
+\[
+\mathbb{Q} = \left\{ \frac{m}{n} \;\middle|\; m, n \in \mathbb{Z},\ n \neq 0 \right\},
+\qquad \mathbb{N} \subset \mathbb{Z} \subset \mathbb{Q}.
+\]
+Ad esempio $-2,\ 0,\ \frac{3}{2},\ -\frac{7}{4} \in \mathbb{Q}$.
+Frazioni diverse possono indicare lo stesso numero:
+$\frac12 = \frac24 = \frac36$.
+
+In $\mathbb{Q}$ vale l'\textbf{esistenza dell'elemento inverso}: per ogni
+$q \in \mathbb{Q}$ con $q \neq 0$ esiste $\frac{1}{q} \in \mathbb{Q}$ tale
+che $q \cdot \frac{1}{q} = 1$. Quindi la divisione è sempre possibile,
+\textbf{tranne per $0$}: lo zero è l'unico numero che non ha inverso
+(non esiste $x$ con $0 \cdot x = 1$).
+
+Con le sue operazioni e l'ordinamento $\leq$, $\mathbb{Q}$ è un
+\emph{campo ordinato}.
+
+\textbf{Rappresentazione decimale.} Ogni numero razionale ha una
+rappresentazione decimale \textbf{finita} (es.\ $\frac14 = 0{,}25$) oppure
+\textbf{periodica} (es.\ $\frac13 = 0{,}\overline{3}$), e viceversa.
+I decimali infiniti \textbf{non periodici} (es.\ $1{,}41421356\dots$)
+\textbf{non} sono razionali.
+
+\textbf{Densità.} $\mathbb{Q}$ è \emph{denso}: tra due razionali ce n'è
+sempre un altro. Se $a, b \in \mathbb{Q}$ con $a < b$, allora
+\[
+a < \frac{a + b}{2} < b,
+\]
+e ripetendo si trova che tra $a$ e $b$ ci sono infiniti razionali.
+
+\textbf{I ``buchi'' di $\mathbb{Q}$.} Nonostante sia denso, $\mathbb{Q}$
+non riempie la retta. La diagonale del quadrato di lato $1$ misura, per
+Pitagora, $\sqrt{1^2 + 1^2} = \sqrt{2}$: riportandola sulla retta con il
+compasso si ottiene un punto ben preciso, che però non corrisponde a nessun
+numero razionale.
+
+\begin{center}
+\begin{tikzpicture}[scale=2.2]
+  \draw[->] (-0.6,0) -- (2.5,0);
+  \foreach \x in {0,1,2}
+    \draw (\x,0.04) -- (\x,-0.04) node[below] {$\x$};
+  \draw (0,0) rectangle (1,1);
+  \draw (0,0) -- (0,1) node[midway, left] {$1$};
+  \draw[thick] (0,0) -- (1,1) node[midway, above left] {$\sqrt{2}$};
+  \draw[dashed] (1,1) arc[start angle=45, end angle=0, radius={sqrt(2)}];
+  \fill (1.4142,0) circle (0.035);
+  \node[below] at (1.4142,-0.02) {$\sqrt{2}$};
+\end{tikzpicture}
+\end{center}
+
+\begin{teorema}
+$\sqrt{2} \notin \mathbb{Q}$.
+\end{teorema}
+
+\begin{proof}
+Per assurdo, sia $\sqrt{2} = \frac{p}{q}$ con $p, q$ senza fattori comuni
+(frazione ridotta ai minimi termini). Elevando al quadrato,
+$p^2 = 2q^2$: quindi $p^2$ è pari e dunque $p$ è pari, $p = 2k$.
+Sostituendo, $4k^2 = 2q^2$, cioè $q^2 = 2k^2$: quindi anche $q$ è pari.
+Allora $p$ e $q$ hanno il fattore comune $2$, contro l'ipotesi: assurdo.
+\end{proof}
+
+Questo ha portato all'espansione verso i numeri reali $\mathbb{R}$.
+
+
+\subsection{Numeri reali $\mathbb{R}$}
+
+\begin{definizione}
+$\mathbb{R}$ è l'insieme degli allineamenti decimali con segno:
+finiti, periodici oppure infiniti non periodici.
+\end{definizione}
+
+I reali che non sono razionali si dicono \emph{irrazionali}: sono i
+decimali infiniti non periodici, ad esempio $\sqrt{2}$, $\pi$, $e$.
+\[
+\mathbb{R} = \mathbb{Q} \cup \{\text{irrazionali}\}, \qquad
+\mathbb{N} \subset \mathbb{Z} \subset \mathbb{Q} \subset \mathbb{R}.
+\]
+
+In $\mathbb{R}$ valgono tutte le proprietà di $\mathbb{Q}$ (è anch'esso un
+campo ordinato). Ciò che lo distingue da $\mathbb{Q}$ è un'ultima
+proprietà: l'assioma di completezza.
+
+\begin{assioma}[di completezza, o di separazione]
+Siano $A, B \subseteq \mathbb{R}$ due insiemi non vuoti tali che
+\[
+a \leq b \quad \text{per ogni } a \in A \text{ e per ogni } b \in B.
+\]
+Allora esiste almeno un $c \in \mathbb{R}$ tale che
+\[
+a \leq c \leq b \quad \text{per ogni } a \in A \text{ e per ogni } b \in B.
+\]
+Il numero $c$ si chiama \emph{elemento separatore} di $A$ e $B$.
+\end{assioma}
+
+In parole: se un insieme sta tutto ``a sinistra'' di un altro, tra i due
+c'è sempre un numero reale che li separa.
+
+\begin{center}
+\begin{tikzpicture}[scale=1.5]
+  \draw[->] (-0.3,0) -- (6.4,0) node[right] {$\mathbb{R}$};
+  \foreach \x in {0.3, 0.9, 1.6, 2.2, 2.7}
+    \fill (\x,0) circle (1.6pt);
+  \foreach \x in {3.4, 3.9, 4.6, 5.3, 6.0}
+    \draw[fill=white] (\x,0) circle (1.6pt);
+  \draw[decorate, decoration={brace, amplitude=5pt}]
+    (0.3,0.2) -- (2.7,0.2) node[midway, above=6pt] {$A$};
+  \draw[decorate, decoration={brace, amplitude=5pt}]
+    (3.4,0.2) -- (6.0,0.2) node[midway, above=6pt] {$B$};
+  \draw[thick] (3.05,0.15) -- (3.05,-0.15) node[below] {$c$};
+\end{tikzpicture}
+\end{center}
+
+
+\begin{esempio}[Elemento separatore]
+Siano $A = \{x \in \mathbb{R} \mid x \leq 3\}$ e $B = \{x \in \mathbb{R} \mid x \geq 5\}$. Ogni elemento di $A$ è minore di ogni elemento di $B$ e un elemento separatore è un qualunque $c \in [3, 5]$: ce ne sono infiniti.
+
+Se invece $A = \{x \in \mathbb{R} \mid x < 4\}$ e $B = \{x \in \mathbb{R} \mid x \geq 4\}$, l'unico elemento separatore è $c = 4$.
+\end{esempio}
+
+\textbf{Perché in $\mathbb{Q}$ non vale.} Consideriamo i due insiemi di
+razionali
+\[
+A = \{q \in \mathbb{Q} \mid q > 0,\ q^2 < 2\}, \qquad
+B = \{q \in \mathbb{Q} \mid q > 0,\ q^2 > 2\}.
+\]
+Ogni elemento di $A$ è minore di ogni elemento di $B$. Gli elementi di $A$
+si avvicinano a $\sqrt{2}$ da sinistra ($1;\ 1{,}4;\ 1{,}41;\ 1{,}414;
+\dots$), quelli di $B$ da destra ($2;\ 1{,}5;\ 1{,}42;\ 1{,}415; \dots$).
+L'unico numero che potrebbe separarli è $\sqrt{2}$, che però non è
+razionale: \textbf{in $\mathbb{Q}$ non esiste un elemento separatore}.
+In $\mathbb{R}$ invece l'assioma garantisce che esiste $c$, e si dimostra
+che $c^2 = 2$, cioè $c = \sqrt{2}$.
+
+\subsubsection*{Perché l'assioma di completezza è così importante}
+
+\begin{enumerate}
+    \item \textbf{La retta non ha buchi.} Grazie alla completezza, a ogni
+          numero reale corrisponde un punto della retta e a ogni punto
+          della retta corrisponde un numero reale (corrispondenza
+          biunivoca). Per questo si parla di \emph{retta reale}, e per lo
+          stesso motivo $\mathbb{R}^2$ descrive tutti i punti del piano.
+    \item \textbf{Garantisce l'esistenza di numeri.} Senza completezza
+          non potremmo nemmeno dire che $\sqrt{2}$ esiste. Con essa si
+          dimostra che esistono le radici dei numeri positivi, $\pi$, $e$,
+          i logaritmi, e che ogni allineamento decimale infinito
+          rappresenta davvero un numero.
+    \item \textbf{È la base di tutta l'analisi.} Limiti, continuità,
+          derivate e integrali funzionano solo perché la retta è
+          ``continua''. Esempio: la funzione $f(x) = x^2 - 2$ vale
+          $f(1) = -1 < 0$ e $f(2) = 2 > 0$, quindi passando da negativa a
+          positiva ci aspettiamo che si annulli da qualche parte. In
+          $\mathbb{R}$ lo fa, in $x = \sqrt{2}$. In $\mathbb{Q}$ invece
+          non si annulla mai. Teoremi come quello degli zeri, dei valori
+          intermedi e di Weierstrass sono falsi in $\mathbb{Q}$ e veri in
+          $\mathbb{R}$ proprio grazie alla completezza.
+    \item \textbf{Forma equivalente: l'estremo superiore.} L'assioma si
+          può enunciare anche così: ogni insieme non vuoto e limitato
+          superiormente ha un estremo superiore in $\mathbb{R}$. È la forma
+          che si usa più spesso nei teoremi di analisi.
+\end{enumerate}
+
+\textbf{Densità e completezza non sono la stessa cosa.}
+\begin{center}
+\begin{tabular}{l|c|c}
+                & denso & completo \\ \hline
+$\mathbb{Q}$    & sì    & no       \\
+$\mathbb{R}$    & sì    & sì
+\end{tabular}
+\end{center}
+Densità: tra due numeri ce n'è sempre un altro. Completezza: non ci sono
+buchi. Inoltre $\mathbb{Q}$ è denso in $\mathbb{R}$: tra due numeri reali
+qualsiasi c'è sempre un razionale (e anche un irrazionale).
+
+\subsubsection*{La retta reale}
+
+Fissati un punto $O$ (lo $0$), un verso e un'unità di misura, ogni numero
+reale corrisponde a un punto della retta e viceversa.
+
+\begin{center}
+\begin{tikzpicture}[scale=1.6]
+  \draw[->] (-3.5,0) -- (3.7,0) node[right] {$\mathbb{R}$};
+  \foreach \x in {-3,...,3}
+    \draw (\x,0.06) -- (\x,-0.06) node[below] {$\x$};
+  \foreach \x/\l in {-1.5/{-\frac{3}{2}}, 0.5/{\frac{1}{2}},
+                     1.4142/{\sqrt{2}}, 3.1416/{\pi}}
+    {\fill (\x,0) circle (1.4pt);
+     \node[above] at (\x,0.05) {$\l$};}
+\end{tikzpicture}
+\end{center}
+
+I punti $-\frac32$ e $\frac12$ sono razionali; $\sqrt{2}$ e $\pi$ sono
+irrazionali, ma hanno anch'essi il loro posto sulla retta: in $\mathbb{R}$
+non manca nessun punto.
+
+\end{document}

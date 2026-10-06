@@ -1,0 +1,1509 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+\linespread{0.99}
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\NewTColorBox{osservazione}{}{nota,
+  before upper={\textbf{Osservazione.}\ }}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Programmazione procedurale\\[0.4em]\large Appunti}
+\author{Marco Cerbella}
+\date{Università degli Studi di Perugia -- A.A. 2026/2027\\ Aggiornato al \today}
+
+\begin{document}
+\maketitle
+\setcounter{tocdepth}{1}
+\tableofcontents
+\clearpage
+
+\section[Algoritmi e diagrammi di flusso (Lezione 1 -- 22 settembre 2026)]{Algoritmi e diagrammi di flusso}
+\noindent\emph{Lezione 1 -- 22 settembre 2026}
+\subsection{Algoritmi e diagrammi di flusso}
+
+\begin{definizione}
+Un \emph{algoritmo} è una procedura che risolve un problema attraverso una
+sequenza finita di passi elementari e non ambigui. Spesso comporta la
+ripetizione di alcune operazioni.
+\end{definizione}
+
+\begin{esempio}
+Il primo algoritmo celebre è quello di Euclide (\emph{Elementi}, 300 a.C.) per
+il massimo comun divisore.
+\end{esempio}
+
+\begin{definizione}
+Un \emph{diagramma di flusso} (\emph{flowchart}) è la rappresentazione grafica
+di un algoritmo. Le operazioni si leggono dall'alto verso il basso, seguendo le
+frecce. I simboli sono standardizzati (ANSI/ISO).
+\end{definizione}
+
+I simboli principali sono:
+\begin{itemize}
+    \item \textbf{ellisse}: inizio e fine;
+    \item \textbf{parallelogramma}: input e output (I/O);
+    \item \textbf{rettangolo}: operazione (\emph{processo});
+    \item \textbf{rombo}: decisione (condizione vero/falso).
+\end{itemize}
+
+\begin{center}
+\begin{tikzpicture}[node distance=0.8cm]
+  \node (inizio) [terminale] {Inizio};
+  \node (input)  [io, below=of inizio] {Input};
+  \node (op)     [processo, below=of input] {Operazioni};
+  \node (output) [io, below=of op] {Output};
+  \node (fine)   [terminale, below=of output] {Fine};
+
+  \draw [freccia] (inizio) -- (input);
+  \draw [freccia] (input) -- (op);
+  \draw [freccia] (op) -- (output);
+  \draw [freccia] (output) -- (fine);
+\end{tikzpicture}
+\end{center}
+
+Lo stesso schema in linguaggio \textit{C}:
+\begin{codice}
+// Importare le librerie necessarie
+#include <stdio.h>
+
+// Funzione principale
+int main() {
+    // Lettura dell'input e operazioni
+
+    // Stampa del risultato
+    return 0;
+}
+\end{codice}
+
+\subsection{Programmare}
+
+\begin{definizione}
+\emph{Programmare} significa tradurre un algoritmo in una notazione, un
+linguaggio di programmazione, che un elaboratore può eseguire. Un
+\emph{programma} è un insieme di istruzioni.
+\end{definizione}
+
+I passi sono: partire dal problema, \emph{pensare all'algoritmo}, scegliere il
+linguaggio giusto e solo dopo programmare.
+
+\subsection{Esempio: massimo comun divisore}
+
+Algoritmo di Euclide (versione con sottrazioni): finché $b \neq 0$, si
+sostituisce il maggiore tra $a$ e $b$ con la differenza tra i due. Alla fine $a$
+contiene il MCD.
+
+\begin{center}
+\begin{tikzpicture}
+  \node (s) at (0,0) [terminale] {Inizio};
+  \node (in) at (0,-1.3) [io] {Leggi $a$, $b$};
+  \node (d1) at (0,-3.3) [decisione] {$b \neq 0$};
+  \node (d2) at (0,-5.8) [decisione] {$a > b$};
+  \node (pa) at (-2.3,-8) [processo] {$a = a - b$};
+  \node (pb) at (2.3,-8) [processo] {$b = b - a$};
+  \node (j) at (0,-9.5) {};
+  \node (m) at (0,-2.3) {};
+  \node (out) at (4.3,-3.3) [io] {Stampa $a$};
+  \node (e) at (4.3,-4.8) [terminale] {Fine};
+
+  \draw [freccia] (s) -- (in);
+  \draw [freccia] (in) -- (d1);
+  \draw [freccia] (d1) -- node[right]{Sì} (d2);
+  \draw [freccia] (d1.east) -- node[above]{No} (out.west);
+  \draw [freccia] (out) -- (e);
+  \draw [freccia] (d2.west) -| node[above, pos=0.2]{Sì} (pa.north);
+  \draw [freccia] (d2.east) -| node[above, pos=0.2]{No} (pb.north);
+  \draw (pa.south) |- (j.center);
+  \draw (pb.south) |- (j.center);
+  \draw [freccia] (j.center) -- (-4.4,-9.5) -- (-4.4,-2.3) -- (m.center);
+\end{tikzpicture}
+\end{center}
+
+E il programma C corrispondente:
+\begin{codice}
+#include <stdio.h>
+
+int main() {
+    int a, b;
+
+    printf("Enter first positive integer: \n");
+    scanf("%d", &a);
+    printf("Enter second positive integer: \n");
+    scanf("%d", &b);
+
+    while (b != 0) {
+        if (a > b)
+            a = a - b;
+        else
+            b = b - a;
+    }
+    printf("GCD = %d\n", a);
+
+    return 0;
+}
+\end{codice}
+
+\begin{osservazione}
+Il ciclo \lstinline|while| corrisponde al rombo $b \neq 0$ con la freccia che
+torna indietro; l'\lstinline|if|/\lstinline|else| corrisponde al secondo rombo.
+\end{osservazione}
+
+\section[Esercizi sui diagrammi di flusso (Lezione 2 -- 23 settembre 2026)]{Esercizi sui diagrammi di flusso}
+\noindent\emph{Lezione 2 -- 23 settembre 2026}
+\subsection{Somma di 10 e 20}
+
+Si usa una variabile \texttt{sum} inizializzata a zero; si leggono i due numeri,
+si sommano salvando il risultato in \texttt{sum} e infine si stampa.
+
+\begin{enumerate}
+    \item Inizializza $sum = 0$ (processo)
+    \item Leggi i numeri (I/O)
+    \item $sum = 10 + 20$ (processo)
+    \item Stampa $sum$ (I/O)
+\end{enumerate}
+
+\begin{center}
+\begin{tikzpicture}[node distance=0.7cm]
+  \node (a) [terminale] {Inizio};
+  \node (b) [processo, below=of a] {$sum = 0$};
+  \node (c) [io, below=of b] {Leggi i numeri};
+  \node (d) [processo, below=of c] {$sum = 10 + 20$};
+  \node (e) [io, below=of d] {Stampa $sum$};
+  \node (f) [terminale, below=of e] {Fine};
+  \draw [freccia] (a) -- (b);
+  \draw [freccia] (b) -- (c);
+  \draw [freccia] (c) -- (d);
+  \draw [freccia] (d) -- (e);
+  \draw [freccia] (e) -- (f);
+\end{tikzpicture}
+\end{center}
+
+\subsection{Somma di 5 numeri}
+
+Servono due variabili: \texttt{sum} (il risultato) e \texttt{count} (quanti
+numeri sono stati letti). Si usa un \emph{ciclo}: i passi si ripetono finché la
+condizione è vera.
+
+\begin{enumerate}
+    \item $sum = 0$, $count = 0$ (processo)
+    \item Leggi $n$ (I/O)
+    \item $sum = sum + n$ e $count = count + 1$ (processo)
+    \item $count < 5$? (decisione)
+    \item Se sì, torna al passo 2; altrimenti stampa $sum$ (I/O)
+\end{enumerate}
+
+\begin{center}
+\begin{tikzpicture}
+  \node (a) at (0,0) [terminale] {Inizio};
+  \node (b) at (0,-1.4) [processo] {$sum = 0,\ count = 0$};
+  \node (c) at (0,-2.8) [io] {Leggi $n$};
+  \node (d) at (0,-4.2) [processo] {$sum = sum + n$};
+  \node (d2) at (0,-5.4) [processo] {$count = count + 1$};
+  \node (e) at (0,-7.2) [decisione] {$count < 5$};
+  \node (f) at (0,-9.2) [io] {Stampa $sum$};
+  \node (g) at (0,-10.6) [terminale] {Fine};
+  \draw [freccia] (a) -- (b);
+  \draw [freccia] (b) -- (c);
+  \draw [freccia] (c) -- (d);
+  \draw [freccia] (d) -- (d2);
+  \draw [freccia] (d2) -- (e);
+  \draw [freccia] (e) -- node[right]{No} (f);
+  \draw [freccia] (f) -- (g);
+  \draw [freccia] (e.west) -- node[above]{Sì} ++(-2.3,0) |- (c.west);
+\end{tikzpicture}
+\end{center}
+
+Il programma C corrispondente:
+\begin{codice}
+#include <stdio.h>
+
+int main() {
+    int sum = 0, count = 0, n;
+    while (count < 5) {
+        scanf("%d", &n);
+        sum = sum + n;
+        count = count + 1;
+    }
+    printf("sum = %d\n", sum);
+    return 0;
+}
+\end{codice}
+
+\subsection{Stampare ``Hello World'' 10 volte}
+
+Anche qui si usa un ciclo con un contatore.
+
+\begin{enumerate}
+    \item $count = 0$ (processo)
+    \item Stampa ``Hello World'' (I/O)
+    \item $count = count + 1$ (processo)
+    \item $count < 10$? Se sì torna al passo 2, altrimenti termina.
+\end{enumerate}
+
+\begin{center}
+\begin{tikzpicture}
+  \node (a) at (0,0) [terminale] {Inizio};
+  \node (b) at (0,-1.4) [processo] {$count = 0$};
+  \node (c) at (0,-2.8) [io] {Stampa ``Hello World''};
+  \node (d) at (0,-4.2) [processo] {$count = count + 1$};
+  \node (e) at (0,-6) [decisione] {$count < 10$};
+  \node (f) at (0,-8) [terminale] {Fine};
+  \draw [freccia] (a) -- (b);
+  \draw [freccia] (b) -- (c);
+  \draw [freccia] (c) -- (d);
+  \draw [freccia] (d) -- (e);
+  \draw [freccia] (e) -- node[right]{No} (f);
+  \draw [freccia] (e.west) -- node[above]{Sì} ++(-2.6,0) |- (c.west);
+\end{tikzpicture}
+\end{center}
+
+\begin{codice}
+#include <stdio.h>
+
+int main() {
+    int count = 0;
+    do {
+        printf("Hello World\n");
+        count = count + 1;
+    } while (count < 10);
+    return 0;
+}
+\end{codice}
+
+\begin{osservazione}
+Il diagramma esegue la stampa \emph{prima} di controllare la condizione, quindi
+il costrutto C fedele è \lstinline|do ... while|. Con un \lstinline|while|
+la condizione verrebbe controllata prima del corpo.
+\end{osservazione}
+
+\subsection{Login a un account (da risolvere liberamente)}
+
+Esercizio aperto: non esiste una sola soluzione. Una possibile sequenza:
+\begin{enumerate}
+    \item Inserisci l'indirizzo del sito nel browser (I/O)
+    \item Si carica la home page (processo)
+    \item Inserisci email e password (I/O)
+    \item Credenziali valide? (decisione)
+    \item Se no: errore di login (processo) e torna al passo 3;
+          se sì: mostra l'account (I/O) e termina.
+\end{enumerate}
+
+\begin{center}
+\begin{tikzpicture}
+  \node (a) at (0,0) [terminale] {Inizio};
+  \node (b) at (0,-1.3) [io] {Inserisci URL};
+  \node (c) at (0,-2.6) [processo] {Si carica la home};
+  \node (d) at (0,-3.9) [io] {Inserisci email e password};
+  \node (e) at (0,-5.8) [decisione] {Credenziali valide?};
+  \node (f) at (0,-7.8) [io] {Mostra l'account};
+  \node (g) at (0,-9.1) [terminale] {Fine};
+  \node (err) at (4.8,-5.8) [processo] {Errore di login};
+  \draw [freccia] (a) -- (b);
+  \draw [freccia] (b) -- (c);
+  \draw [freccia] (c) -- (d);
+  \draw [freccia] (d) -- (e);
+  \draw [freccia] (e) -- node[right]{Sì} (f);
+  \draw [freccia] (f) -- (g);
+  \draw [freccia] (e.east) -- node[above]{No} (err.west);
+  \draw [freccia] (err.north) |- (d.east);
+\end{tikzpicture}
+\end{center}
+
+\section[Il linguaggio C (Lezione 3 -- 28 settembre 2026)]{Il linguaggio C}
+\noindent\emph{Lezione 3 -- 28 settembre 2026}
+\subsection{Linguaggi di programmazione}
+
+\begin{definizione}
+Un \emph{linguaggio di programmazione} è un linguaggio formale che specifica un
+insieme di istruzioni per un elaboratore. Si usa per realizzare programmi che
+implementano algoritmi. I linguaggi \emph{ad alto livello} sono vicini al
+linguaggio umano e lontani dal linguaggio macchina.
+\end{definizione}
+
+I \emph{paradigmi di programmazione} classificano i linguaggi in base alle loro
+caratteristiche. Il C è \emph{imperativo}: il programmatore indica alla
+macchina \emph{come} modificare il proprio stato, ad esempio
+\lstinline|a = a + 1;|.
+
+\subsection{Dal linguaggio macchina al C}
+
+\begin{itemize}
+    \item Il \emph{linguaggio macchina} (sequenze di bit) è l'unico eseguito
+          direttamente dal processore.
+    \item L'\emph{assembly} usa abbreviazioni mnemoniche per le operazioni,
+          ma è legato alla macchina.
+    \item I linguaggi \emph{ad alto livello} sono indipendenti dalla macchina.
+\end{itemize}
+
+\begin{definizione}
+Un \emph{compilatore} è un programma di sistema che traduce il programma
+sorgente scritto in un linguaggio ad alto livello in un programma
+\emph{target} equivalente (assembly/linguaggio macchina). Il programma target
+viene eseguito in un secondo momento.
+\end{definizione}
+
+In questo corso il compilatore è \textbf{gcc}.
+
+\begin{center}
+\begin{tikzpicture}[node distance=1.6cm]
+  \node (src) [processo] {sorgente C};
+  \node (gcc) [processo, right=of src] {gcc};
+  \node (exe) [processo, right=of gcc] {programma eseguibile};
+  \draw [freccia] (src) -- (gcc);
+  \draw [freccia] (gcc) -- (exe);
+\end{tikzpicture}
+\end{center}
+
+\subsection{Caratteristiche del C}
+
+Il C è un linguaggio ad alto livello, \emph{procedurale} e di uso generale,
+progettato (Dennis Ritchie, anni '70) per scrivere sistemi operativi con la
+massima indipendenza dall'hardware.
+
+\textbf{Pregi:}
+\begin{itemize}
+    \item veloce (compilato, vicino alla macchina) e portabile;
+    \item linguaggio piccolo e maturo, con molti strumenti;
+    \item accesso diretto alla memoria e alle funzionalità di basso livello.
+\end{itemize}
+
+\textbf{Difficoltà:}
+\begin{itemize}
+    \item si può facilmente fare danni con accessi diretti alla memoria e
+          puntatori;
+    \item la memoria va gestita a mano;
+    \item il codice è più verboso rispetto a linguaggi di scripting come Python.
+\end{itemize}
+
+\begin{osservazione}
+Il linguaggio C in sé non ha istruzioni di input/output né di gestione della
+memoria dinamica: queste funzioni sono fornite dalla \emph{libreria standard}
+(ad esempio \lstinline|stdio.h|).
+\end{osservazione}
+
+\subsection{Standard}
+
+Il C è stato standardizzato più volte: C89/C90 (ANSI/ISO), C99, C11, C18. Con
+gcc si può scegliere lo standard:
+\begin{comando}
+gcc file.c -std=c11
+\end{comando}
+
+\subsection{Compilati e interpretati}
+
+Un linguaggio \emph{compilato} (come C) viene analizzato a fondo dal traduttore
+prima dell'esecuzione, e quasi tutti i controlli semantici sono fatti a tempo di
+compilazione. In un linguaggio \emph{interpretato} (come Python) l'interprete
+resta presente durante l'esecuzione e la maggior parte dei controlli è fatta a
+tempo di esecuzione.
+
+\section[Struttura di un programma C e compilazione (Lezione 4 -- 29 settembre 2026)]{Struttura di un programma C e compilazione}
+\noindent\emph{Lezione 4 -- 29 settembre 2026}
+\subsection{Struttura di un programma}
+
+Gli elementi costitutivi di un programma C sono le \emph{funzioni}, che possono
+chiamarsi a vicenda.
+\begin{itemize}
+    \item Ogni funzione ha uno scopo preciso; le funzioni \emph{non} si possono
+          annidare.
+    \item Una funzione contiene istruzioni eseguite in sequenza; le istruzioni
+          si raggruppano in \emph{blocchi}.
+    \item Si possono usare funzioni della libreria standard (\lstinline|printf|)
+          o scriverne di proprie.
+    \item Ogni programma deve definire almeno la funzione \lstinline|main()|:
+          è la prima funzione eseguita ed è il livello principale di controllo.
+\end{itemize}
+
+\subsection{Hello World e compilazione con gcc}
+
+\begin{codice}
+#include <stdio.h>
+
+int main() {
+    printf("Hello World\n");
+    return 0;
+}
+\end{codice}
+
+Salvato il codice in \texttt{test.c}, da terminale si compila (creando l'eseguibile \texttt{test}) e poi si esegue:
+\begin{comando}
+gcc -o test test.c
+./test
+\end{comando}
+
+\begin{osservazione}
+Per il corso e per l'esame si compila \emph{solo con gcc} da terminale (anche
+se si usa un editor che ha un terminale integrato). Senza \lstinline|-o| il
+file eseguibile si chiama \texttt{a.out}.
+\end{osservazione}
+
+\subsection{Input e output: printf e scanf}
+
+\begin{esempio}[Somma di due interi]
+\begin{codice}
+#include <stdio.h>
+int main() {
+    int firstNumber, secondNumber, sumOfTwoNumbers;
+
+    printf("Enter two integers: ");
+
+    // gli interi inseriti vengono memorizzati con scanf()
+    scanf("%d %d", &firstNumber, &secondNumber);
+
+    // la somma viene salvata in sumOfTwoNumbers
+    sumOfTwoNumbers = firstNumber + secondNumber;
+
+    // stampa della somma
+    printf("%d + %d = %d", firstNumber, secondNumber, sumOfTwoNumbers);
+
+    return 0;
+}
+\end{codice}
+\begin{risultato}
+Enter two integers: 12
+11
+12 + 11 = 23
+\end{risultato}
+\end{esempio}
+
+\begin{esempio}[Quoziente e resto]
+\begin{codice}
+#include <stdio.h>
+int main() {
+    int dividend, divisor, quotient, remainder;
+
+    printf("Enter dividend: ");
+    scanf("%d", &dividend);
+
+    printf("Enter divisor: ");
+    scanf("%d", &divisor);
+
+    quotient = dividend / divisor;    // quoziente
+    remainder = dividend % divisor;   // resto
+
+    printf("Quotient = %d\n", quotient);
+    printf("Remainder = %d", remainder);
+
+    return 0;
+}
+\end{codice}
+\begin{risultato}
+Enter dividend: 25
+Enter divisor: 4
+Quotient = 6
+Remainder = 1
+\end{risultato}
+\end{esempio}
+
+\begin{osservazione}
+\lstinline|%d| è il segnaposto per un intero; in \lstinline|scanf| le variabili
+vanno precedute da \lstinline|&|.
+\end{osservazione}
+
+\subsection{Programmazione procedurale e modulare}
+
+\begin{definizione}
+La \emph{programmazione procedurale} è un paradigma, derivato dalla
+programmazione strutturata, basato sul concetto di chiamata di procedura. Le
+procedure (o routine, sottoprogrammi, funzioni) contengono una serie di passi di
+calcolo da eseguire. Il C è imperativo e procedurale: le istruzioni sono
+raggruppate in funzioni.
+\end{definizione}
+
+\begin{esempio}
+\texttt{mainfile.c}
+\begin{codice}
+#include <stdio.h>
+void myPrintHello();
+
+int main() {
+    myPrintHello();
+    return(0);
+}
+
+void myPrintHello(void) {
+    printf("Hello!\n");
+    return;
+}
+\end{codice}
+\end{esempio}
+
+\begin{definizione}
+La \emph{programmazione modulare} è una tecnica di progettazione che separa le
+funzionalità di un programma in \emph{moduli} indipendenti e intercambiabili,
+ciascuno contenente tutto il necessario per realizzare un solo aspetto della
+funzionalità.
+\end{definizione}
+
+Ad esempio il codice si può dividere in file diversi.
+
+\texttt{mainfile.c}:
+\begin{codice}
+int main() {
+    myPrintHello();
+    return(0);
+}
+\end{codice}
+
+\texttt{hello.c}:
+\begin{codice}
+#include <stdio.h>
+
+void myPrintHello(void) {
+    printf("Hello!\n");
+    return;
+}
+\end{codice}
+
+e si compilano insieme:
+\begin{comando}
+gcc -o executable mainfile.c hello.c
+\end{comando}
+
+\section[Errori di compilazione e di esecuzione (Lezione 5 -- 30 settembre 2026)]{Errori di compilazione e di esecuzione}
+\noindent\emph{Lezione 5 -- 30 settembre 2026}
+\subsection{Compile-time e run-time}
+
+La vita di un programmatore ha due momenti: il \emph{compile-time}, quando si
+esegue \texttt{gcc}, e il \emph{run-time}, quando si esegue il programma.
+
+\begin{definizione}
+Un \emph{errore di compilazione} (\emph{compile-time}) è un errore rilevato dal
+compilatore. Cause comuni: errori di sintassi, come un punto e virgola mancante
+o l'uso di una parola riservata (ad esempio \lstinline|while|) come nome.
+\end{definizione}
+
+\begin{definizione}
+Un \emph{errore di esecuzione} (\emph{run-time}) è un errore del programma che
+si verifica mentre il programma è in esecuzione.
+\end{definizione}
+
+\subsection{Esempio di errore di compilazione}
+
+Nel programma del MCD manca il \texttt{;} dopo la seconda \lstinline|scanf|:
+\begin{codice}
+printf("Enter first positive integer: \n");
+scanf("%d", &b)        // manca il ';'
+\end{codice}
+
+Il compilatore segnala:
+\begin{risultato}
+$ gcc -o euclid euclid.c
+euclid.c:9:20: error: expected ';' after expression
+   scanf("%d", &b)
+                 ^
+                 ;
+1 error generated.
+\end{risultato}
+
+Il messaggio indica file, riga e colonna dell'errore: bisogna imparare a
+leggere l'output del compilatore per eliminare tutti gli errori di compilazione.
+
+\subsection{Esempio di errore di esecuzione}
+
+Il programma compila senza problemi, ma dereferenzia un puntatore nullo:
+\begin{codice}
+#include <stdio.h>
+int main() {
+    int *a = NULL;
+
+    printf("%d", *a);    // accesso a memoria non valida
+
+    int i = 0;
+    while (i < 4) {
+        printf("Hello World");
+        i++;
+    }
+    return 0;
+}
+\end{codice}
+\begin{risultato}
+$ gcc -o runtime_error runtime_error.c
+$ ./runtime_error
+Segmentation fault: 11
+\end{risultato}
+
+\begin{osservazione}
+Eliminare gli errori di compilazione non basta: bisogna testare il programma
+con molti input diversi per eliminare (il più possibile) gli errori di
+esecuzione.
+\end{osservazione}
+
+\begin{center}
+\emph{``Testing shows the presence, not the absence of bugs''} -- E.\,W.\ Dijkstra
+\end{center}
+
+\section[Commenti, identificatori e parole chiave (Lezione 6 -- 5 ottobre 2026)]{Commenti, identificatori e parole chiave}
+\noindent\emph{Lezione 6 -- 5 ottobre 2026}
+\subsection{Commenti}
+
+In C ci sono due tipi di commenti:
+\begin{itemize}
+    \item \emph{a blocco}: iniziano con \lstinline|/*| e finiscono con \lstinline|*/|, possono
+          occupare più righe;
+    \item \emph{di riga}: iniziano con \lstinline|//| e finiscono a fine riga.
+\end{itemize}
+
+\begin{codice}
+double pi = 3.1415926536;   // Pi è 3,14
+\end{codice}
+
+All'interno di una stringa o di una costante carattere i simboli \lstinline|/*| e
+\lstinline|//| non iniziano un commento:
+\begin{codice}
+printf("Comments in C begin with /* or //.\n");
+\end{codice}
+
+\begin{osservazione}
+I commenti a blocco \emph{non si possono annidare}: il primo \lstinline|*/|
+chiude il commento aperto. Si possono invece usare per ``spegnere'' del codice
+che contiene commenti di riga.
+\end{osservazione}
+
+\begin{esempio}
+Qui il commento aperto alla riga 3 termina al primo \lstinline|*/| (riga 6): il
+secondo \lstinline|*/| è un errore di sintassi.
+\begin{codice}
+#include <stdio.h>
+int main() {
+    int x = 4; /*
+    int y = 10; /*
+
+    printf("x = %d\n", x); */
+    printf("y = %d\n", y); */
+}
+\end{codice}
+\end{esempio}
+
+\subsubsection{Scrivere buoni commenti}
+
+Il codice si scrive per essere eseguito da un computer ma letto da persone:
+da noi stessi mentre lo scriviamo e dopo settimane o mesi, dai colleghi che
+devono integrarlo e da chi lo manterrà anni dopo.
+\begin{itemize}
+    \item Evitare commenti ridondanti, come \lstinline|i = i + 1; // incrementa i|.
+    \item Non lasciare codice ``eliminato'' sotto forma di commento (va bene
+          solo temporaneamente durante il debug).
+    \item Evitare commenti decorati (riquadri di asterischi): sono difficili da
+          mantenere.
+    \item Un commento che chiarisce spesso segnala codice troppo complesso:
+          meglio semplificare il codice, che deve essere \emph{autoesplicativo}.
+\end{itemize}
+
+\subsection{Caratteri}
+
+Il C definisce due insiemi di caratteri: quello \emph{sorgente} (usabile nel
+codice) e quello di \emph{esecuzione} (interpretabile dal programma in
+esecuzione); nella maggior parte delle implementazioni coincidono. I caratteri
+\emph{spazio bianco} sono: spazio, \verb|\f| (form feed), \verb|\n| (a capo),
+\verb|\t| (tab orizzontale), \verb|\v| (tab verticale).
+
+\subsection{Identificatori}
+
+\begin{definizione}
+Un \emph{identificatore} è il nome di una variabile, funzione, macro,
+struttura o altro oggetto definito in un programma C. Può contenere:
+\begin{itemize}
+    \item lettere \texttt{a--z} e \texttt{A--Z} (il C è \emph{case-sensitive});
+    \item il carattere underscore \texttt{\_};
+    \item cifre \texttt{0--9}, ma il primo carattere \emph{non} può essere una cifra.
+\end{itemize}
+\end{definizione}
+
+\begin{esempio}
+Identificatori validi: \texttt{x}, \texttt{dollar}, \texttt{While},
+\texttt{error\_handler}, \texttt{scale64}.
+
+Non validi: \texttt{1st\_rank} (inizia con una cifra), \texttt{switch} (parola
+riservata), \texttt{y/n} e \texttt{x-ray} (caratteri non ammessi).
+\end{esempio}
+
+Non c'è un limite alla lunghezza, ma i compilatori considerano significativi
+solo i primi 31 o 63 caratteri. Molti nomi sono già usati dalla libreria
+standard (ad esempio \lstinline|printf|) e non si possono riutilizzare per
+funzioni proprie o variabili globali.
+
+\subsection{Parole riservate}
+
+Le seguenti 44 parole chiave sono riservate in C (erano 32 in C89), hanno un
+significato preciso per il compilatore e non si possono usare come
+identificatori:
+
+\begin{center}
+\begin{minipage}{0.9\textwidth}
+\ttfamily\small
+auto, break, case, char, const, continue, default, do, double, else, enum,
+extern, float, for, goto, if, inline, int, long, register, restrict, return,
+short, signed, sizeof, static, struct, switch, typedef, union, unsigned, void,
+volatile, while, \_Alignas, \_Alignof, \_Atomic, \_Bool, \_Complex, \_Generic,
+\_Imaginary, \_Noreturn, \_Static\_assert, \_Thread\_local
+\end{minipage}
+\end{center}
+
+\subsubsection{Scegliere i nomi}
+
+Un nome descrive l'oggetto, il suo comportamento e il suo uso: una variabile
+chiamata male può confondere molto.
+\begin{itemize}
+    \item evitare nomi inutilmente lunghi;
+    \item usare nomi diversi in ambiti diversi, per evitare confusione.
+\end{itemize}
+
+\begin{esempio}
+Confrontare \lstinline|a = b * c;| con
+\lstinline|weekly_pay = hours_worked * pay_rate;|.
+\end{esempio}
+
+\section[Scope e binding (Lezione 7 -- 6 ottobre 2026)]{Scope e binding}
+\noindent\emph{Lezione 7 -- 6 ottobre 2026}
+\subsection{Scope degli identificatori}
+
+\begin{definizione}
+Lo \emph{scope} (ambito) di un identificatore è la parte del programma in cui
+l'identificatore è significativo, cioè in cui può essere ``visto''. Il tipo di
+scope dipende da dove l'identificatore viene dichiarato.
+\end{definizione}
+
+\begin{itemize}
+    \item \textbf{File scope}: l'identificatore è dichiarato fuori da tutti i
+          blocchi e dalle liste di parametri (cioè fuori dalle funzioni). Si
+          può usare dalla dichiarazione fino alla fine del file.
+    \item \textbf{Block scope}: l'identificatore è dichiarato dentro un blocco.
+          Si può usare dalla dichiarazione fino alla fine del blocco più piccolo
+          che la contiene (spesso, ma non sempre, il corpo di una funzione).
+\end{itemize}
+
+\begin{esempio}
+\begin{codice}
+int p;                   // file scope
+
+int fun2(void) {         // fun2: file scope
+    int r = 3;           // r, s: block scope
+    int s = r;
+    while (r != s) {
+        r--;
+    }
+    return r;
+}
+\end{codice}
+\end{esempio}
+
+\begin{osservazione}
+Non si possono avere due variabili con lo stesso nome nello stesso scope:
+\begin{codice}
+int main() {
+    int a = 5;
+    float a = 6.5;   // errore: a già dichiarata
+}
+\end{codice}
+\end{osservazione}
+
+\subsection{Shadowing}
+
+Si può riusare un identificatore in una dichiarazione \emph{annidata} nello
+scope esistente; la nuova dichiarazione deve avere block scope, in un blocco
+contenuto in quello esterno. In questo caso la dichiarazione interna
+\emph{nasconde} (\emph{shadowing}) quella esterna, che non è visibile nello
+scope interno.
+
+\begin{esempio}
+\begin{codice}
+int main() {
+    int x = 1, y = 2, z = 3;
+    printf(" x = %d, y = %d, z = %d \n", x, y, z);
+    {
+        int x = 10;
+        float y = 20;
+        printf(" x = %d, y = %f, z = %d \n", x, y, z);
+        {
+            int z = 100;
+            printf(" x = %d, y = %f, z = %d \n", x, y, z);
+        }
+    }
+    return 0;
+}
+\end{codice}
+\begin{risultato}
+x = 1, y = 2, z = 3
+x = 10, y = 20.000000, z = 3
+x = 10, y = 20.000000, z = 100
+\end{risultato}
+\end{esempio}
+
+\begin{esempio}
+Qui \lstinline|x++| modifica la \lstinline|x| esterna (non è ridichiarata),
+mentre \lstinline|y++| modifica la \lstinline|y| interna; uscendo dal blocco
+interno la \lstinline|y| torna a valere 20.
+\begin{codice}
+int main() {
+    {
+        int x = 10, y = 20;
+        {
+            printf("x = %d, y = %d\n", x, y);
+            {
+                int y = 40;
+                x++;
+                y++;
+                printf("x = %d, y = %d\n", x, y);
+            }
+            printf("x = %d, y = %d\n", x, y);
+        }
+    }
+    return 0;
+}
+\end{codice}
+\begin{risultato}
+x = 10, y = 20
+x = 11, y = 41
+x = 11, y = 20
+\end{risultato}
+\end{esempio}
+
+\begin{esempio}
+Fuori dal blocco in cui è dichiarata, una variabile non è accessibile:
+\begin{codice}
+int main() {
+    {
+        int x = 10;
+    }
+    {
+        printf("%d", x);    // errore: x non visibile qui
+    }
+    return 0;
+}
+\end{codice}
+\begin{risultato}
+error: 'x' undeclared (first use in this function)
+\end{risultato}
+\end{esempio}
+
+\subsection{Binding statico}
+
+\begin{definizione}
+Un \emph{binding} è l'associazione tra un nome e l'oggetto che esso denota. Il
+\emph{binding time} è il momento in cui il binding viene creato (più in
+generale, il momento in cui viene presa una decisione di implementazione). La
+regione testuale del programma in cui un binding è attivo è il suo scope.
+\end{definizione}
+
+In C lo scope di un binding è determinato \emph{staticamente}, cioè a tempo di
+compilazione (\emph{static scoping}), come si vede dal testo del programma e non
+dall'ordine delle chiamate a run-time. Altri linguaggi usano lo scoping
+\emph{dinamico}: ad esempio in Perl \lstinline|my| definisce una variabile
+locale a scope statico, \lstinline|local| una a scope dinamico.
+
+\subsection{Esercizio}
+
+\begin{esercizio}
+Qual è l'output del seguente programma?
+\begin{codice}
+#include <stdio.h>
+
+int f1(void);
+int f2(int x, int a);
+
+int a;
+
+int main() {
+    int a, b, c;
+
+    a = 7;
+    b = f1();
+    c = f2(a, b);
+    printf("%d %d %d\n", a, b, c);
+}
+
+int f1(void) {
+    a = 12;
+    printf("%d ", a);
+    return (a + 5);
+}
+
+int f2(int x, int a) {
+    printf("%d ", a);
+    return (x * a);
+}
+\end{codice}
+\end{esercizio}
+
+\emph{Soluzione.}
+\begin{itemize}
+    \item In \lstinline|main| la \lstinline|a| locale (che vale 7) nasconde la
+          \lstinline|a| globale.
+    \item \lstinline|f1| non dichiara una propria \lstinline|a|: per binding
+          statico modifica quella \emph{globale}, la pone a 12, stampa
+          \texttt{12} e restituisce 17, quindi $b = 17$.
+    \item In \lstinline|f2(7, 17)| il parametro \lstinline|a| vale 17: stampa
+          \texttt{17} e restituisce $7 \cdot 17 = 119$, quindi $c = 119$.
+    \item Infine \lstinline|main| stampa \texttt{7 17 119}.
+\end{itemize}
+\begin{risultato}
+12 17 7 17 119
+\end{risultato}
+
+\section[Tipi di dato (Lezione 8 -- 7 ottobre 2026)]{Tipi di dato}
+\noindent\emph{Lezione 8 -- 7 ottobre 2026}
+\subsection{Tipi e oggetti}
+
+I programmi devono memorizzare ed elaborare dati di tipo diverso, come interi e
+numeri in virgola mobile, in modi diversi: il compilatore deve quindi sapere che
+tipo di dato rappresenta un valore.
+
+\begin{definizione}
+In C un \emph{oggetto} è una zona di memoria il cui contenuto può rappresentare
+valori. Gli oggetti che hanno un nome sono detti \emph{variabili}. Il
+\emph{tipo} di un oggetto determina:
+\begin{itemize}
+    \item quanto spazio occupa in memoria;
+    \item i valori che la variabile può assumere;
+    \item le operazioni che si possono eseguire su di essa.
+\end{itemize}
+\end{definizione}
+
+\subsubsection{Tipi in C}
+
+\begin{itemize}
+    \item \textbf{Tipi di base}: interi (standard ed estesi) e floating-point
+          (reali e complessi).
+    \item \textbf{Tipi enumerati}.
+    \item Il tipo \lstinline|void|.
+    \item \textbf{Tipi derivati}: puntatori, array, strutture, unioni, funzioni.
+\end{itemize}
+
+I tipi di base e i tipi enumerati formano i \emph{tipi aritmetici}; i tipi
+aritmetici e i puntatori formano i \emph{tipi scalari}; array e strutture sono
+detti \emph{tipi aggregati}. Un \emph{tipo funzione} descrive l'interfaccia di
+una funzione: il tipo del valore restituito ed eventualmente i tipi dei
+parametri.
+
+\subsection{Interi}
+
+I tipi interi con segno sono cinque (molti hanno sinonimi):
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\textbf{tipo} & \textbf{sinonimi} \\
+\midrule
+\lstinline|signed char| & \\
+\lstinline|int| & \lstinline|signed|, \lstinline|signed int| \\
+\lstinline|short| & \lstinline|short int|, \lstinline|signed short|, \lstinline|signed short int| \\
+\lstinline|long| & \lstinline|long int|, \lstinline|signed long|, \lstinline|signed long int| \\
+\lstinline|long long| (C99) & \lstinline|long long int|, \lstinline|signed long long|, \lstinline|signed long long int| \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+C definisce solo le dimensioni minime: \lstinline|short| occupa almeno 2 byte,
+\lstinline|long| almeno 4 e \lstinline|long long| almeno 8. I tipi possono essere
+più grandi, ma devono rispettare l'ordine
+\[
+  \texttt{sizeof(short)} \leq \texttt{sizeof(int)} \leq \texttt{sizeof(long)}
+  \leq \texttt{sizeof(long long)} .
+\]
+
+\subsubsection{Booleani}
+
+In C non esistono \emph{true} e \emph{false}: $0$ è falso e qualsiasi valore
+diverso da $0$ (ad esempio $1$, $-25$, $123456$) è vero.
+
+\begin{codice}
+if (3)                      if (0)
+    printf("YES\n");            printf("YES\n");
+else                        else
+    printf("NO\n");             printf("NO\n");
+\end{codice}
+
+Il primo \lstinline|if| stampa \texttt{YES}, il secondo \texttt{NO}.
+
+C99 ha introdotto il tipo intero senza segno \lstinline|_Bool|: \emph{vero} è
+codificato come $1$, \emph{falso} come $0$. Includendo l'header
+\lstinline|stdbool.h| si possono usare anche \lstinline|bool|, \lstinline|true| e
+\lstinline|false|: \lstinline|bool| è sinonimo di \lstinline|_Bool| e
+\lstinline|true|, \lstinline|false| sono costanti uguali a $1$ e $0$.
+
+\subsubsection{Caratteri}
+
+Anche \lstinline|char| è un tipo intero standard, ma il nome \lstinline|char| è
+sinonimo di \lstinline|signed char| oppure di \lstinline|unsigned char| a seconda
+del compilatore. Occupa 1 byte e i caratteri corrispondono ai codici della
+tabella ASCII.
+
+Con le variabili \lstinline|char| si può fare aritmetica: sta al programmatore
+decidere se il numero contenuto è un codice di carattere o altro.
+
+\begin{codice}
+char ch = 'A';       // variabile di tipo char
+printf("The character %c has the character code %d.\n", ch, ch);
+printf("%c", ch + 1);
+\end{codice}
+\begin{risultato}
+The character A has the character code 65.
+B
+\end{risultato}
+
+\subsection{Sistemi di numerazione}
+
+\begin{definizione}
+Il sistema \emph{binario} (base 2) rappresenta i numeri con due soli simboli,
+$0$ e $1$; ogni cifra è un \emph{bit}. Quasi tutti i calcolatori lo usano
+internamente perché è semplice da realizzare con circuiti a porte logiche.
+\end{definizione}
+
+\begin{definizione}
+Il sistema \emph{esadecimale} (base 16) usa sedici simboli: le cifre $0$--$9$ per
+i valori da zero a nove e le lettere \texttt{A, B, C, D, E, F} (o minuscole) per
+i valori da dieci a quindici. Ogni cifra esadecimale corrisponde a 4 bit (un
+\emph{nibble}, metà di un byte da 8 bit): è una rappresentazione più
+leggibile dei valori binari. Il sistema \emph{ottale} (base 8) usa le cifre
+$0$--$7$.
+\end{definizione}
+
+\begin{center}
+\begin{tabular}{rcc @{\qquad} rcc}
+\toprule
+\textbf{Bin.} & \textbf{Esa.} & \textbf{Dec.} &
+\textbf{Bin.} & \textbf{Esa.} & \textbf{Dec.} \\
+\midrule
+0    & 0 & 0  & 1000 & 8 & 8 \\
+1    & 1 & 1  & 1001 & 9 & 9 \\
+10   & 2 & 2  & 1010 & A & 10 \\
+11   & 3 & 3  & 1011 & B & 11 \\
+100  & 4 & 4  & 1100 & C & 12 \\
+101  & 5 & 5  & 1101 & D & 13 \\
+110  & 6 & 6  & 1110 & E & 14 \\
+111  & 7 & 7  & 1111 & F & 15 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsubsection{Da binario/esadecimale a decimale}
+
+Un numero con cifre $d_n \dots d_1 d_0$ in base $b$ vale
+$d_n b^n + d_{n-1} b^{n-1} + \dots + d_1 b^1 + d_0 b^0$ (in base 2:
+$d_n 2^n + \dots + d_1 2^1 + d_0 2^0 = N_{10}$).
+
+\begin{esempio}
+$1001_2 = 1 \cdot 2^3 + 0 \cdot 2^2 + 0 \cdot 2^1 + 1 \cdot 2^0 = 9$ \quad e \quad
+$\texttt{002B}_{16} = 2 \cdot 16 + 11 = 43$.
+\end{esempio}
+
+\subsubsection{Da decimale a binario/esadecimale}
+
+Si divide ripetutamente il numero per la base e si leggono i resti
+\emph{dal basso verso l'alto}. Per l'ottale si usa lo stesso algoritmo con base 8.
+
+\begin{esempio}
+$156$ in binario (divisioni per 2): i quozienti successivi sono
+$78, 39, 19, 9, 4, 2, 1, 0$ e i resti $0, 0, 1, 1, 1, 0, 0, 1$. Letti dal basso:
+$156 = 10011100_2$.
+
+$1565$ in esadecimale (divisioni per 16): $1565 = 97 \cdot 16 + 13$ (resto
+$13 = \texttt{d}$), $97 = 6 \cdot 16 + 1$ (resto $1$), $6 = 0 \cdot 16 + 6$
+(resto $6$). Quindi $1565 = \texttt{61d}_{16}$.
+\end{esempio}
+
+Con $N$ bit si rappresentano i numeri da $0$ a $2^N - 1$; con 8 bit (un byte)
+da $0$ a $255$ (da \texttt{0000 0000} a \texttt{1111 1111}). Servono però anche i
+numeri negativi, e per questo esistono rappresentazioni diverse: segno e modulo,
+complemento a due.
+
+\subsection{Rappresentazione degli interi in memoria}
+
+\subsubsection{Segno e modulo}
+
+Un bit (di solito il più a sinistra) indica il segno: $0$ per i positivi, $1$ per
+i negativi; i bit restanti rappresentano il modulo. Ad esempio \texttt{1001 1000}
+vale $-24$ (mentre se si usasse solo per numeri positivi varrebbe $152$).
+
+Con $n$ bit si rappresentano i valori da $-(2^{n-1} - 1)$ a $2^{n-1} - 1$, e
+$\pm 0$: con 8 bit da $-127$ a $+127$.
+
+\begin{osservazione}
+Problema: lo zero ha due rappresentazioni, \texttt{0000 0000} ($+0$) e
+\texttt{1000 0000} ($-0$). Una soluzione è il complemento a due.
+\end{osservazione}
+
+\subsubsection{Complemento a due}
+
+\begin{center}
+\begin{tabular}{ccc}
+\toprule
+\textbf{Valore binario} & \textbf{Complemento a due} & \textbf{Senza segno} \\
+\midrule
+\texttt{00000000} & $0$    & $0$   \\
+\texttt{00000001} & $1$    & $1$   \\
+$\vdots$ & $\vdots$ & $\vdots$ \\
+\texttt{01111110} & $126$  & $126$ \\
+\texttt{01111111} & $127$  & $127$ \\
+\texttt{10000000} & $-128$ & $128$ \\
+\texttt{10000001} & $-127$ & $129$ \\
+\texttt{10000010} & $-126$ & $130$ \\
+$\vdots$ & $\vdots$ & $\vdots$ \\
+\texttt{11111110} & $-2$   & $254$ \\
+\texttt{11111111} & $-1$   & $255$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Nel complemento a due esiste un solo zero, \texttt{00000000}. Per cambiare segno a
+un numero (positivo o negativo) si \textbf{invertono tutti i bit e poi si somma 1}.
+
+\begin{esempio}
+\begin{itemize}
+    \item \texttt{0000 0101} (valore $5$); invertendo: \texttt{1111 1010};
+          sommando $1$: \texttt{1111 1011}, che vale $-5$.
+    \item Da \texttt{1111 1011}: invertendo \texttt{0000 0100}, sommando $1$
+          \texttt{0000 0101}, cioè di nuovo $5$.
+\end{itemize}
+\end{esempio}
+
+Con $n$ bit si rappresentano i valori da $-2^{n-1}$ a $2^{n-1} - 1$: non c'è
+``$-0$'', quindi si rappresenta un numero negativo in più. Con 8 bit, da $-128$
+(\texttt{1000 0000}) a $+127$ (\texttt{0111 1111}).
+
+\begin{osservazione}
+La regola ``inverti e somma 1'' non funziona per $-128$, perché $128$ non è
+rappresentabile con 8 bit in complemento a due. D'ora in poi si usa il complemento
+a due.
+\end{osservazione}
+
+\subsubsection{Endianness}
+
+\begin{definizione}
+L'\emph{endianness} indica l'ordine usato per interpretare numericamente una
+sequenza di byte della memoria come una parola più grande (e l'ordine di
+trasmissione dei byte su un collegamento digitale). Le parole possono essere in
+formato \emph{big-endian} o \emph{little-endian}, a seconda che si parta
+dall'estremità più significativa (big end) o meno significativa (little end).
+\end{definizione}
+
+Esempi: i mainframe IBM z/Architecture e i Motorola 68000 usano big-endian, i
+processori Intel x86 little-endian.
+
+La memoria è un array di byte; ogni byte ha il suo \emph{indirizzo logico}
+(un numero positivo), cioè l'indirizzo al quale un elemento appare risiedere dal
+punto di vista di un programma in esecuzione. Per architetture a 64 bit il limite
+superiore è $2^{64} - 1$.
+
+\begin{esempio}
+Il numero $2$ scritto su 4 byte, a partire dall'indirizzo $1500$:
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+ & 1500 & 1501 & 1502 & 1503 \\
+\midrule
+big-endian    & \texttt{00} & \texttt{00} & \texttt{00} & \texttt{02} \\
+little-endian & \texttt{02} & \texttt{00} & \texttt{00} & \texttt{00} \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{esempio}
+
+\begin{esempio}
+Sulla stringa di 4 bit \texttt{0010}, in complemento a due: in big-endian vale $2$;
+in little-endian si leggono i bit in ordine inverso (\texttt{0100}) e vale $4$.
+Sulla stringa \texttt{1010}: in big-endian vale $-6$, in little-endian
+(\texttt{0101}) vale $5$.
+\end{esempio}
+
+\subsection{Dimensione e limiti dei tipi}
+
+L'operatore \lstinline|sizeof| restituisce la dimensione esatta in byte di un tipo
+o di una variabile: \lstinline|sizeof(tipo)| oppure \lstinline|sizeof espressione|
+(in questo caso conta il tipo dell'espressione).
+
+\begin{codice}
+int iIndex;
+iIndex = 1000;
+// sizeof(int) e sizeof(iIndex) valgono entrambi 4
+\end{codice}
+
+I limiti dei tipi interi per il proprio compilatore sono nell'header
+\lstinline|limits.h|, che definisce macro come \lstinline|INT_MIN|,
+\lstinline|INT_MAX|, \lstinline|UINT_MAX|, \lstinline|CHAR_MIN|,
+\lstinline|CHAR_MAX|.
+
+\begin{codice}
+#include <stdio.h>
+#include <limits.h>
+
+int main() {
+    printf(" char %zu %d %d\n", sizeof(char), CHAR_MIN, CHAR_MAX);
+    printf(" int %zu %d %d\n", sizeof(int), INT_MIN, INT_MAX);
+    return 0;
+}
+\end{codice}
+\begin{risultato}
+ char 1 -128 127
+ int 4 -2147483648 2147483647
+\end{risultato}
+
+\begin{osservazione}
+Il risultato di \lstinline|sizeof| ha tipo \lstinline|size_t|: per stamparlo è
+corretto \lstinline|%zu| (nelle slide compare \lstinline|%d|). I valori stampati
+dipendono dalla piattaforma (qui un caso tipico).
+\end{osservazione}
+
+\subsection{Numeri in virgola mobile}
+
+Per rappresentare i non interi, con la virgola in qualsiasi posizione, C ha tre
+tipi floating-point standard:
+\begin{itemize}
+    \item \lstinline|float|: precisione singola;
+    \item \lstinline|double|: precisione doppia;
+    \item \lstinline|long double|: precisione estesa.
+\end{itemize}
+
+\subsubsection{Precisione}
+
+Un valore in virgola mobile si memorizza solo con una \emph{precisione} limitata,
+determinata dal formato binario e dalla memoria usata. La precisione si esprime in
+cifre significative: ad esempio con sei cifre significative la conversione in un
+numero decimale di sei cifre restituisce le sei cifre originali. La posizione della
+virgola e gli zeri iniziali o finali non contano: $123\,456\,000$ e
+$0{,}00123456$ si possono entrambi memorizzare in un tipo con precisione a sei
+cifre.
+
+In C le operazioni aritmetiche tra numeri in virgola mobile sono eseguite
+internamente con precisione double o superiore.
+
+\begin{codice}
+float height = 1.2345, width = 2.3456;   // precisione singola
+double area = height * width;            // il calcolo è fatto in double
+\end{codice}
+
+Se il risultato è assegnato a una variabile \lstinline|float|, viene arrotondato
+se necessario. L'header \lstinline|float.h| definisce macro come
+\lstinline|FLT_MIN|, \lstinline|FLT_MAX| e \lstinline|FLT_DIG|, che indicano
+intervallo di valori e precisione del tipo \lstinline|float|.
+
+\subsubsection{Notazione E e formato IEEE 754}
+
+La \emph{notazione E} è la rappresentazione testuale della notazione scientifica:
+\texttt{1.234e+56} significa $1{,}234 \times 10^{56}$.
+
+Nel formato \emph{IEEE 754} ogni numero finito è descritto da tre interi: un segno
+$s$ (zero o uno), un \emph{significando} (o mantissa) $c$ e un esponente $q$. Il
+valore è
+\[
+  (-1)^s \times c \times b^q ,
+\]
+dove $b$ è la base (2 o 10). Ad esempio con base 10, segno $1$ (negativo),
+significando $12345$ ed esponente $-3$ il valore è $-12{,}345$.
+
+Il formato 754 a \emph{precisione singola} usa: 1 bit di segno, 8 bit di esponente,
+23 bit di significando. Il valore è
+\[
+  (-1)^{\text{segno}} \times \Bigl( 1 + \sum_{i=1}^{23} b_{23-i}\, 2^{-i} \Bigr)
+  \times 2^{(e - 127)} .
+\]
+
+\begin{esempio}
+Con segno $0$, esponente \texttt{01111100} ($e = 124$) e frazione
+\texttt{010\dots0} (cioè $b_{21} = 1$, tutti gli altri bit nulli) si ha
+$1 + 2^{-2} = 1{,}25$ e $2^{124 - 127} = 2^{-3}$, quindi
+\[
+  \text{valore} = (+1) \times 1{,}25 \times 2^{-3} = +0{,}15625 .
+\]
+\end{esempio}
+
+Con la \emph{precisione doppia} (\lstinline|double|) si usano 1 bit di segno,
+11 di esponente e 52 di frazione; la \emph{precisione estesa}
+(\lstinline|long double|, 80 bit) ha 1 bit di segno, 15 di esponente, 1 bit di
+parte intera e 63 di frazione.
+
+\subsubsection{Errori di arrotondamento}
+
+L'errore di arrotondamento è intrinseco nel calcolo in virgola mobile.
+
+\begin{codice}
+#include <stdio.h>
+
+int main() {
+    int a = 16777217;
+    float b = a;
+    printf("%f\n", b);
+}
+\end{codice}
+\begin{risultato}
+16777216.000000
+\end{risultato}
+
+Il valore $16777217 = 2^{24} + 1$ non è rappresentabile esattamente con un
+\lstinline|float|. Allo stesso modo conviene tenere in \lstinline|double| anche
+il risultato di un prodotto come \lstinline|height * width|: salvarlo in un
+\lstinline|float| fa perdere precisione.
+
+\begin{osservazione}
+Il modo più semplice per evitare di accumulare errori è usare numeri in virgola
+mobile ad alta precisione, cioè \lstinline|double| al posto di \lstinline|float|.
+Sulle CPU moderne non c'è (quasi) penalizzazione di tempo, ma un \lstinline|double|
+occupa il doppio della memoria.
+\end{osservazione}
+
+\subsection{Tipi enumerati}
+
+Le \emph{enumerazioni} sono tipi interi definiti dal programmatore. La definizione
+inizia con la parola chiave \lstinline|enum|, eventualmente seguita da un
+identificatore, e contiene l'elenco dei possibili valori con un nome per ciascuno:
+\begin{codice}
+enum [identificatore] { lista-enumeratori };
+\end{codice}
+
+\begin{esempio}
+\begin{codice}
+enum color { black, red, green, yellow, blue, white = 7, gray };
+\end{codice}
+Le costanti elencate valgono $0, 1, 2, 3, 4, 7, 8$ (se non si assegna un valore,
+si continua dal precedente più uno).
+\end{esempio}
+
+\begin{codice}
+enum color fgColor = blue,          // due variabili
+           bgColor = yellow;        // di tipo enum color
+
+void setFgColor(enum color fgc);    // funzione con parametro enum color
+\end{codice}
+
+Con le variabili di tipo enumerato si può fare aritmetica ordinaria
+(\lstinline|red + red| vale $2$). Costanti diverse della stessa enumerazione
+possono avere lo stesso valore:
+\begin{codice}
+enum signals { OFF, ON, STOP = 0, GO = 1, CLOSED = 0, OPEN = 1 };
+\end{codice}
+
+\begin{esempio}
+\begin{codice}
+#include <stdio.h>
+
+enum week { sunday, monday, tuesday, wednesday, thursday, friday, saturday };
+
+int main() {
+    enum week today;
+    today = wednesday;
+    printf("Day %d", today + 1);
+    return 0;
+}
+\end{codice}
+\begin{risultato}
+Day 4
+\end{risultato}
+\end{esempio}
+
+\begin{osservazione}
+Conviene usare sempre un'enumerazione quando una variabile (in particolare un
+parametro di funzione) può assumere solo uno tra pochi valori possibili: si evitano
+errori dovuti a costanti non valide, si documentano i valori ammessi ed è più
+mnemonico degli interi.
+\end{osservazione}
+
+\subsection{Il tipo void}
+
+Il tipo \lstinline|void| indica che non è disponibile alcun valore. Non si possono
+dichiarare variabili o costanti di questo tipo, ma si usa:
+\begin{itemize}
+    \item nelle dichiarazioni di funzioni;
+    \item nelle espressioni \lstinline|void|;
+    \item nei puntatori a \lstinline|void| (si vedranno con i puntatori).
+\end{itemize}
+
+Una funzione che non restituisce nulla ha tipo \lstinline|void|:
+\lstinline|void error(int a) {}|. \lstinline|void| nella lista dei parametri di un
+prototipo indica che la funzione non ha parametri:
+\lstinline|void printMenu(void) {}|. Il compilatore segnala un errore se si
+chiama \lstinline|printMenu(3)|.
+
+\end{document}
