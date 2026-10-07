@@ -447,6 +447,52 @@ In questo corso il compilatore è \textbf{gcc}.
 \end{tikzpicture}
 \end{center}
 
+\subsection{Le fasi della compilazione con gcc}
+
+Quando si lancia \lstinline|gcc|, il passaggio da sorgente a eseguibile non è
+un'unica operazione ma una catena di quattro fasi, ciascuna delle quali può
+essere fermata con una opzione.
+
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{@{}l l l p{5.6cm}@{}}
+\toprule
+\textbf{Fase} & \textbf{Comando} & \textbf{Risultato} & \textbf{Cosa fa} \\
+\midrule
+Preprocessing & \lstinline|gcc -E main.c -o main.i| & \texttt{main.i} &
+  gestisce le righe che iniziano con \lstinline|#|: sostituisce i
+  \lstinline|#define|, inserisce il contenuto degli \lstinline|#include|,
+  toglie i commenti. Il risultato è ancora codice C. \\
+Compilazione & \lstinline|gcc -S main.c| & \texttt{main.s} &
+  traduce il C in \emph{assembly}. Qui emergono gli errori di sintassi e di
+  tipo. \\
+Assemblaggio & \lstinline|gcc -c main.c| & \texttt{main.o} &
+  traduce l'assembly in codice macchina (\emph{file oggetto}). Non è ancora
+  eseguibile. \\
+Linking & \lstinline|gcc main.o -o prog| & \texttt{prog} &
+  unisce i file oggetto e le librerie e produce l'eseguibile. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{osservazione}
+Un file oggetto contiene codice macchina ma le chiamate a funzioni definite in
+altri file o in libreria (ad esempio \lstinline|printf|) non hanno ancora un
+indirizzo. Il \emph{linker} li risolve. Un errore di linking tipico è
+\texttt{undefined reference to `fun'}: la funzione è stata dichiarata ma non
+è stata definita in nessuno dei file collegati.
+\end{osservazione}
+
+I file oggetto servono per compilare ogni file sorgente separatamente e unirli
+alla fine. Con due file \texttt{main.c} e \texttt{altro.c}:
+\begin{comando}
+gcc -c main.c
+gcc -c altro.c
+gcc -o prog main.o altro.o
+\end{comando}
+oppure in un solo comando \lstinline|gcc -o prog main.c altro.c|.
+
 \subsection{Caratteristiche del C}
 
 Il C è un linguaggio ad alto livello, \emph{procedurale} e di uso generale,
@@ -489,6 +535,10 @@ prima dell'esecuzione, e quasi tutti i controlli semantici sono fatti a tempo di
 compilazione. In un linguaggio \emph{interpretato} (come Python) l'interprete
 resta presente durante l'esecuzione e la maggior parte dei controlli è fatta a
 tempo di esecuzione.
+
+\begin{osservazione}
+Un interprete non produce necessariamente codice macchina: spesso esegue direttamente le istruzioni (Python, ad esempio, compila prima in \emph{bytecode} e poi lo interpreta). Essere compilato o interpretato è inoltre una proprietà dell'\emph{implementazione} più che del linguaggio. Un vantaggio del compilato è che molti errori (sintassi, tipi) sono segnalati prima che il programma giri; con l'interprete molti emergono solo quando la riga viene eseguita.
+\end{osservazione}
 
 \section[Struttura di un programma C e compilazione (Lezione 4 -- 29 settembre 2026)]{Struttura di un programma C e compilazione}
 \noindent\emph{Lezione 4 -- 29 settembre 2026}

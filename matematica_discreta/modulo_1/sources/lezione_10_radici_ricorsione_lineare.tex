@@ -1,0 +1,422 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\newrunin{osservazione}{Osservazione}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Radici di polinomi e ricorsione lineare}
+\author{Marco Cerbella}
+\date{Lezione 6 -- 6 ottobre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Radici di polinomi}
+
+\begin{definizione}
+Sia $f \in \mathbb{R}[t]$. Un numero $\alpha \in \mathbb{R}$ si dice \emph{radice}
+di $f$ se $f(\alpha) = 0$.
+\end{definizione}
+
+Il legame con la divisibilità, vista nella lezione precedente, è il seguente.
+
+\begin{teorema}[del fattore]
+Sia $f \in \mathbb{R}[t]$ e sia $\alpha \in \mathbb{R}$. Allora
+\[
+  \alpha \text{ è una radice di } f
+  \iff
+  (t - \alpha) \mid f .
+\]
+\end{teorema}
+
+\begin{proof}
+Dividiamo $f$ per $t - \alpha$ (che ha grado $1$): per il teorema di divisione
+con resto esistono $q, r \in \mathbb{R}[t]$ tali che
+\[
+  f(t) = q(t)\,(t - \alpha) + r(t), \qquad \operatorname{gr}(r) < 1 ,
+\]
+quindi $r$ è un polinomio costante. Valutando in $t = \alpha$ si ottiene
+\[
+  f(\alpha) = q(\alpha)\cdot 0 + r = r .
+\]
+Dunque $f(\alpha) = 0$ se e solo se $r = 0$, cioè se e solo se $t - \alpha$
+divide $f$.
+\end{proof}
+
+\begin{osservazione}
+Il resto della divisione di $f$ per $t - \alpha$ è quindi esattamente il valore
+$f(\alpha)$. Se $\alpha$ è radice di $f$ si può scrivere $f = (t - \alpha)\, q$,
+con $\operatorname{gr}(q) = \operatorname{gr}(f) - 1$: trovare una radice
+permette di abbassare il grado del problema.
+\end{osservazione}
+
+\begin{definizione}
+Sia $f \neq 0$. Una radice $\alpha$ ha \emph{molteplicità} (algebrica)
+$m \geq 1$ se $(t - \alpha)^m \mid f$ ma $(t - \alpha)^{m+1} \nmid f$, cioè se
+$f = (t - \alpha)^m\, g$ con $g(\alpha) \neq 0$. Le radici di molteplicità $1$
+si dicono \emph{semplici}.
+\end{definizione}
+
+\subsection{Ricerca delle radici e scomposizione}
+
+\begin{osservazione}
+Se $f = a_n t^n + \dots + a_1 t + a_0$ ha coefficienti \emph{interi} e
+$\frac{p}{q}$ (frazione ridotta) è una radice razionale di $f$, allora
+$p \mid a_0$ e $q \mid a_n$. In particolare, se $f$ è monico, le radici
+razionali sono intere e dividono $a_0$: basta provare i divisori di $a_0$
+(con entrambi i segni).
+\end{osservazione}
+
+\begin{esempio}[radici semplici]
+Scomponiamo $f(t) = t^3 - 2t^2 - 5t + 6$. Le possibili radici intere sono i
+divisori di $6$: $\pm 1, \pm 2, \pm 3, \pm 6$. Si trova
+\[
+  f(1) = 1 - 2 - 5 + 6 = 0 ,
+\]
+quindi $1$ è radice e $(t - 1) \mid f$. Per trovare il quoziente si può
+usare la regola di Ruffini: si riportano i coefficienti di $f$ e si procede
+da sinistra a destra, moltiplicando per $\alpha = 1$ e sommando.
+\[
+\begin{array}{r|rrrr}
+   & 1 & -2 & -5 & 6 \\
+ 1 &   &  1 & -1 & -6 \\ \hline
+   & 1 & -1 & -6 & \;0
+\end{array}
+\]
+L'ultimo numero è il resto ($=f(1)=0$), gli altri sono i coefficienti del
+quoziente: $f = (t - 1)(t^2 - t - 6)$. Il fattore di secondo grado si
+scompone cercando due numeri con somma $-1$ e prodotto $-6$:
+$t^2 - t - 6 = (t - 3)(t + 2)$. Quindi
+\[
+  f(t) = (t - 1)(t - 3)(t + 2),
+\]
+e le radici sono $1$, $3$, $-2$, tutte semplici.
+\end{esempio}
+
+\begin{esempio}[radice multipla]
+Sia $f(t) = t^3 - 3t^2 + 4$. I divisori di $4$ sono $\pm 1, \pm 2, \pm 4$ e
+\[
+  f(2) = 8 - 12 + 4 = 0 , \qquad f(-1) = -1 - 3 + 4 = 0 .
+\]
+Dividendo per $t - 2$ (Ruffini con $\alpha = 2$ sui coefficienti
+$1, -3, 0, 4$) si ottiene $f = (t - 2)(t^2 - t - 2)$ e poi
+$t^2 - t - 2 = (t - 2)(t + 1)$. Dunque
+\[
+  f(t) = (t - 2)^2 (t + 1) .
+\]
+La radice $2$ ha molteplicità $2$, la radice $-1$ ha molteplicità $1$.
+\end{esempio}
+
+\section{Ricorsione lineare}
+
+\begin{definizione}
+Una successione $(a_n)_{n \geq 0}$ è \emph{ricorsiva lineare omogenea di grado
+$k$} (a coefficienti costanti) se esistono $c_1, \dots, c_k \in \mathbb{R}$,
+con $c_k \neq 0$, tali che per ogni $n \geq k$
+\[
+  a_n = c_1\, a_{n-1} + c_2\, a_{n-2} + \dots + c_k\, a_{n-k} ,
+\]
+e se sono assegnati i primi $k$ valori $a_0, \dots, a_{k-1}$ (\emph{condizioni
+iniziali}). Il polinomio
+\[
+  p(t) = t^k - c_1\, t^{k-1} - c_2\, t^{k-2} - \dots - c_{k-1}\, t - c_k
+\]
+si dice \emph{polinomio caratteristico} della ricorrenza.
+\end{definizione}
+
+``Lineare'' significa che $a_n$ è combinazione lineare dei termini precedenti,
+``omogenea'' che non compaiono termini aggiuntivi che non dipendono dalla
+successione.
+
+\begin{osservazione}[perché il polinomio caratteristico]
+Cerchiamo soluzioni della forma $a_n = \alpha^n$ con $\alpha \neq 0$.
+Sostituendo nella ricorrenza e dividendo per $\alpha^{n-k}$ si ottiene
+\[
+  \alpha^k = c_1\, \alpha^{k-1} + \dots + c_k
+  \iff p(\alpha) = 0 .
+\]
+Quindi $\alpha^n$ risolve la ricorrenza se e solo se $\alpha$ è una radice del
+polinomio caratteristico. I teoremi seguenti dicono come combinare queste
+soluzioni per soddisfare anche le condizioni iniziali.
+\end{osservazione}
+
+\begin{esempio}
+\begin{itemize}
+  \item $a_n = 3\, a_{n-1}$ ha grado $1$ e $p(t) = t - 3$; con $a_0$ dato si ha
+        $a_n = a_0\, 3^n$.
+  \item Fibonacci: $F_n = F_{n-1} + F_{n-2}$, con $F_0 = 0$, $F_1 = 1$. Grado
+        $2$, $p(t) = t^2 - t - 1$.
+  \item $a_n = 5\, a_{n-1} - 6\, a_{n-2}$ ha grado $2$ e
+        $p(t) = t^2 - 5t + 6$.
+  \item $a_n = 6 a_{n-1} - 11 a_{n-2} + 6 a_{n-3}$ ha grado $3$ e
+        $p(t) = t^3 - 6t^2 + 11t - 6$.
+\end{itemize}
+\end{esempio}
+
+\subsection{Teorema A: radici distinte}
+
+\begin{teorema}[A]
+Sia $(a_n)$ una successione ricorsiva lineare omogenea di grado $k$ il cui
+polinomio caratteristico $p$ ha $k$ radici \emph{distinte}
+$\alpha_1, \dots, \alpha_k$. Allora esistono costanti
+$c_1, \dots, c_k$ tali che per ogni $n \geq 0$
+\[
+  a_n = c_1\, \alpha_1^{\,n} + c_2\, \alpha_2^{\,n} + \dots + c_k\, \alpha_k^{\,n} .
+\]
+Le costanti $c_i$ sono univocamente determinate dalle condizioni iniziali.
+\end{teorema}
+
+(Senza dimostrazione.)
+
+\paragraph{Procedura per trovare la forma chiusa.}
+\begin{enumerate}
+  \item Scrivere il polinomio caratteristico $p(t)$.
+  \item Trovare le sue $k$ radici distinte $\alpha_1, \dots, \alpha_k$
+        (con il teorema del fattore).
+  \item Scrivere $a_n = c_1 \alpha_1^{\,n} + \dots + c_k \alpha_k^{\,n}$.
+  \item Imporre le condizioni iniziali $a_0, \dots, a_{k-1}$: si ottiene un
+        sistema lineare di $k$ equazioni nelle incognite $c_1, \dots, c_k$.
+  \item Risolvere il sistema e sostituire i valori trovati.
+\end{enumerate}
+
+\begin{esempio}
+Sia $a_n = 5\, a_{n-1} - 6\, a_{n-2}$ con $a_0 = 0$, $a_1 = 1$. Il polinomio
+caratteristico è $p(t) = t^2 - 5t + 6 = (t - 2)(t - 3)$, con radici distinte
+$2$ e $3$. Quindi
+\[
+  a_n = c_1\, 2^n + c_2\, 3^n .
+\]
+Le condizioni iniziali danno il sistema
+\[
+  \begin{cases}
+    a_0 = c_1 + c_2 = 0 \\
+    a_1 = 2c_1 + 3c_2 = 1
+  \end{cases}
+  \quad\Longrightarrow\quad c_2 = 1,\ c_1 = -1 ,
+\]
+perciò
+\[
+  a_n = 3^n - 2^n .
+\]
+Verifica: $a_2 = 5 \cdot 1 - 6 \cdot 0 = 5 = 3^2 - 2^2$ e
+$a_3 = 5 \cdot 5 - 6 \cdot 1 = 19 = 3^3 - 2^3$.
+\end{esempio}
+
+\begin{esempio}[Fibonacci]
+Per $F_n = F_{n-1} + F_{n-2}$, $F_0 = 0$, $F_1 = 1$, il polinomio
+caratteristico è $t^2 - t - 1$, con radici distinte
+\[
+  \varphi = \frac{1 + \sqrt{5}}{2} , \qquad \psi = \frac{1 - \sqrt{5}}{2} .
+\]
+Allora $F_n = c_1\, \varphi^n + c_2\, \psi^n$ e
+\[
+  \begin{cases}
+    c_1 + c_2 = 0 \\
+    c_1\, \varphi + c_2\, \psi = 1
+  \end{cases}
+  \quad\Longrightarrow\quad
+  c_1 (\varphi - \psi) = 1 ,\quad \varphi - \psi = \sqrt{5}
+  \quad\Longrightarrow\quad c_1 = \frac{1}{\sqrt{5}},\ c_2 = -\frac{1}{\sqrt{5}} .
+\]
+Si ottiene la formula di Binet:
+\[
+  F_n = \frac{1}{\sqrt{5}}\left[\left(\frac{1 + \sqrt{5}}{2}\right)^{n}
+        - \left(\frac{1 - \sqrt{5}}{2}\right)^{n}\right] .
+\]
+\end{esempio}
+
+\begin{esempio}[grado 3]
+Sia $a_n = 6 a_{n-1} - 11 a_{n-2} + 6 a_{n-3}$ con $a_0 = 3$, $a_1 = 6$,
+$a_2 = 14$. Il polinomio caratteristico è
+$p(t) = t^3 - 6t^2 + 11t - 6$. Provando i divisori di $6$ si trova
+$p(1) = 0$, e con Ruffini $p(t) = (t - 1)(t^2 - 5t + 6) = (t-1)(t-2)(t-3)$.
+Le radici $1, 2, 3$ sono distinte, quindi
+\[
+  a_n = c_1 + c_2\, 2^n + c_3\, 3^n ,
+  \qquad
+  \begin{cases}
+    c_1 + c_2 + c_3 = 3 \\
+    c_1 + 2c_2 + 3c_3 = 6 \\
+    c_1 + 4c_2 + 9c_3 = 14
+  \end{cases}
+\]
+Sottraendo la prima equazione dalla seconda e la seconda dalla terza si ha
+$c_2 + 2c_3 = 3$ e $2c_2 + 6c_3 = 8$, da cui $c_3 = 1$, $c_2 = 1$, $c_1 = 1$.
+Dunque
+\[
+  a_n = 1 + 2^n + 3^n .
+\]
+\end{esempio}
+
+\subsection{Teorema B: radici con molteplicità}
+
+\begin{teorema}[B]
+Sia $(a_n)$ una successione ricorsiva lineare omogenea di grado $k$ il cui
+polinomio caratteristico si scompone come
+\[
+  p(t) = (t - \alpha_1)^{m_1} (t - \alpha_2)^{m_2} \cdots (t - \alpha_r)^{m_r},
+  \qquad m_1 + m_2 + \dots + m_r = k ,
+\]
+con $\alpha_1, \dots, \alpha_r$ distinte e $m_i$ la molteplicità di
+$\alpha_i$. Allora
+\[
+  a_n = \sum_{i=1}^{r}
+        \bigl(c_{i,0} + c_{i,1}\, n + \dots + c_{i,m_i - 1}\, n^{m_i - 1}\bigr)\,
+        \alpha_i^{\,n} ,
+\]
+con $k$ costanti $c_{i,j}$ univocamente determinate dalle condizioni iniziali.
+\end{teorema}
+
+(Senza dimostrazione.)
+
+\begin{osservazione}
+Ogni radice $\alpha$ di molteplicità $m$ contribuisce con $m$ termini,
+\[
+  \alpha^n,\ n\,\alpha^n,\ n^2\alpha^n,\ \dots,\ n^{m-1}\alpha^n ,
+\]
+in totale $k$ costanti, quante le condizioni iniziali. Se tutte le molteplicità
+sono $1$ si ritrova il Teorema A.
+\end{osservazione}
+
+\begin{esempio}[radice doppia]
+Sia $a_n = 4\, a_{n-1} - 4\, a_{n-2}$ con $a_0 = 1$, $a_1 = 0$. Il polinomio
+caratteristico è $p(t) = t^2 - 4t + 4 = (t - 2)^2$: un'unica radice $2$ di
+molteplicità $2$. Quindi
+\[
+  a_n = (c_0 + c_1\, n)\, 2^n .
+\]
+Dalle condizioni iniziali:
+\[
+  a_0 = c_0 = 1 , \qquad a_1 = 2\,(c_0 + c_1) = 0 \Rightarrow c_1 = -1 ,
+\]
+perciò
+\[
+  a_n = (1 - n)\, 2^n .
+\]
+Verifica: $a_2 = 4 \cdot 0 - 4 \cdot 1 = -4 = (1-2)\cdot 2^2$ e
+$a_3 = 4\cdot(-4) - 4 \cdot 0 = -16 = (1-3)\cdot 2^3$.
+\end{esempio}
+
+\begin{esempio}[radici di molteplicità diversa]
+Sia $a_n = 5\, a_{n-1} - 8\, a_{n-2} + 4\, a_{n-3}$ con $a_0 = 2$, $a_1 = 5$,
+$a_2 = 13$. Il polinomio caratteristico è $p(t) = t^3 - 5t^2 + 8t - 4$.
+Poiché $p(1) = 0$, con Ruffini si ottiene
+\[
+  p(t) = (t - 1)(t^2 - 4t + 4) = (t - 1)(t - 2)^2 ,
+\]
+cioè la radice $1$ ha molteplicità $1$ e la radice $2$ ha molteplicità $2$.
+Per il Teorema B
+\[
+  a_n = c + (d + e\, n)\, 2^n ,
+  \qquad
+  \begin{cases}
+    c + d = 2 \\
+    c + 2d + 2e = 5 \\
+    c + 4d + 8e = 13
+  \end{cases}
+\]
+Sottraendo la prima equazione dalla seconda e la seconda dalla terza:
+$d + 2e = 3$ e $2d + 6e = 8$, cioè $d + 3e = 4$. Quindi $e = 1$, $d = 1$,
+$c = 1$ e
+\[
+  a_n = 1 + (1 + n)\, 2^n .
+\]
+Verifica: $a_3 = 5 \cdot 13 - 8 \cdot 5 + 4 \cdot 2 = 33 = 1 + 4 \cdot 8$.
+\end{esempio}
+
+\end{document}

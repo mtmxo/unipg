@@ -6,3 +6,7 @@
 *.synctex.gz
 *.fls
 *.fdb_latexmk
+
+# Materiale di studio generato in chat (non va nel repo)
+**/esami_passati/
+**/esercizi_chat/
