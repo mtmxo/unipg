@@ -1,0 +1,175 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\newrunin{osservazione}{Osservazione}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Funzioni invertibili e funzioni monotone}
+\author{Marco Cerbella}
+\date{Lezione 5 -- 8 ottobre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Funzioni invertibili}
+
+\begin{definizione}
+$f : D \to \mathbb{R}$ si dice \emph{invertibile} se per ogni uscita $y \in f(D)$ esiste un solo ingresso $x \in D$ tale che $f(x) = y$. La \emph{funzione inversa} di $f$ è la funzione che associa a ogni $y \in f(D)$ l'unico $x \in D$ tale che $f(x) = y$; si indica con $f^{-1}$.
+\end{definizione}
+
+Significato geometrico: il grafico di $f$ è intersecato al massimo in un punto da ogni retta parallela all'asse delle ascisse.
+
+\begin{itemize}
+    \item funzione biunivoca $\Rightarrow$ funzione invertibile;
+    \item funzione iniettiva $\Rightarrow$ funzione invertibile su $\mathrm{Im}(f)$.
+\end{itemize}
+
+Il grafico di $f^{-1}$ è
+\[
+\mathrm{Gr}(f^{-1}) = \{(y, f^{-1}(y)) : y \in D(f^{-1})\} = \{(f(x), x) : x \in D\},
+\]
+cioè si ottiene da quello di $f$ scambiando tra loro le componenti di ciascuna coppia. Geometricamente, il grafico di $f^{-1}$ si ottiene ribaltando il grafico di $f$ rispetto alla bisettrice del primo e terzo quadrante.
+
+\begin{esempio}
+\leavevmode
+\begin{itemize}
+    \item $f(x) = x + 1$ è invertibile: da $x + 1 = y$ si ricava $x = y - 1$, quindi $f^{-1}(x) = x - 1$. I punti $(0,1)$ e $(1,0)$ del grafico di $f$ e di $f^{-1}$ sono simmetrici rispetto alla bisettrice.
+    \item $f(x) = ax + b$ è invertibile per $a \neq 0$ e $f^{-1}(x) = \dfrac{x - b}{a}$.
+    \item $g(x) = x^2$ \emph{non} è invertibile su $\mathbb{R}$, ma lo è se si restringe il dominio:
+    \begin{itemize}
+        \item $g|_{[0,+\infty)}$ è invertibile e $(g|_{[0,+\infty)})^{-1}(x) = \sqrt{x}$;
+        \item $g|_{(-\infty,0]}$ è invertibile e $(g|_{(-\infty,0]})^{-1}(x) = -\sqrt{x}$.
+    \end{itemize}
+    \item $h(x) = x^3$ è invertibile e $h^{-1}(x) = \sqrt[3]{x}$.
+\end{itemize}
+\end{esempio}
+
+\section{Funzioni monotone}
+
+\begin{definizione}
+$f : D \to \mathbb{R}$ si dice
+\begin{itemize}
+    \item \emph{monotona crescente} se $\forall x_1, x_2 \in D$, $x_1 > x_2 \Rightarrow f(x_1) \geq f(x_2)$;
+    \item \emph{monotona decrescente} se $\forall x_1, x_2 \in D$, $x_1 > x_2 \Rightarrow f(x_1) \leq f(x_2)$.
+\end{itemize}
+Se al posto di $\geq$ vale $>$ si dice \emph{strettamente crescente}; se al posto di $\leq$ vale $<$ si dice \emph{strettamente decrescente}.
+\end{definizione}
+
+\begin{proposizione}
+Se $f : D \to \mathbb{R}$ è strettamente monotona allora è iniettiva, cioè invertibile su $\mathrm{Im}(f)$ (monotonia stretta $\Rightarrow$ invertibilità).
+\end{proposizione}
+
+Non vale il viceversa: invertibile $\not\Rightarrow$ monotona. Ad esempio
+\[
+f(x) = \begin{cases} \dfrac{1}{x} & \text{se } x \neq 0, \\[4pt] 0 & \text{se } x = 0 \end{cases}
+\]
+è invertibile ma non monotona: presi $x_2 < 0 < x_1$ si ha $x_1 > x_2$ e $f(x_1) > f(x_2)$, mentre per $0 < x_2 < x_1$ si ha $x_1 > x_2$ e $f(x_1) < f(x_2)$.
+
+\begin{osservazione}
+La somma di funzioni monotone concordi è monotona dello stesso tipo.
+\end{osservazione}
+
+\begin{esempio}
+$f(x) = x^5 + x$ è monotona crescente, quindi invertibile, ma non si può esplicitare $f(x) = y$ nella forma $x = f^{-1}(y)$.
+\end{esempio}
+
+\begin{esempio}[Test]
+Una funzione $f : \mathbb{R} \to [0,1]$ è sicuramente \emph{limitata} (risposta corretta: 1). Non è detto che sia negativa (ha valori in $[0,1]$), né iniettiva, né suriettiva: ad esempio $f(x) = 1$ non è suriettiva neppure considerando come codominio l'intervallo $[0,1]$.
+\end{esempio}
+
+\end{document}

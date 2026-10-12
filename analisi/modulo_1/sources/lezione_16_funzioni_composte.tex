@@ -1,0 +1,213 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\newrunin{osservazione}{Osservazione}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Funzioni composte}
+\author{Marco Cerbella}
+\date{Lezione 5 -- 8 ottobre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Composizione di funzioni}
+
+Siano date tre funzioni $f : D_1 \to \mathbb{R}$, $g : D_2 \to \mathbb{R}$ e $r : D_3 \to \mathbb{R}$.
+
+\begin{definizione}
+Se $f(D_1) \subseteq D_2$ si può definire la \emph{funzione composta} $h : D_1 \to \mathbb{R}$ di $f$ e $g$ mediante la formula
+\[
+h(x) = g[f(x)] = (g \circ f)(x).
+\]
+\end{definizione}
+
+Supponiamo siano ben definite le composizioni $g \circ f$, $f \circ g$ e $(f \circ g) \circ r$. Allora
+\begin{itemize}
+    \item $f \circ g \neq g \circ f$ in generale: \emph{non vale} la proprietà commutativa;
+    \item $(f \circ g) \circ r = f \circ (g \circ r)$: \emph{vale} la proprietà associativa.
+\end{itemize}
+
+\section{Esempi}
+
+\begin{esempio}
+Siano $f(x) = x - 3$ e $g(y) = y^2 + 1$. Allora
+\begin{align*}
+h(x) &= (g \circ f)(x) = (x - 3)^2 + 1, \\
+\ell(x) &= (f \circ g)(x) = x^2 + 1 - 3 = x^2 - 2.
+\end{align*}
+\end{esempio}
+
+\begin{esempio}
+Siano $f(x) = \dfrac{x + 2}{|x - 1|}$, con $D(f) = \mathbb{R} \setminus \{1\}$, e $g(y) = \sqrt{y}$, con $D(g) = [0, +\infty)$.
+
+Per $h = g \circ f$, $h(x) = \sqrt{\dfrac{x+2}{|x-1|}}$, il dominio si ricava da
+\[
+\begin{cases} \dfrac{x+2}{|x-1|} \geq 0 \\[4pt] |x - 1| \neq 0 \end{cases}
+\]
+Poiché $|x-1| \geq 0$ per ogni $x$, la prima condizione equivale a $x + 2 \geq 0$. Quindi
+\[
+\begin{cases} x \geq -2 \\ x \neq 1 \end{cases}
+\qquad D(h) = [-2, +\infty) \setminus \{1\}.
+\]
+
+Per $\ell = f \circ g$, $\ell(x) = \dfrac{\sqrt{x} + 2}{|\sqrt{x} - 1|}$, il dominio è
+\[
+\begin{cases} x \geq 0 \\ |\sqrt{x} - 1| \neq 0 \end{cases}
+\iff
+\begin{cases} x \geq 0 \\ x \neq 1 \end{cases}
+\qquad D(\ell) = [0, +\infty) \setminus \{1\}.
+\]
+\end{esempio}
+
+\begin{esempio}[Una composizione impossibile]
+Siano $f(x) = \dfrac{1}{1 + x^2}$, con $D(f) = \mathbb{R}$, e $g(y) = \sqrt{y - 5}$, con $D(g) = [5, +\infty)$.
+
+Per $h = g \circ f$, $h(x) = \sqrt{\dfrac{1}{1+x^2} - 5}$, il dominio richiede
+\[
+\frac{1}{1+x^2} - 5 \geq 0 \iff \frac{-4 - 5x^2}{1 + x^2} \geq 0 .
+\]
+Il numeratore è sempre negativo e il denominatore sempre positivo: la disequazione è impossibile, quindi $D(h) = \emptyset$. Il problema è che $f(\mathbb{R}) \subseteq (0, 1]$ non è contenuto in $D(g) = [5, +\infty)$: \emph{la composizione non si può fare}.
+
+Per $\ell = f \circ g$ si ha, per $x \geq 5$,
+\[
+\ell(x) = \frac{1}{1 + (\sqrt{x - 5})^2} = \frac{1}{1 + x - 5} = \frac{1}{x - 4}.
+\]
+Il dominio della composta è $D(\ell) = [5, +\infty)$, perché $x$ deve stare nel dominio di $g$; l'espressione semplificata $\frac{1}{x-4}$ da sola avrebbe invece dominio $\mathbb{R} \setminus \{4\}$.
+\end{esempio}
+
+\section{Proprietà della composizione}
+
+\begin{proprieta}
+\leavevmode
+\begin{itemize}
+    \item $f, g$ suriettive $\Rightarrow$ $g \circ f$ suriettiva;
+    \item $f, g$ iniettive $\Rightarrow$ $g \circ f$ iniettiva;
+    \item $f, g$ invertibili $\Rightarrow$ $g \circ f$ invertibile e $(g \circ f)^{-1} = f^{-1} \circ g^{-1}$;
+    \item $f, g$ monotone concordi $\Rightarrow$ $g \circ f$ monotona crescente;
+    \item $f, g$ monotone discordi $\Rightarrow$ $g \circ f$ monotona decrescente.
+\end{itemize}
+\end{proprieta}
+
+\begin{esempio}[Dimostrazione: $f, g$ decrescenti $\Rightarrow$ $g \circ f$ crescente]
+Siano $x_1, x_2 \in \mathbb{R}$ con $x_1 > x_2$. Poiché $f$ è decrescente, $f(x_1) \leq f(x_2)$. Poiché $g$ è decrescente, applicandola a entrambi i membri si inverte di nuovo la disuguaglianza:
+\[
+g(f(x_1)) \geq g(f(x_2)).
+\]
+Quindi $g \circ f$ è monotona crescente.
+\end{esempio}
+
+\begin{esempio}[Test]
+Date $f(x) = x + 3$ e $g(x) = x^2$ si ha $(f \circ g)(2) = f(4) = 7$ e $(g \circ f)(2) = g(5) = 25$, quindi $(f \circ g)(2) < (g \circ f)(2)$ (risposta corretta: 1).
+\end{esempio}
+
+\section{Funzione identità}
+
+Sia $f : D \to \mathbb{R}$ invertibile. Allora
+\begin{align*}
+(f^{-1} \circ f)(x) &= f^{-1}(f(x)) = x && \forall x \in D, \\
+(f \circ f^{-1})(y) &= f(f^{-1}(y)) = y && \forall y \in \mathrm{Im}(f).
+\end{align*}
+
+\begin{definizione}
+La \emph{funzione identità} su un insieme $X$ è $\mathrm{id}_X : X \to X$ tale che $\mathrm{id}_X(x) = x$ per ogni $x \in X$.
+\end{definizione}
+
+Quindi $f^{-1} \circ f = \mathrm{id}_D$ e $f \circ f^{-1} = \mathrm{id}_{\mathrm{Im}(f)}$.
+
+\end{document}
