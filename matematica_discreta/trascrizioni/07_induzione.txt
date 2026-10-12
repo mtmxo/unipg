@@ -1,0 +1,33 @@
+Matematica discreta. Capitolo sette: il principio di induzione.
+
+L'induzione è una tecnica di dimostrazione che permette di provare infinite affermazioni, una per ogni numero naturale, con un numero finito di passaggi. Sembra magia, ma è basata su un'idea molto semplice: quella dei domino.
+
+Partiamo dall'osservazione. Sia U un sottoinsieme dei numeri naturali, con due proprietà. Primo: lo zero sta in U. Secondo: se un numero k sta in U, allora anche k più uno sta in U. Allora U contiene tutti i naturali. Perché? Lo zero è in U; quindi anche uno; quindi anche due; quindi anche tre, e così via. Si sale a gradini e si raggiungono tutti i naturali.
+
+Ora usiamo questa idea per le dimostrazioni. Sia p di n una affermazione che riguarda il numero naturale n. Per esempio "n più uno è maggiore di n", oppure "due divide n per n più uno". Il principio di induzione dice: se vale p di zero, e se per ogni k, dal fatto che p di k è vera segue che p di k più uno è vera, allora p di n è vera per ogni naturale n.
+
+Si chiamano così i due passi. Il primo è il caso base: verificare l'affermazione per il primo valore. Il secondo è il passo induttivo: dimostrare l'implicazione da k a k più uno. In questo passo, l'affermazione per k si chiama ipotesi induttiva, e quella per k più uno si chiama tesi da dimostrare.
+
+Nei domino: il caso base è dare la spinta al primo. Il passo induttivo è dimostrare che, se un domino cade, fa cadere il successivo. Se valgono entrambe, cadono tutti.
+
+Un errore tipico da evitare: nel passo induttivo non si dimostra che p di k è vera. Si assume che lo sia, e si dimostra che di conseguenza lo è anche p di k più uno.
+
+Primo esempio. Dimostriamo che, per ogni n naturale, due divide n per n più uno. Cioè il prodotto di due numeri consecutivi è sempre pari.
+
+Caso base: n uguale zero. Zero per uno fa zero, e due divide zero, perché zero è zero per due.
+
+Passo induttivo. Ipotesi: due divide k per k più uno. Tesi: due divide k più uno, per k più due. Scriviamo k più uno per k più due come k più uno per k, più k più uno per due. Cioè k per k più uno, più due per k più uno. Per ipotesi induttiva, k per k più uno è uguale a due per m, con m intero. Allora tutto vale due m, più due per k più uno, che è due per m più k più uno. È un multiplo di due, che è la tesi. Fatto.
+
+Una variante utile: l'induzione a partire da un numero diverso da zero. A volte l'affermazione è vera solo da un certo numero in poi. Se il caso base è n barra, e il passo induttivo vale per ogni k maggiore o uguale a n barra, allora l'affermazione è vera per ogni n maggiore o uguale a n barra. Per esempio "n meno cinque è maggiore di zero" è vera da sei in poi: si parte da n barra uguale sei.
+
+Secondo esempio, il più famoso. Dimostrare che per ogni n maggiore o uguale a uno, la somma dei numeri da uno a n vale n per n più uno, diviso due.
+
+La storia dice che il piccolo Gauss, a scuola, dovette sommare i numeri da uno a cento. Notò che uno più cento fa centouno, due più novantanove fa centouno, e così via: ci sono cinquanta coppie, quindi cinquanta per centouno fa cinquemilacinquanta. La formula generalizza: n per n più uno, diviso due. Vediamo come si dimostra per induzione.
+
+Caso base, n uguale uno: la somma è uno, e la formula dà uno per due, diviso due, cioè uno. Vero.
+
+Passo induttivo. Ipotesi: la somma da uno a k vale k per k più uno, diviso due. Tesi: la somma da uno a k più uno vale k più uno per k più due, diviso due. La somma fino a k più uno è la somma fino a k, più k più uno. Per ipotesi induttiva, questa è k per k più uno diviso due, più k più uno. Portando tutto a denominatore due: k per k più uno, più due per k più uno, il tutto diviso due. Raccogliendo k più uno, otteniamo k più uno per k più due, diviso due. Che è la tesi. Per induzione la formula vale per ogni n maggiore o uguale a uno.
+
+Notate lo schema: nel passo induttivo si parte dal termine che si vuole calcolare, si isola la parte che conosco per ipotesi induttiva, la si sostituisce, e poi si fa un po' di algebra fino a ottenere la tesi.
+
+Riassunto: il principio di induzione, caso base, passo induttivo, ipotesi induttiva e tesi, l'induzione a partire da un numero qualsiasi, e due esempi: la parità del prodotto di due consecutivi e la somma dei primi n numeri.

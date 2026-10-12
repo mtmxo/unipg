@@ -1,0 +1,31 @@
+Matematica discreta. Capitolo sei: le funzioni.
+
+Le funzioni sono ovunque, e adesso le definiamo con il linguaggio che abbiamo costruito.
+
+Siano A e B due insiemi. Una funzione f da A a B è un sottoinsieme del prodotto cartesiano A per B, con una proprietà: per ogni elemento a di A esiste uno e un solo elemento b di B tale che la coppia a, b sta in f. Il punto esclamativo dopo "esiste" significa proprio "esiste uno e uno solo".
+
+Traduzione in parole: da ogni elemento di A parte una freccia, e una sola. Se pensate alla funzione come a una macchina, ogni ingresso dà esattamente un'uscita.
+
+Notazioni. Con "f da A a B" si indica che f è una funzione da A a B. Con "f di a uguale b" si intende che la coppia a, b sta in f, e b si chiama immagine di a. A è il dominio e B è il codominio. L'insieme delle coppie a, f di a si chiama grafico. Notate che, con questa definizione, la funzione coincide con il suo grafico.
+
+Le condizioni sono due. Esistenza: nessun elemento del dominio resta senza freccia. Unicità: da ogni elemento parte una sola freccia. Invece non si chiede che ogni elemento del codominio riceva una freccia, né che ne riceva una sola. Più elementi del dominio possono finire sullo stesso elemento del codominio.
+
+Esempi. Uno: A uguale x, y, z, e B uguale uno, due, tre, quattro. La funzione f manda x in uno, y in tre, z in quattro. Il grafico è l'insieme delle tre coppie. Il numero due, nel codominio, non è immagine di nessuno, e va benissimo.
+
+Due: B uguale uno, due, tre, quattro, e C uguale a, b. La funzione g manda uno e due in b, e tre e quattro in a. Due elementi del dominio finiscono sullo stesso elemento: nessun problema, è comunque una funzione.
+
+Un esempio di cosa non è una funzione: se mandassi x sia in uno sia in tre, violerei l'unicità. E se lasciassi z senza immagine, violerei l'esistenza.
+
+Altri esempi. La funzione da N a N che manda n in due n. La funzione da Z a N che manda k nel valore assoluto di k: se k è maggiore o uguale a zero, resta k; altrimenti diventa meno k. La funzione da R a R che manda x in x al quadrato meno due. La funzione che manda x in cinque x più tre.
+
+Le funzioni costanti: F che manda ogni intero k in tre. Tutti gli elementi del dominio hanno la stessa immagine. Osservazione importante: possiamo considerare F come funzione da Z in Z, oppure da Z nell'insieme che contiene solo il tre. La legge è la stessa, ma le funzioni sono diverse, perché hanno codomini diversi. Il codominio fa parte della definizione.
+
+Adesso un legame con il capitolo sulle equivalenze. Data una funzione f da A a B, definiamo su A la relazione associata a f: due elementi a uno e a due sono in relazione se hanno la stessa immagine, cioè f di a uno uguale f di a due.
+
+Esempio. A uguale uno, due, tre, quattro. B uguale x, y, z. La funzione manda uno, due e tre in x, e quattro in y. Allora uno è in relazione con due, tre con tre, quattro con quattro, e così via. Le classi sono: uno, due, tre insieme, e quattro da solo. L'insieme quotiente ha due elementi.
+
+Il teorema dice che questa relazione è sempre di equivalenza, qualunque sia la funzione. La dimostrazione è immediata, perché l'uguaglianza tra immagini eredita le proprietà dell'uguaglianza. Riflessiva: f di a è uguale a f di a. Simmetrica: se f di a uno è f di a due, allora f di a due è f di a uno. Transitiva: se f di a uno è uguale a f di a due e f di a due è uguale a f di a tre, allora f di a uno è uguale a f di a tre.
+
+Interpretazione: ogni funzione divide il suo dominio in gruppi, e ciascun gruppo contiene tutti gli elementi che finiscono nella stessa immagine. Questa è una partizione, e ne vedremo l'importanza più avanti.
+
+Riassunto: definizione come sottoinsieme del prodotto cartesiano, esistenza e unicità, dominio, codominio, grafico, funzioni costanti, e la relazione di equivalenza associata.
