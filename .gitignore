@@ -10,3 +10,10 @@
 # Materiale di studio generato in chat (non va nel repo)
 **/esami_passati/
 **/esercizi_chat/
+**/fogli_esercizi/
+
+# Scraper UniStudium (non va nel repo)
+scraper/
+
+# App discreta (non va nel repo)
+discreta_app/
