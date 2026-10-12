@@ -328,4 +328,433 @@ nullo, unicità del complemento, assorbimento, semplificazione, involuzione, De
 Morgan e consenso.
 \end{esercizio}
 
+\section[Funzioni ed espressioni booleane (Lezione 2 -- 6 ottobre 2026)]{Funzioni ed espressioni booleane}
+\noindent\emph{Lezione 2 -- 6 ottobre 2026}
+\subsection{Funzioni booleane}
+
+\begin{definizione}[Funzione booleana]
+Sia $\mathcal{B} = \langle A = \{0,1\}, +, \cdot, ', 0, 1 \rangle$ un'algebra di
+commutazione. Una \emph{funzione booleana} a $n$ variabili è una relazione
+\[
+  f \colon A^n \to A
+\]
+che mette in corrispondenza gli elementi del dominio $A^n$ con gli elementi del
+codominio $A$.
+\end{definizione}
+
+Dal punto di vista operativo una funzione booleana si definisce con le quattro
+regole seguenti.
+\begin{enumerate}
+    \item $\forall a \in A$, la \emph{funzione costante}
+          $f(x_1, \dots, x_n) = a$ è una funzione booleana a $n$ variabili.
+    \item $\forall x_i \in \{x_1, \dots, x_n\}$, la \emph{funzione proiezione}
+          $f(x_1, \dots, x_n) = x_i$ è una funzione booleana a $n$ variabili.
+    \item Se $g$ e $h$ sono funzioni booleane a $n$ variabili, lo sono anche
+          $g + h$, $g \cdot h$ e $g'$, definite da
+          \begin{align*}
+            (g + h)(x_1, \dots, x_n) &= g(x_1, \dots, x_n) + h(x_1, \dots, x_n)\\
+            (g \cdot h)(x_1, \dots, x_n) &= g(x_1, \dots, x_n) \cdot h(x_1, \dots, x_n)\\
+            (g')(x_1, \dots, x_n) &= \bigl(g(x_1, \dots, x_n)\bigr)'
+          \end{align*}
+    \item Non esistono altre funzioni booleane oltre a quelle ottenute
+          dall'applicazione iterativa delle regole precedenti.
+\end{enumerate}
+
+\subsubsection{Tabelle di verità}
+
+In un'algebra di commutazione $A = \{0,1\}$, quindi le funzioni booleane hanno
+la forma
+\[
+  f \colon \{0,1\}^n \to \{0,1\}.
+\]
+Il dominio di $f$ ha $2^n$ elementi e il codominio ne ha $2$. La funzione può
+essere descritta dalla sua \emph{tabella di verità} $T_f$, che contiene una riga
+per ciascuna configurazione delle $n$ variabili in ingresso, con il relativo
+valore di uscita di $f$.
+
+\begin{esempio}
+Funzione booleana sulle variabili $x, y, z$ che vale $1$ se e solo se
+\emph{esattamente due} variabili valgono $1$.
+\begin{center}
+\begin{tabular}{ccc|c}
+$x$ & $y$ & $z$ & $f(x,y,z)$ \\ \midrule
+0 & 0 & 0 & 0 \\
+0 & 0 & 1 & 0 \\
+0 & 1 & 0 & 0 \\
+0 & 1 & 1 & 1 \\
+1 & 0 & 0 & 0 \\
+1 & 0 & 1 & 1 \\
+1 & 1 & 0 & 1 \\
+1 & 1 & 1 & 0
+\end{tabular}
+\end{center}
+\end{esempio}
+
+\begin{proposizione}
+Il numero di funzioni booleane (su un'algebra di commutazione) di $n$ variabili
+è $2^{2^n}$.
+\end{proposizione}
+
+Infatti, date $n$ variabili si hanno $2^n$ configurazioni (tante quanti gli
+elementi di $\{0,1\}^n$) e ogni funzione è definita dall'insieme delle
+configurazioni per cui assume valore $1$. Il numero di funzioni è quindi la
+cardinalità dell'insieme delle parti di $\{0,1\}^n$, cioè $2^{2^n}$.
+
+\subsubsection{Esempi}
+
+\begin{esempio}[Funzioni di una variabile]
+Alcune di queste hanno particolare importanza dal punto di vista della
+realizzazione.
+\begin{center}
+\begin{tabular}{c|cccc}
+$x$ & $f(x)$ & $f(x)$ & $f(x)$ & $f(x)$ \\ \midrule
+0 & 0 & 0 & 1 & 1 \\
+1 & 0 & 1 & 0 & 1 \\ \midrule
+  & \footnotesize costante $0$ & \footnotesize proiezione di $x$
+  & \footnotesize negazione di $x$ & \footnotesize costante $1$
+\end{tabular}
+\end{center}
+\end{esempio}
+
+\begin{esempio}[Funzioni di due variabili (I)]
+\begin{center}
+\small
+\begin{tabular}{cc|cccccc}
+$x$ & $y$ & \multicolumn{6}{c}{$f(x,y)$} \\ \midrule
+0 & 0 & 0 & 1 & 0 & 0 & 1 & 1 \\
+0 & 1 & 0 & 1 & 0 & 1 & 1 & 0 \\
+1 & 0 & 0 & 1 & 1 & 0 & 0 & 1 \\
+1 & 1 & 0 & 1 & 1 & 1 & 0 & 0 \\ \midrule
+\multicolumn{2}{c|}{}
+  & \footnotesize costante $0$ & \footnotesize costante $1$
+  & \footnotesize proiez.\ $x$ & \footnotesize proiez.\ $y$
+  & \footnotesize negaz.\ $x$ & \footnotesize negaz.\ $y$
+\end{tabular}
+\end{center}
+\end{esempio}
+
+\begin{esempio}[Funzioni di due variabili (II)]
+\begin{center}
+\small
+\begin{tabular}{cc|cccccc}
+$x$ & $y$ & \multicolumn{6}{c}{$f(x,y)$} \\ \midrule
+0 & 0 & 0 & 0 & 1 & 1 & 0 & 1 \\
+0 & 1 & 0 & 1 & 1 & 0 & 1 & 0 \\
+1 & 0 & 0 & 1 & 1 & 0 & 1 & 0 \\
+1 & 1 & 1 & 1 & 0 & 0 & 0 & 1 \\ \midrule
+\multicolumn{2}{c|}{}
+  & \footnotesize AND & \footnotesize OR & \footnotesize NAND
+  & \footnotesize NOR & \footnotesize XOR & \footnotesize EQUIV.
+\end{tabular}
+\end{center}
+\end{esempio}
+
+\subsubsection{Funzioni non completamente specificate}
+
+Talvolta una funzione $f$ viene specificata solo in parte e si dice
+\emph{non completamente specificata}. Ci sono due motivi principali:
+\begin{enumerate}
+    \item la natura del problema garantisce che una certa combinazione delle
+          variabili di ingresso non possa presentarsi;
+    \item non ha importanza quale valore assuma la funzione per una certa
+          combinazione delle variabili di ingresso.
+\end{enumerate}
+Nel primo caso si dice che la funzione \emph{non è controllabile} in
+corrispondenza di quella combinazione di ingressi, nel secondo che
+\emph{non è osservabile}.
+
+\begin{esempio}
+Sia $f$ una funzione di due variabili $x_1, x_2$ tale che
+\[
+  \bigl(f(x_1,x_2) = 1 \iff x_1 = x_2 = 0\bigr) \ \wedge\
+  \bigl(f(x_1,x_2) = 0 \iff x_1 \neq x_2\bigr).
+\]
+Il valore di $f(1,1)$ non è specificato (nella tabella si indica con $-$).
+\begin{center}
+\begin{tabular}{cc|c}
+$x_1$ & $x_2$ & $f(x_1,x_2)$ \\ \midrule
+0 & 0 & 1 \\
+0 & 1 & 0 \\
+1 & 0 & 0 \\
+1 & 1 & $-$
+\end{tabular}
+\end{center}
+\end{esempio}
+
+\subsection{Espressioni booleane}
+
+\begin{definizione}[Espressione booleana]
+Un'\emph{espressione booleana} definita su un insieme di variabili booleane
+$X = \{x_1, x_2, \dots, x_n\}$ è definita dalle regole seguenti:
+\begin{itemize}
+    \item gli elementi del supporto sono espressioni;
+    \item le variabili $x_1, x_2, \dots, x_n$ sono espressioni;
+    \item se $h, g$ sono espressioni booleane, lo sono anche $h + g$,
+          $h \cdot g$ e $h'$;
+    \item non esistono altre espressioni oltre a quelle ottenute applicando
+          iterativamente le regole precedenti.
+\end{itemize}
+\end{definizione}
+
+\subsubsection{Notazioni e convenzioni}
+
+Fissato l'insieme dei simboli usati per le variabili, si può eliminare il
+simbolo di prodotto logico $\cdot$ nei termini prodotto. Per le proprietà
+dell'algebra booleana si possono inoltre omettere alcune parentesi, ricordando
+che il prodotto logico ha \emph{priorità} sulla somma logica.
+
+\begin{esempio}
+\begin{itemize}
+    \item $x + (y \cdot z)$ si scrive $x + yz$ (si elimina il simbolo $\cdot$
+          nel termine prodotto $y \cdot z$ e si usa la priorità di $\cdot$
+          rispetto a $+$);
+    \item per la proprietà associativa, $x + (y + z \cdot x)$ si scrive
+          $x + y + zx$ (si eliminano le parentesi per l'associatività e il
+          simbolo $\cdot$ nel termine prodotto $z \cdot x$).
+\end{itemize}
+\end{esempio}
+
+\subsubsection{Letterali}
+
+Un \emph{letterale} è un'occorrenza di una variabile (in forma naturale o
+negata) all'interno di un'espressione.
+
+\begin{esempio}
+L'espressione $(x' + y') \cdot (x + x')$ contiene $4$ letterali:
+\begin{itemize}
+    \item un'occorrenza della variabile $x$ in forma naturale;
+    \item due occorrenze della variabile $x$ in forma negata ($x'$);
+    \item un'occorrenza della variabile $y$ in forma negata ($y'$).
+\end{itemize}
+\end{esempio}
+
+\subsubsection{Valutazione di un'espressione}
+
+Sia $e$ un'espressione booleana sulle variabili $x_1, \dots, x_n$ e sia
+$(v_1, \dots, v_n) \in \{0,1\}^n$ una configurazione delle variabili. La
+\emph{valutazione} di $e$ rispetto a $(v_1, \dots, v_n)$ è il procedimento con
+cui si sostituisce a ciascuna variabile il suo valore e, applicando le regole
+dell'algebra di commutazione, si ottiene un valore $v \in \{0,1\}$ per
+l'espressione. Ripetendo il procedimento per tutte le configurazioni si ottiene
+una tabella di verità: \emph{ad ogni espressione corrisponde dunque una
+funzione}.
+
+\begin{esempio}
+Sia $e = z(y + x) + xy$. La valutazione per $(1,0,0)$ è
+\[
+  e(100) = 0 \cdot (0 + 1) + 1 \cdot 0 = 0 .
+\]
+La valutazione completa determina la tabella di verità della funzione booleana
+su $x, y, z$:
+\begin{center}
+\begin{tabular}{ccc|c}
+$x$ & $y$ & $z$ & $e$ \\ \midrule
+0 & 0 & 0 & 0 \\
+0 & 0 & 1 & 0 \\
+0 & 1 & 0 & 0 \\
+0 & 1 & 1 & 1 \\
+1 & 0 & 0 & 0 \\
+1 & 0 & 1 & 1 \\
+1 & 1 & 0 & 1 \\
+1 & 1 & 1 & 1
+\end{tabular}
+\end{center}
+\end{esempio}
+
+\subsubsection{Espressioni e funzioni}
+
+Ad una singola espressione corrisponde una singola funzione; ad una funzione
+possono invece corrispondere molte espressioni.
+
+\begin{definizione}[Espressioni equivalenti]
+Due espressioni $e_1, e_2$ definite sullo stesso insieme di variabili si dicono
+\emph{equivalenti}, e si scrive $e_1 \equiv e_2$, se corrispondono alla stessa
+funzione.
+\end{definizione}
+
+Le trasformazioni eseguite su un'espressione di partenza $e_0$ usando i
+postulati e le proprietà dell'algebra booleana portano a espressioni
+equivalenti.
+
+\subsubsection{Espressioni a confronto}
+
+Nei contesti in cui si usa un'algebra booleana è fondamentale rappresentare le
+funzioni con \emph{buone} espressioni. Un possibile criterio di bontà consiste
+nel minimizzare il numero di letterali: si individua una prima espressione che
+rappresenti la funzione e si cerca poi un'espressione equivalente migliore (con
+meno letterali). Espressioni di partenza tipiche da manipolare per minimizzare i
+letterali sono le espressioni in \emph{forma canonica}. Le forme canoniche di
+base sono due: la prima espressa come somma di prodotti (SOP), la seconda come
+prodotto di somme (POS); entrambe si ottengono dal teorema di espansione di
+Shannon.
+
+\subsection{Forme canoniche}
+
+\subsubsection{Teorema di espansione di Shannon}
+
+\begin{teorema}[Espansione di Shannon]
+Sia $f \colon B^n \to B$ una funzione booleana di $n$ variabili. Allora per
+ogni $(x_1, \dots, x_n) \in B^n$
+\[
+  f(x_1, \dots, x_n) = x_1' \cdot f(0, x_2, \dots, x_n)
+                     + x_1 \cdot f(1, x_2, \dots, x_n)
+\]
+e dualmente
+\[
+  f(x_1, \dots, x_n) = \bigl(x_1' + f(1, x_2, \dots, x_n)\bigr)
+                       \cdot \bigl(x_1 + f(0, x_2, \dots, x_n)\bigr).
+\]
+\end{teorema}
+
+I termini $f(0, x_2, \dots, x_n)$ e $f(1, x_2, \dots, x_n)$ si chiamano
+\emph{cofattori} e si indicano spesso con $f_{x_1'}$ e $f_{x_1}$.
+
+\begin{esempio}[Applicazione iterata, forma somma]
+Per una funzione di due variabili $f(x,y)$:
+\begin{align*}
+f(x,y) &= x' \cdot f(0,y) + x \cdot f(1,y)\\
+       &= x' \bigl(y' \cdot f(0,0) + y \cdot f(0,1)\bigr)
+          + x \bigl(y' \cdot f(1,0) + y \cdot f(1,1)\bigr)\\
+       &= x'y' \cdot f(00) + x'y \cdot f(01) + xy' \cdot f(10) + xy \cdot f(11).
+\end{align*}
+In generale, l'applicazione iterata del teorema a una funzione di $n$ variabili
+permette di riscriverla come somma di $2^n$ termini:
+\begin{align*}
+f(x_1,\dots,x_n) = {}& x_1' \cdots x_{n-1}' x_n' \cdot f(0\dots00)\\
+ + {}& x_1' \cdots x_{n-1}' x_n \cdot f(0\dots01)\\
+ + {}& \cdots\\
+ + {}& x_1 \cdots x_{n-1} x_n \cdot f(1\dots11).
+\end{align*}
+\end{esempio}
+
+\begin{esempio}[Applicazione iterata, forma prodotto]
+Applicando la forma duale a $f(x,y)$:
+\begin{align*}
+f(x,y) &= \bigl(x' + f(1,y)\bigr)\bigl(x + f(0,y)\bigr)\\
+       &= \bigl(x' + [(y' + f(11))(y + f(10))]\bigr)
+          \bigl(x + [(y' + f(01))(y + f(00))]\bigr)\\
+       &= (x' + y' + f(11))(x' + y + f(10))(x + y' + f(01))(x + y + f(00)).
+\end{align*}
+In generale si ottiene il prodotto di $2^n$ termini:
+\begin{align*}
+f(x_1,\dots,x_n) = {}& (x_1 + \dots + x_{n-1} + x_n + f(0\dots00))\\
+ \cdot {}& (x_1 + \dots + x_{n-1} + x_n' + f(0\dots01))\\
+ \cdot {}& \cdots\\
+ \cdot {}& (x_1' + \dots + x_{n-1}' + x_n' + f(1\dots11)).
+\end{align*}
+\end{esempio}
+
+\subsubsection{Prima forma canonica: mintermini}
+
+\begin{definizione}[Mintermine]
+Un \emph{mintermine} su $x_1, \dots, x_n$ è un termine prodotto
+$y_1 \cdot y_2 \cdots y_n$ dove $y_i = x_i$ oppure $y_i = x_i'$, per ogni
+$i = 1, \dots, n$.
+
+Dato $\bar{v} = (v_1, \dots, v_n) \in \{0,1\}^n$ si costruisce il mintermine
+$m_{\bar{v}} = y_1 \cdot y_2 \cdots y_n$ con $y_i = x_i$ se $v_i = 1$ e
+$y_i = x_i'$ se $v_i = 0$ (il mintermine \emph{corrispondente} alla
+configurazione $\bar{v}$).
+\end{definizione}
+
+Il mintermine $m_{\bar{v}}$ è un'espressione che vale $1$ in corrispondenza
+dell'\emph{unica} configurazione di ingresso $\bar{v}$.
+
+\begin{esempio}
+Sia $\bar{v} = (101)$ una configurazione per le variabili $\{x,y,z\}$. Il
+mintermine associato è $m_{\bar{v}} = xy'z$, che assume valore $1$ soltanto se
+$x = 1$, $y = 0$ e $z = 1$, cioè per la sola configurazione $(101)$.
+\end{esempio}
+
+\begin{definizione}[Prima forma canonica (\emph{Sum of Products}, SOP)]
+Data una funzione booleana $f(x_1, \dots, x_n)$, la sua rappresentazione in
+\emph{prima forma canonica} è la somma di tutti i mintermini su
+$x_1, \dots, x_n$ associati alle configurazioni per cui $f$ vale $1$.
+\end{definizione}
+
+L'applicazione iterata del teorema di Shannon porta alla prima forma canonica.
+In pratica, per ricavarla basta guardare le righe della tabella di verità dove
+$f$ vale $1$.
+
+\begin{esempio}
+Sia $f$ la funzione su $x, y, z$ che vale $1$ se e solo se esattamente due
+variabili valgono $1$ (tabella dell'esempio all'inizio della lezione). I mintermini associati alle
+configurazioni per cui $f = 1$ sono:
+\begin{itemize}
+    \item $x'yz$, dalla quarta riga ($011$);
+    \item $xy'z$, dalla sesta riga ($101$);
+    \item $xyz'$, dalla settima riga ($110$).
+\end{itemize}
+Quindi la prima forma canonica di $f$ è
+\[
+  f = x'yz + xy'z + xyz' .
+\]
+\end{esempio}
+
+\subsubsection{Seconda forma canonica: maxtermini}
+
+\begin{definizione}[Maxtermine]
+Un \emph{maxtermine} su $x_1, \dots, x_n$ è un termine somma
+$y_1 + y_2 + \dots + y_n$ dove $y_i = x_i$ oppure $y_i = x_i'$, per ogni
+$i = 1, \dots, n$.
+
+Data la configurazione $\bar{v} = (v_1, \dots, v_n) \in \{0,1\}^n$ si costruisce
+il maxtermine $M_{\bar{v}} = y_1 + y_2 + \dots + y_n$ con $y_i = x_i$ se
+$v_i = 0$ e $y_i = x_i'$ se $v_i = 1$ (il maxtermine \emph{corrispondente} alla
+configurazione $\bar{v}$).
+\end{definizione}
+
+Il maxtermine $M_{\bar{v}}$ è un'espressione che vale $0$ in corrispondenza
+dell'\emph{unica} configurazione di ingresso $\bar{v}$.
+
+\begin{esempio}
+Per $\bar{v} = (101)$ su $\{x,y,z\}$ il maxtermine associato è
+$M_{\bar{v}} = x' + y + z'$, che assume valore $0$ soltanto se $x = 1$,
+$y = 0$ e $z = 1$.
+\end{esempio}
+
+\begin{definizione}[Seconda forma canonica (\emph{Product of Sums}, POS)]
+Data una funzione booleana $f(x_1, \dots, x_n)$, la sua rappresentazione in
+\emph{seconda forma canonica} è il prodotto di tutti i maxtermini su
+$x_1, \dots, x_n$ corrispondenti alle configurazioni per cui $f$ vale $0$.
+\end{definizione}
+
+L'applicazione iterata del teorema di Shannon nella sua forma duale porta alla
+seconda forma canonica. In pratica, per ricavarla basta guardare le righe della
+tabella di verità dove $f$ vale $0$.
+
+\begin{esempio}
+Per la stessa funzione (esattamente due variabili valgono $1$) i maxtermini
+associati alle configurazioni per cui $f = 0$ sono:
+\begin{itemize}
+    \item $x + y + z$, dalla prima riga ($000$);
+    \item $x + y + z'$, dalla seconda riga ($001$);
+    \item $x + y' + z$, dalla terza riga ($010$);
+    \item $x' + y + z$, dalla quinta riga ($100$);
+    \item $x' + y' + z'$, dall'ultima riga ($111$).
+\end{itemize}
+Quindi la seconda forma canonica di $f$ è
+\[
+  f = (x + y + z)(x + y + z')(x + y' + z)(x' + y + z)(x' + y' + z') .
+\]
+\end{esempio}
+
+\subsection*{Riferimenti}
+
+Capitolo 2 del libro di testo: C.\ Bolchini et al., \emph{Reti Logiche},
+Maggioli Editore. Lezione 2: sezione 2.3; lezione 3: sezioni 2.4 e 2.5.
+
+\subsection*{Esercizi per casa}
+
+\begin{esercizio}
+Definire la tabella di verità della funzione booleana $f \colon B^3 \to B$ che
+assume valore $1$ soltanto se almeno due bit in ingresso hanno valore $0$.
+\end{esercizio}
+\begin{esercizio}
+Rappresentare $f$ mediante un'espressione booleana in prima forma canonica.
+\end{esercizio}
+\begin{esercizio}
+Rappresentare $f'$ mediante un'espressione booleana in seconda forma canonica.
+\end{esercizio}
+
 \end{document}
