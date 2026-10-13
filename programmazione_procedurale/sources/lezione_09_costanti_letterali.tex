@@ -1,0 +1,206 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\NewTColorBox{osservazione}{}{nota,
+  before upper={\textbf{Osservazione.}\ }}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Costanti letterali}
+\author{Marco Cerbella}
+\date{Lezione 9 -- 12 ottobre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Costanti letterali}
+
+\begin{definizione}
+Un \emph{literal} (costante letterale) è un token che denota un valore fisso, che può essere un intero, un numero in virgola mobile, un carattere o una stringa. Il tipo di un literal è determinato dal suo valore e dalla sua notazione.
+\end{definizione}
+
+\section{Costanti intere}
+
+Una costante intera si può scrivere come un normale numero decimale oppure in notazione ottale o esadecimale. La notazione si specifica con un \emph{prefisso}.
+
+\begin{itemize}
+    \item \textbf{Decimale}: inizia con una cifra diversa da zero.
+    \item \textbf{Ottale} (base 8, cifre $0, \dots, 7$): inizia con uno zero iniziale. Il valore è $c_n 8^n + c_{n-1} 8^{n-1} + \dots + c_1 8^1 + c_0 8^0$.
+    \item \textbf{Esadecimale}: inizia con il prefisso \lstinline|0x| o \lstinline|0X|. Le cifre da A a F possono essere maiuscole o minuscole.
+\end{itemize}
+
+\begin{esempio}
+\leavevmode
+\begin{itemize}
+    \item $047 = 4 \cdot 8^1 + 7 \cdot 8^0 = 39$.
+    \item \lstinline|0xff|, \lstinline|0Xff|, \lstinline|0xFF| e \lstinline|0XFF| valgono tutte $15 \cdot 16^1 + 15 \cdot 16^0 = 255$.
+\end{itemize}
+\end{esempio}
+
+\subsection{Tipo delle costanti intere}
+
+Il tipo di una costante è determinato nel momento in cui ne viene definito il valore. Le costanti intere degli esempi precedenti hanno di solito tipo \lstinline|int|. Se il valore è troppo grande, il compilatore assegna il primo tipo, in una gerarchia, abbastanza grande da rappresentarlo. Ad esempio, la costante decimale \lstinline|50000| ha tipo \lstinline|int|, perché il massimo valore possibile per uno \lstinline|short| (2 byte) è $32\,767 = 2^{15} - 1$.
+
+Si può influenzare esplicitamente il tipo di una costante con un \emph{suffisso}:
+\begin{itemize}
+    \item \lstinline|512U|: \lstinline|unsigned int|;
+    \item \lstinline|0Xf0fUL|: \lstinline|unsigned long|;
+    \item \lstinline|0777ll|: \lstinline|long long|;
+    \item \lstinline|123uLL|: \lstinline|unsigned long long|.
+\end{itemize}
+Maiuscole e minuscole sono equivalenti (\lstinline|ll| e \lstinline|LL| sono la stessa cosa).
+
+\begin{codice}
+int a = 512U;
+int b = 1LL;
+int c = 7UL;
+\end{codice}
+
+\section{Costanti in virgola mobile}
+
+Le costanti in virgola mobile si scrivono in notazione decimale o esadecimale. Una costante è una sequenza di cifre decimali contenente un punto decimale. Si può moltiplicare il valore per una potenza di $10$, come nella notazione scientifica: la potenza di $10$ si indica con un esponente introdotto dalla lettera \lstinline|e| o \lstinline|E|.
+
+\begin{esempio}
+\lstinline|2.34E5| vale $2.34 \cdot 10^5$ e \lstinline|67e-12| vale $67.0 \cdot 10^{-12}$.
+\end{esempio}
+
+Il punto decimale può anche essere il primo o l'ultimo carattere: \lstinline|10.| e \lstinline|.234E6| sono numeri validi. Il numero \lstinline|10| senza punto decimale è invece una costante \emph{intera}, non in virgola mobile.
+
+\subsection{Forzare il tipo}
+
+Il tipo di default di una costante in virgola mobile è \lstinline|double|. Con il suffisso \lstinline|F| o \lstinline|f| si assegna il tipo \lstinline|float|; con il suffisso \lstinline|L| o \lstinline|l| il tipo \lstinline|long double|.
+
+\section{Costanti carattere}
+
+Una costante carattere è un carattere racchiuso tra apici singoli: \lstinline|'a'|, \lstinline|'0'|, \lstinline|'*'|. Per rappresentare l'apice, il backslash e il ritorno a capo si usano \lstinline|'\''|, \lstinline|'\\'| e \lstinline|'\n'|. Le costanti carattere hanno tipo \lstinline|int|.
+
+\subsection{Sequenze di escape}
+
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+Sequenza & Valore del carattere & Azione sul dispositivo di output \\
+\midrule
+\verb|\'| & apice singolo (\lstinline|'|) & stampa il carattere \\
+\verb|\"| & virgolette (\lstinline|"|) & stampa il carattere \\
+\verb|\?| & punto interrogativo & stampa il carattere \\
+\verb|\\| & backslash & stampa il carattere \\
+\verb|\a| & alert & produce un segnale acustico o visivo \\
+\verb|\b| & backspace & riporta la posizione attiva indietro di un carattere \\
+\verb|\f| & form feed & porta la posizione all'inizio della pagina successiva \\
+\verb|\n| & line feed & porta la posizione all'inizio della riga successiva \\
+\verb|\r| & carriage return & porta la posizione all'inizio della riga corrente \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Stringhe letterali}
+
+Una \emph{stringa letterale} è una sequenza di caratteri (e/o sequenze di escape) racchiusa tra virgolette doppie, ad esempio \lstinline|"Hello world!\n"|. Come le costanti carattere, può contenere tutti i caratteri del set di caratteri sorgente.
+
+Una stringa letterale è un \emph{array statico di char} che contiene i codici dei caratteri seguiti dal terminatore di stringa, il carattere nullo \lstinline|\0|. La stringa vuota \lstinline|""| occupa esattamente un byte di memoria, che contiene il carattere nullo di terminazione.
+
+\begin{codice}
+char helloWorld[128] = "Hello World!\n";
+printf("Print the string: %s\n", helloWorld);
+\end{codice}
+
+\section*{Riferimenti}
+
+Sul libro: sezione 15.6 (pagina 339) e pagina 46, sezione 9.10.
+
+\end{document}

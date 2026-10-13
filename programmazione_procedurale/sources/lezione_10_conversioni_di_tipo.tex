@@ -1,0 +1,344 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\NewTColorBox{osservazione}{}{nota,
+  before upper={\textbf{Osservazione.}\ }}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Conversioni di tipo}
+\author{Marco Cerbella}
+\date{Lezione 10 -- 13 ottobre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Conversioni}
+
+Operandi di tipo diverso si possono combinare in una stessa operazione.
+
+\begin{codice}
+double dVar = 2.5;
+dVar = dVar * 3;
+if (dVar < 10L) { /* ... */ }
+\end{codice}
+
+Quando gli operandi hanno tipi diversi, il compilatore cerca di convertirli a un tipo uniforme prima di eseguire l'operazione.
+
+\subsection{Conversioni implicite}
+
+Il compilatore applica conversioni di tipo implicite quando
+\begin{itemize}
+    \item gli operandi hanno tipi non corrispondenti;
+    \item si chiama una funzione con un argomento il cui tipo non corrisponde a quello del parametro;
+    \item si inizializzano variabili o si assegnano loro valori.
+\end{itemize}
+Se la conversione necessaria non è possibile il compilatore segnala un errore; altre volte segnala un warning.
+
+\subsection{Operatore di cast}
+
+Si può convertire un valore da un tipo a un altro anche \emph{esplicitamente}, con l'operatore di cast:
+\[
+\texttt{(nome\_tipo) espressione}
+\]
+
+\begin{codice}
+int sum = 10, count = 3;
+double mean = (double) sum / count;   // 3.3333
+\end{codice}
+
+Il valore di \lstinline|sum| viene prima convertito (esplicitamente) in \lstinline|double|; il compilatore deve poi convertire implicitamente il divisore, il valore di \lstinline|count|, allo stesso tipo prima di eseguire la divisione.
+
+\begin{osservazione}
+Conviene usare sempre il cast quando c'è la possibilità di perdere informazione. I cast espliciti evitano i warning del compilatore.
+\end{osservazione}
+
+\section{Conversione dei tipi aritmetici}
+
+\subsection{Gerarchia dei tipi}
+
+Quando gli operandi aritmetici hanno tipi diversi, la conversione implicita è governata dal \emph{rango di conversione} dei tipi:
+\begin{itemize}
+    \item due tipi interi senza segno qualsiasi hanno ranghi diversi: se uno è più largo dell'altro ha rango più alto;
+    \item ogni tipo intero con segno ha lo stesso rango del corrispondente tipo senza segno;
+    \item i tipi interi standard sono ordinati: \lstinline|_Bool| $<$ \lstinline|char| $<$ \lstinline|short| $<$ \lstinline|int| $<$ \lstinline|long| $<$ \lstinline|long long|;
+    \item i tipi in virgola mobile sono ordinati: \lstinline|float| $<$ \lstinline|double| $<$ \lstinline|long double|;
+    \item il tipo in virgola mobile di rango più basso, \lstinline|float|, ha rango più alto di qualunque tipo intero;
+    \item gli \lstinline|enum| hanno lo stesso rango di \lstinline|int|.
+\end{itemize}
+
+\subsection{Promozione intera}
+
+In qualunque espressione si può usare un valore di tipo con rango inferiore a \lstinline|int| al posto di un operando di tipo \lstinline|int| o \lstinline|unsigned int|. In questi casi il compilatore applica la \emph{promozione intera}: ogni operando di rango inferiore a \lstinline|int| viene convertito automaticamente in \lstinline|int|, purché \lstinline|int| sia in grado di rappresentare tutti i valori del tipo originale; altrimenti viene convertito in \lstinline|unsigned int|. Le operazioni nella CPU vengono eseguite su almeno 4 byte.
+
+\begin{esempio}
+\begin{codice}
+#include <stdio.h>
+int main()
+{
+    char a = 30, b = 40, c = 10;
+    char d = (a * b) / c;
+    printf("%d ", d);
+    return 0;
+}
+\end{codice}
+\begin{risultato}
+120
+\end{risultato}
+A prima vista \lstinline|(a*b)/c| sembra causare un overflow aritmetico: i \lstinline|char| con segno vanno da $-128$ a $127$ (nella maggior parte dei compilatori) e il valore di \lstinline|(a*b)| è $1200$. Ma sui tipi \lstinline|char| avviene la promozione intera, quindi si ottiene il risultato corretto senza overflow.
+\end{esempio}
+
+\subsection{Conversioni aritmetiche usuali}
+
+Le \emph{conversioni aritmetiche usuali} sono le conversioni implicite applicate automaticamente agli operandi di tipo aritmetico diverso per la maggior parte degli operatori. Si applicano implicitamente a
+\begin{itemize}
+    \item gli operatori aritmetici a due operandi: \lstinline|*|, \lstinline|/|, \lstinline|%|, \lstinline|+| e \lstinline|-|;
+    \item gli operatori relazionali e di uguaglianza: \lstinline|<|, \lstinline|<=|, \lstinline|>|, \lstinline|>=|, \lstinline|==| e \lstinline|!=|.
+\end{itemize}
+
+\begin{esempio}
+\begin{codice}
+int x = 0;
+int i = -1;
+unsigned int limit = 200U;
+long n = 30L;
+
+if (i < limit)
+    x = limit * n;
+
+printf("%d\n", x);
+\end{codice}
+\begin{risultato}
+0
+\end{risultato}
+\end{esempio}
+
+Le conversioni aritmetiche usuali si applicano così:
+\begin{itemize}
+    \item Se uno degli operandi ha tipo in virgola mobile, l'operando di rango più basso viene convertito a un tipo con lo stesso rango dell'altro. I tipi reali si convertono solo in tipi reali.
+    \item Se entrambi gli operandi sono interi, si esegue prima la promozione intera su entrambi. Se dopo la promozione i tipi sono ancora diversi, si procede così:
+    \begin{itemize}
+        \item \textbf{Regola 1}: se un operando ha un tipo \emph{senza segno} $T$ con rango almeno pari a quello del tipo dell'altro operando, l'altro operando viene convertito al tipo senza segno $T$.
+        \item \textbf{Regola 2}: altrimenti, un operando ha un tipo \emph{con segno} $T$ con rango più alto di quello dell'altro. L'altro operando viene convertito al tipo con segno $T$ solo se $T$ è in grado di rappresentare tutti i valori del suo tipo precedente; se non lo è, entrambi gli operandi vengono convertiti al tipo senza segno corrispondente a $T$.
+    \end{itemize}
+\end{itemize}
+
+\begin{esempio}[Applicazione delle regole]
+Nell'esempio sopra, per valutare il confronto \lstinline|i < limit| il valore di \lstinline|i|, $-1$, viene convertito a \lstinline|unsigned int| (Regola~1: \lstinline|limit| è senza segno e ha rango almeno pari a \lstinline|int|). Il risultato è un numero positivo molto grande, quindi la condizione dell'\lstinline|if| è \emph{falsa} e \lstinline|x| resta $0$.
+
+In \lstinline|limit * n| (Regola~2) \lstinline|limit| viene convertito al tipo di \lstinline|n|, \lstinline|long|, se l'intervallo dei valori di \lstinline|long| contiene tutto l'intervallo di \lstinline|unsigned int|. Altrimenti (ad esempio se \lstinline|int| e \lstinline|long| hanno entrambi $32$ bit) entrambi i fattori vengono convertiti a \lstinline|unsigned long|.
+
+Come si rappresenta $-1$ in un \lstinline|int| (little endian, complemento a due)? Con $32$ bit tutti a $1$: \texttt{11111111111111111111111111111111}. Un \lstinline|unsigned int| ha $32$ bit (in quel compilatore), quindi $-1$ viene convertito implicitamente in \lstinline|unsigned int| e il suo valore diventa $4\,294\,967\,295$.
+\end{esempio}
+
+\section{Altre conversioni implicite}
+
+Il compilatore converte automaticamente i valori aritmetici anche nei casi seguenti:
+\begin{itemize}
+    \item nelle assegnazioni e nelle inizializzazioni, il valore dell'operando di destra viene sempre convertito al tipo dell'operando di sinistra;
+    \item nelle chiamate di funzione, gli argomenti vengono convertiti ai tipi dei parametri corrispondenti;
+    \item nelle istruzioni \lstinline|return|, il valore dell'espressione viene convertito al tipo restituito dalla funzione.
+\end{itemize}
+
+In un'\emph{assegnazione composta}, come \lstinline|x += 2.5| (cioè \lstinline|x = x + 2.5|), i valori di entrambi gli operandi sono prima soggetti alle conversioni aritmetiche usuali; poi il risultato dell'operazione viene convertito, come in una assegnazione semplice, al tipo dell'operando di sinistra. Se \lstinline|x| è \lstinline|int|, viene convertito in \lstinline|double| e poi il risultato \lstinline|x + 2.5| (di tipo \lstinline|double|) viene riconvertito in \lstinline|int|.
+
+\begin{esempio}
+\begin{codice}
+#include <math.h>   // dichiara double sqrt(double)
+int i = 7;
+float x = 0.5;      // la costante viene convertita da double a float
+
+i = x;              // il valore di x viene convertito da float a int
+
+x += 2.5;           // prima dell'addizione x viene convertito in double;
+                    // la somma viene poi convertita in float per l'assegnazione
+
+x = sqrt(i);        // l'argomento viene convertito da int a double;
+                    // il valore restituito da double a float
+
+long my_func() {    // la costante 0 viene convertita a long,
+    /* ... */       // il tipo restituito dalla funzione
+    return 0;
+}
+\end{codice}
+\end{esempio}
+
+\section{Conversioni verso tipi interi}
+
+\subsection{Verso tipi interi senza segno}
+
+I valori interi sono sempre preservati se rientrano nell'intervallo del nuovo tipo senza segno, cioè tra $0$ e \lstinline|Utype_MAX|. Per i valori fuori intervallo, il valore dopo la conversione si ottiene sommando o sottraendo $\mathtt{Utype\_MAX} + 1$ tante volte quante servono perché il risultato rientri nell'intervallo del nuovo tipo.
+
+\begin{codice}
+unsigned short n = 1000;   // 1000 rientra nell'intervallo di unsigned short: ok
+n = -1;                    // il valore -1 deve essere convertito
+\end{codice}
+
+Si ha $-1 + (\mathtt{USHRT\_MAX} + 1) = \mathtt{USHRT\_MAX}$, quindi l'ultima istruzione equivale a \lstinline|n = USHRT_MAX;|.
+
+\subsection{Da virgola mobile a interi}
+
+Per convertire un numero reale in virgola mobile in un tipo intero (con o senza segno) il compilatore scarta la parte frazionaria. Se la parte intera rimanente è fuori dall'intervallo del nuovo tipo, il risultato della conversione è \emph{indefinito}.
+
+\begin{codice}
+double x = 2.9;
+unsigned long n = x;   // la parte frazionaria di x viene persa: n = 2
+\end{codice}
+
+\subsection{Verso tipi interi con segno}
+
+Il problema del superamento dell'intervallo dei valori del tipo di destinazione può presentarsi anche quando un valore intero, con o senza segno, viene convertito in un tipo intero \emph{con segno}, ad esempio da \lstinline|long| o \lstinline|unsigned int| a \lstinline|int|. A differenza delle conversioni verso tipi senza segno, il risultato di un overflow in conversione verso un tipo con segno è lasciato all'implementazione. La maggior parte dei compilatori scarta i bit più significativi della rappresentazione binaria del valore originale e interpreta i bit più bassi secondo il nuovo tipo.
+
+\begin{esempio}
+\begin{codice}
+#include <stdio.h>
+#include <limits.h>
+int main() {
+    long long int a = (LLONG_MAX - UINT_MAX) + 1;
+    int b = a;
+
+    printf("b: %d\n", b);
+    printf("a: %lld\n", a);
+}
+\end{codice}
+\begin{risultato}
+b: 1
+a: 9223372032559808513
+\end{risultato}
+In esadecimale \lstinline|LLONG_MAX| è \texttt{0x7FFFFFFFFFFFFFFF} e \lstinline|UINT_MAX| è \texttt{0xFFFFFFFF}, quindi
+\[
+a = \texttt{0x7FFFFFFF00000001}.
+\]
+Convertendo in \lstinline|int| (32 bit) si tengono solo i $32$ bit più bassi, \texttt{00000001}: perciò $b = 1$.
+\end{esempio}
+
+\section{Conversioni verso tipi in virgola mobile}
+
+Non tutti i valori interi sono rappresentabili esattamente nei tipi in virgola mobile. Ad esempio, benché l'intervallo di valori del tipo \lstinline|float| includa quello di \lstinline|long| e \lstinline|long long|, \lstinline|float| ha una precisione di sole sei cifre decimali. Quindi alcuni valori \lstinline|long| non possono essere memorizzati esattamente in un \lstinline|float|: il risultato della conversione è il valore rappresentabile immediatamente inferiore o superiore.
+
+\begin{esempio}
+\begin{codice}
+float r_var = 16777217;
+double l_var = 16777217;
+printf("The rounding error (l_var - r_var) is %.2f\n", l_var - r_var);
+printf("r_var is %.2f\n", r_var);
+\end{codice}
+\begin{risultato}
+The rounding error (l_var - r_var) is 1.00
+r_var is 16777216.00
+\end{risultato}
+\end{esempio}
+
+Ogni valore di un tipo in virgola mobile si può rappresentare esattamente in un altro tipo in virgola mobile di precisione maggiore. Quindi, quando un \lstinline|double| viene convertito in \lstinline|long double|, o un \lstinline|float| in \lstinline|double| o \lstinline|long double|, il valore è esattamente preservato.
+
+Nelle conversioni da un tipo più preciso a uno meno preciso, invece, il valore da convertire può essere fuori dall'intervallo del nuovo tipo.
+\begin{itemize}
+    \item Se il valore supera l'intervallo del tipo di destinazione, il risultato della conversione è \emph{indefinito}.
+    \item Se il valore è nell'intervallo ma non è rappresentabile esattamente con la precisione del tipo di destinazione, il risultato è il valore rappresentabile immediatamente inferiore o superiore.
+\end{itemize}
+
+\section*{Riferimenti}
+
+Niente sul libro. Risorse indicate dal docente:
+\begin{itemize}
+    \item \url{https://www.w3schools.com/c/c_type_conversion.php}
+    \item \url{https://www.guru99.com/c-type-casting.html}
+    \item soprattutto, il capitolo 4 di \emph{C in a Nutshell} (O'Reilly):\\
+          \url{https://www.oreilly.com/library/view/c-in-a/0596006977/ch04.html}
+\end{itemize}
+
+\end{document}
