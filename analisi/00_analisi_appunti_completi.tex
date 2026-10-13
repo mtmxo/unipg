@@ -1836,4 +1836,261 @@ Sia $f : D \to \mathbb{R}$.
 \end{enumerate}
 \end{esempio}
 
+\section[Funzioni suriettive, iniettive e biunivoche (Lezione 5 -- 8 ottobre 2026)]{Funzioni suriettive, iniettive e biunivoche}
+\noindent\emph{Lezione 5 -- 8 ottobre 2026}
+\subsection{Funzioni suriettive}
+
+\begin{definizione}
+Una applicazione $f : D \subseteq \mathbb{R} \to C \subseteq \mathbb{R}$ si dice \emph{suriettiva} se
+\[
+\forall y \in C, \ \exists x \in D \text{ tale che } f(x) = y.
+\]
+\end{definizione}
+
+Significato geometrico: ogni retta parallela all'asse delle ascisse che taglia l'asse delle ordinate in un punto $y \in C$ interseca il grafico di $f$ in \emph{almeno} un punto.
+
+\begin{esempio}
+\leavevmode
+\begin{itemize}
+    \item $f : \mathbb{R} \to \mathbb{R}$, $f(x) = ax + b$ (con $a \neq 0$) è suriettiva perché $f(\mathbb{R}) = \mathbb{R}$.
+    \item $g : \mathbb{R} \to \mathbb{R}$, $g(x) = x^2$ \emph{non} è suriettiva perché $g(\mathbb{R}) = [0, +\infty) \subsetneq \mathbb{R}$: un numero negativo non può essere il quadrato di un numero reale.
+\end{itemize}
+\end{esempio}
+
+\subsection{Funzioni iniettive}
+
+\begin{definizione}
+Una applicazione $f : D \to \mathbb{R}$ si dice \emph{iniettiva} se
+\[
+\forall x_1, x_2 \in D, \quad x_1 \neq x_2 \Rightarrow f(x_1) \neq f(x_2).
+\]
+\end{definizione}
+
+Significato geometrico: ogni retta parallela all'asse delle ascisse che taglia l'asse delle ordinate in un punto $y \in C$ interseca il grafico di $f$ in \emph{al più} un punto.
+
+\begin{esempio}
+\leavevmode
+\begin{itemize}
+    \item $f(x) = ax + b$ è iniettiva per $a \neq 0$. Infatti, per assurdo, siano $x_1 \neq x_2$ con $f(x_1) = f(x_2)$, cioè $a x_1 + b = a x_2 + b$. Sottraendo $b$ e dividendo per $a$ si ottiene $x_1 = x_2$, contro l'ipotesi.
+    \item $g(x) = x^2$ \emph{non} è iniettiva: per $x_1 \neq 0$ si ha $x_1 \neq -x_1$ ma $g(x_1) = x_1^2 = g(-x_1)$.
+\end{itemize}
+\end{esempio}
+
+\subsection{Funzioni biunivoche}
+
+\begin{definizione}
+$f$ si dice \emph{biunivoca} se è sia iniettiva sia suriettiva.
+\end{definizione}
+
+Significato geometrico: ogni retta parallela all'asse delle ascisse che taglia l'asse delle ordinate in un punto $y \in C$ interseca il grafico di $f$ in \emph{uno ed un solo} punto.
+
+\begin{esempio}
+$f(x) = ax + b$ è biunivoca per $a \neq 0$; $g(x) = x^2$ (da $\mathbb{R}$ in $\mathbb{R}$) non è biunivoca.
+\end{esempio}
+
+\section[Funzioni invertibili e funzioni monotone (Lezione 5 -- 8 ottobre 2026)]{Funzioni invertibili e funzioni monotone}
+\noindent\emph{Lezione 5 -- 8 ottobre 2026}
+\subsection{Funzioni invertibili}
+
+\begin{definizione}
+$f : D \to \mathbb{R}$ si dice \emph{invertibile} se per ogni uscita $y \in f(D)$ esiste un solo ingresso $x \in D$ tale che $f(x) = y$. La \emph{funzione inversa} di $f$ è la funzione che associa a ogni $y \in f(D)$ l'unico $x \in D$ tale che $f(x) = y$; si indica con $f^{-1}$.
+\end{definizione}
+
+Significato geometrico: il grafico di $f$ è intersecato al massimo in un punto da ogni retta parallela all'asse delle ascisse.
+
+\begin{itemize}
+    \item funzione biunivoca $\Rightarrow$ funzione invertibile;
+    \item funzione iniettiva $\Rightarrow$ funzione invertibile su $\mathrm{Im}(f)$.
+\end{itemize}
+
+Il grafico di $f^{-1}$ è
+\[
+\mathrm{Gr}(f^{-1}) = \{(y, f^{-1}(y)) : y \in D(f^{-1})\} = \{(f(x), x) : x \in D\},
+\]
+cioè si ottiene da quello di $f$ scambiando tra loro le componenti di ciascuna coppia. Geometricamente, il grafico di $f^{-1}$ si ottiene ribaltando il grafico di $f$ rispetto alla bisettrice del primo e terzo quadrante.
+
+\begin{esempio}
+\leavevmode
+\begin{itemize}
+    \item $f(x) = x + 1$ è invertibile: da $x + 1 = y$ si ricava $x = y - 1$, quindi $f^{-1}(x) = x - 1$. I punti $(0,1)$ e $(1,0)$ del grafico di $f$ e di $f^{-1}$ sono simmetrici rispetto alla bisettrice.
+    \item $f(x) = ax + b$ è invertibile per $a \neq 0$ e $f^{-1}(x) = \dfrac{x - b}{a}$.
+    \item $g(x) = x^2$ \emph{non} è invertibile su $\mathbb{R}$, ma lo è se si restringe il dominio:
+    \begin{itemize}
+        \item $g|_{[0,+\infty)}$ è invertibile e $(g|_{[0,+\infty)})^{-1}(x) = \sqrt{x}$;
+        \item $g|_{(-\infty,0]}$ è invertibile e $(g|_{(-\infty,0]})^{-1}(x) = -\sqrt{x}$.
+    \end{itemize}
+    \item $h(x) = x^3$ è invertibile e $h^{-1}(x) = \sqrt[3]{x}$.
+\end{itemize}
+\end{esempio}
+
+\subsection{Funzioni monotone}
+
+\begin{definizione}
+$f : D \to \mathbb{R}$ si dice
+\begin{itemize}
+    \item \emph{monotona crescente} se $\forall x_1, x_2 \in D$, $x_1 > x_2 \Rightarrow f(x_1) \geq f(x_2)$;
+    \item \emph{monotona decrescente} se $\forall x_1, x_2 \in D$, $x_1 > x_2 \Rightarrow f(x_1) \leq f(x_2)$.
+\end{itemize}
+Se al posto di $\geq$ vale $>$ si dice \emph{strettamente crescente}; se al posto di $\leq$ vale $<$ si dice \emph{strettamente decrescente}.
+\end{definizione}
+
+\begin{proposizione}
+Se $f : D \to \mathbb{R}$ è strettamente monotona allora è iniettiva, cioè invertibile su $\mathrm{Im}(f)$ (monotonia stretta $\Rightarrow$ invertibilità).
+\end{proposizione}
+
+Non vale il viceversa: invertibile $\not\Rightarrow$ monotona. Ad esempio
+\[
+f(x) = \begin{cases} \dfrac{1}{x} & \text{se } x \neq 0, \\[4pt] 0 & \text{se } x = 0 \end{cases}
+\]
+è invertibile ma non monotona: presi $x_2 < 0 < x_1$ si ha $x_1 > x_2$ e $f(x_1) > f(x_2)$, mentre per $0 < x_2 < x_1$ si ha $x_1 > x_2$ e $f(x_1) < f(x_2)$.
+
+\begin{osservazione}
+La somma di funzioni monotone concordi è monotona dello stesso tipo.
+\end{osservazione}
+
+\begin{esempio}
+$f(x) = x^5 + x$ è monotona crescente, quindi invertibile, ma non si può esplicitare $f(x) = y$ nella forma $x = f^{-1}(y)$.
+\end{esempio}
+
+\begin{esempio}[Test]
+Una funzione $f : \mathbb{R} \to [0,1]$ è sicuramente \emph{limitata} (risposta corretta: 1). Non è detto che sia negativa (ha valori in $[0,1]$), né iniettiva, né suriettiva: ad esempio $f(x) = 1$ non è suriettiva neppure considerando come codominio l'intervallo $[0,1]$.
+\end{esempio}
+
+\section[Funzioni composte (Lezione 5 -- 8 ottobre 2026)]{Funzioni composte}
+\noindent\emph{Lezione 5 -- 8 ottobre 2026}
+\subsection{Composizione di funzioni}
+
+Siano date tre funzioni $f : D_1 \to \mathbb{R}$, $g : D_2 \to \mathbb{R}$ e $r : D_3 \to \mathbb{R}$.
+
+\begin{definizione}
+Se $f(D_1) \subseteq D_2$ si può definire la \emph{funzione composta} $h : D_1 \to \mathbb{R}$ di $f$ e $g$ mediante la formula
+\[
+h(x) = g[f(x)] = (g \circ f)(x).
+\]
+\end{definizione}
+
+Supponiamo siano ben definite le composizioni $g \circ f$, $f \circ g$ e $(f \circ g) \circ r$. Allora
+\begin{itemize}
+    \item $f \circ g \neq g \circ f$ in generale: \emph{non vale} la proprietà commutativa;
+    \item $(f \circ g) \circ r = f \circ (g \circ r)$: \emph{vale} la proprietà associativa.
+\end{itemize}
+
+\subsection{Esempi}
+
+\begin{esempio}
+Siano $f(x) = x - 3$ e $g(y) = y^2 + 1$. Allora
+\begin{align*}
+h(x) &= (g \circ f)(x) = (x - 3)^2 + 1, \\
+\ell(x) &= (f \circ g)(x) = x^2 + 1 - 3 = x^2 - 2.
+\end{align*}
+\end{esempio}
+
+\begin{esempio}
+Siano $f(x) = \dfrac{x + 2}{|x - 1|}$, con $D(f) = \mathbb{R} \setminus \{1\}$, e $g(y) = \sqrt{y}$, con $D(g) = [0, +\infty)$.
+
+Per $h = g \circ f$, $h(x) = \sqrt{\dfrac{x+2}{|x-1|}}$, il dominio si ricava da
+\[
+\begin{cases} \dfrac{x+2}{|x-1|} \geq 0 \\[4pt] |x - 1| \neq 0 \end{cases}
+\]
+Poiché $|x-1| \geq 0$ per ogni $x$, la prima condizione equivale a $x + 2 \geq 0$. Quindi
+\[
+\begin{cases} x \geq -2 \\ x \neq 1 \end{cases}
+\qquad D(h) = [-2, +\infty) \setminus \{1\}.
+\]
+
+Per $\ell = f \circ g$, $\ell(x) = \dfrac{\sqrt{x} + 2}{|\sqrt{x} - 1|}$, il dominio è
+\[
+\begin{cases} x \geq 0 \\ |\sqrt{x} - 1| \neq 0 \end{cases}
+\iff
+\begin{cases} x \geq 0 \\ x \neq 1 \end{cases}
+\qquad D(\ell) = [0, +\infty) \setminus \{1\}.
+\]
+\end{esempio}
+
+\begin{esempio}[Una composizione impossibile]
+Siano $f(x) = \dfrac{1}{1 + x^2}$, con $D(f) = \mathbb{R}$, e $g(y) = \sqrt{y - 5}$, con $D(g) = [5, +\infty)$.
+
+Per $h = g \circ f$, $h(x) = \sqrt{\dfrac{1}{1+x^2} - 5}$, il dominio richiede
+\[
+\frac{1}{1+x^2} - 5 \geq 0 \iff \frac{-4 - 5x^2}{1 + x^2} \geq 0 .
+\]
+Il numeratore è sempre negativo e il denominatore sempre positivo: la disequazione è impossibile, quindi $D(h) = \emptyset$. Il problema è che $f(\mathbb{R}) \subseteq (0, 1]$ non è contenuto in $D(g) = [5, +\infty)$: \emph{la composizione non si può fare}.
+
+Per $\ell = f \circ g$ si ha, per $x \geq 5$,
+\[
+\ell(x) = \frac{1}{1 + (\sqrt{x - 5})^2} = \frac{1}{1 + x - 5} = \frac{1}{x - 4}.
+\]
+Il dominio della composta è $D(\ell) = [5, +\infty)$, perché $x$ deve stare nel dominio di $g$; l'espressione semplificata $\frac{1}{x-4}$ da sola avrebbe invece dominio $\mathbb{R} \setminus \{4\}$.
+\end{esempio}
+
+\subsection{Proprietà della composizione}
+
+\begin{proprieta}
+\leavevmode
+\begin{itemize}
+    \item $f, g$ suriettive $\Rightarrow$ $g \circ f$ suriettiva;
+    \item $f, g$ iniettive $\Rightarrow$ $g \circ f$ iniettiva;
+    \item $f, g$ invertibili $\Rightarrow$ $g \circ f$ invertibile e $(g \circ f)^{-1} = f^{-1} \circ g^{-1}$;
+    \item $f, g$ monotone concordi $\Rightarrow$ $g \circ f$ monotona crescente;
+    \item $f, g$ monotone discordi $\Rightarrow$ $g \circ f$ monotona decrescente.
+\end{itemize}
+\end{proprieta}
+
+\begin{esempio}[Dimostrazione: $f, g$ decrescenti $\Rightarrow$ $g \circ f$ crescente]
+Siano $x_1, x_2 \in \mathbb{R}$ con $x_1 > x_2$. Poiché $f$ è decrescente, $f(x_1) \leq f(x_2)$. Poiché $g$ è decrescente, applicandola a entrambi i membri si inverte di nuovo la disuguaglianza:
+\[
+g(f(x_1)) \geq g(f(x_2)).
+\]
+Quindi $g \circ f$ è monotona crescente.
+\end{esempio}
+
+\begin{esempio}[Test]
+Date $f(x) = x + 3$ e $g(x) = x^2$ si ha $(f \circ g)(2) = f(4) = 7$ e $(g \circ f)(2) = g(5) = 25$, quindi $(f \circ g)(2) < (g \circ f)(2)$ (risposta corretta: 1).
+\end{esempio}
+
+\subsection{Funzione identità}
+
+Sia $f : D \to \mathbb{R}$ invertibile. Allora
+\begin{align*}
+(f^{-1} \circ f)(x) &= f^{-1}(f(x)) = x && \forall x \in D, \\
+(f \circ f^{-1})(y) &= f(f^{-1}(y)) = y && \forall y \in \mathrm{Im}(f).
+\end{align*}
+
+\begin{definizione}
+La \emph{funzione identità} su un insieme $X$ è $\mathrm{id}_X : X \to X$ tale che $\mathrm{id}_X(x) = x$ per ogni $x \in X$.
+\end{definizione}
+
+Quindi $f^{-1} \circ f = \mathrm{id}_D$ e $f \circ f^{-1} = \mathrm{id}_{\mathrm{Im}(f)}$.
+
+\section[Funzioni simmetriche e periodiche (Lezione 5 -- 8 ottobre 2026)]{Funzioni simmetriche e periodiche}
+\noindent\emph{Lezione 5 -- 8 ottobre 2026}
+\subsection{Funzioni simmetriche}
+
+Un insieme $D \subseteq \mathbb{R}$ è \emph{simmetrico rispetto a $x = 0$} se $x \in D \Rightarrow -x \in D$. Ad esempio $[-1, 1]$ è un insieme simmetrico, mentre $[1, +\infty)$ non lo è.
+
+\begin{definizione}
+Sia $D$ simmetrico rispetto a $x = 0$ e $f : D \to \mathbb{R}$.
+\begin{itemize}
+    \item $f$ si dice \emph{pari} se $f(-x) = f(x)$ per ogni $x \in D$;
+    \item $f$ si dice \emph{dispari} se $f(-x) = -f(x)$ per ogni $x \in D$.
+\end{itemize}
+\end{definizione}
+
+\begin{esempio}
+$f(x) = x^2$ è una funzione pari.
+\end{esempio}
+
+\subsection{Funzioni periodiche}
+
+\begin{definizione}
+$f : D \to \mathbb{R}$ si dice \emph{periodica di periodo $T$} se $T > 0$ è il più piccolo numero reale positivo tale che
+\[
+f(x + T) = f(x) \quad \forall x \in D.
+\]
+\end{definizione}
+
+\begin{esempio}
+$f(x) = x - [x]$ (la mantissa) è una funzione periodica di periodo $1$.
+\end{esempio}
+
 \end{document}
