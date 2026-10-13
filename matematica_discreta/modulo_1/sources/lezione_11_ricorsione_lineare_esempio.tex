@@ -1,0 +1,177 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\newrunin{osservazione}{Osservazione}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Ricorsione lineare: un esempio con radice doppia}
+\author{Marco Cerbella}
+\date{Lezione 7 -- 12 ottobre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Esempio con radici di molteplicità diversa}
+
+Applichiamo il Teorema~B (radici con molteplicità) alla successione ricorsiva lineare omogenea a coefficienti costanti di grado $k = 3$
+\[
+\begin{cases}
+a_0 = 2 \\
+a_1 = -1 \\
+a_2 = -8 \\
+a_n = 5a_{n-1} - 3a_{n-2} - 9a_{n-3} & (n \geq 3).
+\end{cases}
+\]
+
+\paragraph{Polinomio caratteristico.} L'equazione caratteristica è
+\[
+x^3 - 5x^2 + 3x + 9 = 0 .
+\]
+
+\paragraph{Radici.} Il polinomio è monico a coefficienti interi, quindi le radici razionali si cercano tra i divisori di $9$: $\pm 1, \pm 3, \pm 9$. Si trova che $3$ e $-1$ sono radici e
+\[
+(x - 3)^2 (x + 1) = 0 .
+\]
+\begin{itemize}
+    \item $\lambda_1 = 3$ è radice con molteplicità algebrica doppia: $m_a(3) = 2$ ($= m_1$);
+    \item $\lambda_2 = -1$ è radice semplice: $m_a(-1) = 1$ ($= m_2$);
+    \item la somma delle molteplicità è $m_a(3) + m_a(-1) = 3 = k$, come deve essere.
+\end{itemize}
+
+\paragraph{Forma generale.} Per il Teorema~B
+\[
+a_n = (c_{1,0} + c_{1,1}\, n)\, 3^n + c_{2,0}\, (-1)^n .
+\]
+
+\paragraph{Condizioni iniziali.} Per trovare le costanti si impongono le condizioni iniziali (formula $=$ dato):
+\[
+\begin{cases}
+n = 0: & c_{1,0} + c_{2,0} = 2 \\
+n = 1: & (c_{1,0} + c_{1,1})\cdot 3 + c_{2,0}\,(-1) = -1 \\
+n = 2: & (c_{1,0} + 2c_{1,1})\cdot 3^2 + c_{2,0}\,(-1)^2 = -8
+\end{cases}
+\]
+Dalla prima equazione $c_{1,0} = 2 - c_{2,0}$. Sostituendo nelle altre due:
+\[
+\begin{cases}
+6 - 3c_{2,0} + 3c_{1,1} - c_{2,0} = -1 \\
+18 - 9c_{2,0} + 18c_{1,1} + c_{2,0} = -8
+\end{cases}
+\iff
+\begin{cases}
+-4c_{2,0} + 3c_{1,1} = -7 \\
+-8c_{2,0} + 18c_{1,1} = -26
+\end{cases}
+\]
+Dalla prima, $c_{1,1} = -\tfrac{7}{3} + \tfrac{4}{3} c_{2,0}$; sostituendo nella seconda
+\[
+-8c_{2,0} - 42 + 24c_{2,0} = -26 \iff 16 c_{2,0} = 16 \iff c_{2,0} = 1 .
+\]
+Quindi
+\[
+c_{2,0} = 1, \qquad c_{1,1} = -\tfrac{7}{3} + \tfrac{4}{3} = -1, \qquad c_{1,0} = 2 - 1 = 1 .
+\]
+
+\paragraph{Formula chiusa.}
+\[
+a_n = (1 - n)\, 3^n + (-1)^n .
+\]
+
+Verifica: $a_0 = 1 + 1 = 2$, $a_1 = 0 - 1 = -1$, $a_2 = (-1)\cdot 9 + 1 = -8$ e, dalla ricorrenza, $a_3 = 5(-8) - 3(-1) - 9\cdot 2 = -55 = (1-3)\cdot 27 - 1$.
+
+\end{document}

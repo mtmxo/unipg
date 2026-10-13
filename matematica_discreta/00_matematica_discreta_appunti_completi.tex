@@ -2010,4 +2010,265 @@ $c = 1$ e
 Verifica: $a_3 = 5 \cdot 13 - 8 \cdot 5 + 4 \cdot 2 = 33 = 1 + 4 \cdot 8$.
 \end{esempio}
 
+\section[Ricorsione lineare: un esempio con radice doppia (Lezione 7 -- 12 ottobre 2026)]{Ricorsione lineare: un esempio con radice doppia}
+\noindent\emph{Lezione 7 -- 12 ottobre 2026}
+\subsection{Esempio con radici di molteplicità diversa}
+
+Applichiamo il Teorema~B (radici con molteplicità) alla successione ricorsiva lineare omogenea a coefficienti costanti di grado $k = 3$
+\[
+\begin{cases}
+a_0 = 2 \\
+a_1 = -1 \\
+a_2 = -8 \\
+a_n = 5a_{n-1} - 3a_{n-2} - 9a_{n-3} & (n \geq 3).
+\end{cases}
+\]
+
+\paragraph{Polinomio caratteristico.} L'equazione caratteristica è
+\[
+x^3 - 5x^2 + 3x + 9 = 0 .
+\]
+
+\paragraph{Radici.} Il polinomio è monico a coefficienti interi, quindi le radici razionali si cercano tra i divisori di $9$: $\pm 1, \pm 3, \pm 9$. Si trova che $3$ e $-1$ sono radici e
+\[
+(x - 3)^2 (x + 1) = 0 .
+\]
+\begin{itemize}
+    \item $\lambda_1 = 3$ è radice con molteplicità algebrica doppia: $m_a(3) = 2$ ($= m_1$);
+    \item $\lambda_2 = -1$ è radice semplice: $m_a(-1) = 1$ ($= m_2$);
+    \item la somma delle molteplicità è $m_a(3) + m_a(-1) = 3 = k$, come deve essere.
+\end{itemize}
+
+\paragraph{Forma generale.} Per il Teorema~B
+\[
+a_n = (c_{1,0} + c_{1,1}\, n)\, 3^n + c_{2,0}\, (-1)^n .
+\]
+
+\paragraph{Condizioni iniziali.} Per trovare le costanti si impongono le condizioni iniziali (formula $=$ dato):
+\[
+\begin{cases}
+n = 0: & c_{1,0} + c_{2,0} = 2 \\
+n = 1: & (c_{1,0} + c_{1,1})\cdot 3 + c_{2,0}\,(-1) = -1 \\
+n = 2: & (c_{1,0} + 2c_{1,1})\cdot 3^2 + c_{2,0}\,(-1)^2 = -8
+\end{cases}
+\]
+Dalla prima equazione $c_{1,0} = 2 - c_{2,0}$. Sostituendo nelle altre due:
+\[
+\begin{cases}
+6 - 3c_{2,0} + 3c_{1,1} - c_{2,0} = -1 \\
+18 - 9c_{2,0} + 18c_{1,1} + c_{2,0} = -8
+\end{cases}
+\iff
+\begin{cases}
+-4c_{2,0} + 3c_{1,1} = -7 \\
+-8c_{2,0} + 18c_{1,1} = -26
+\end{cases}
+\]
+Dalla prima, $c_{1,1} = -\tfrac{7}{3} + \tfrac{4}{3} c_{2,0}$; sostituendo nella seconda
+\[
+-8c_{2,0} - 42 + 24c_{2,0} = -26 \iff 16 c_{2,0} = 16 \iff c_{2,0} = 1 .
+\]
+Quindi
+\[
+c_{2,0} = 1, \qquad c_{1,1} = -\tfrac{7}{3} + \tfrac{4}{3} = -1, \qquad c_{1,0} = 2 - 1 = 1 .
+\]
+
+\paragraph{Formula chiusa.}
+\[
+a_n = (1 - n)\, 3^n + (-1)^n .
+\]
+
+Verifica: $a_0 = 1 + 1 = 2$, $a_1 = 0 - 1 = -1$, $a_2 = (-1)\cdot 9 + 1 = -8$ e, dalla ricorrenza, $a_3 = 5(-8) - 3(-1) - 9\cdot 2 = -55 = (1-3)\cdot 27 - 1$.
+
+\section[Calcolo combinatorio: regole di base e notazioni (Lezione 7 -- 12 ottobre 2026)]{Calcolo combinatorio: regole di base e notazioni}
+\noindent\emph{Lezione 7 -- 12 ottobre 2026}
+\subsection{Regole di somma e di prodotto}
+
+Siano $A, B$ insiemi finiti con $|A| = n$ e $|B| = k$.
+
+\begin{proprieta}[Regola della somma]
+Se $A \cap B = \emptyset$ allora $|A \cup B| = n + k$.
+\end{proprieta}
+
+\begin{proprieta}[Regola del prodotto]
+$|A \times B| = n \cdot k$.
+\end{proprieta}
+
+Infatti gli elementi di $A \times B$ sono le coppie $(a_i, b_j)$ e si possono disporre in una tabella con $n$ righe (una per ogni $a_i$) e $k$ colonne (una per ogni $b_j$):
+\begin{center}
+\begin{tabular}{c|ccc}
+$A \times B$ & $b_1$ & $\cdots$ & $b_k$ \\ \midrule
+$a_1$ & $(a_1, b_1)$ & $\cdots$ & $(a_1, b_k)$ \\
+$\vdots$ & $\vdots$ & & $\vdots$ \\
+$a_n$ & $(a_n, b_1)$ & $\cdots$ & $(a_n, b_k)$
+\end{tabular}
+\end{center}
+
+\begin{esempio}
+Una collana ha una pietra, che può essere Blu, Verde o Rossa, e un simbolo, che può essere Cuore, Stella, Cerchio, Quadrato o Fiore. Si possono costruire $3 \cdot 5 = 15$ collane con una pietra e un simbolo.
+\end{esempio}
+
+\subsection{Notazioni}
+
+\begin{definizione}
+Il \emph{fattoriale} di $n \in \mathbb{N}$ è
+\[
+n! = \begin{cases} 1 & \text{se } n = 0, \\ n \cdot (n-1)! & \text{se } n \geq 1, \end{cases}
+\]
+cioè $n! = n \cdot (n-1) \cdots 2 \cdot 1$.
+\end{definizione}
+
+\begin{definizione}
+Per $n \geq k$ il \emph{coefficiente binomiale} ``$n$ su $k$'' è
+\[
+\binom{n}{k} = \frac{n!}{k!\,(n-k)!} = C_{n,k}.
+\]
+\end{definizione}
+
+\subsection{Come si scelgono $k$ oggetti tra $n$}
+
+Dati $n$ oggetti, ne scegliamo $k$: in quanti modi possiamo fare la scelta? La risposta dipende da due domande: l'\emph{ordine} conta? sono ammesse \emph{ripetizioni}? Prendiamo come esempio $X = \{x, y, z\}$.
+
+\begin{center}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{@{}l|p{5.2cm}|p{5.2cm}@{}}
+ & \textbf{Insiemi} (l'ordine non conta) & \textbf{Liste} (l'ordine è importante) \\ \midrule
+\textbf{Senza ripetizioni}
+ & \textbf{Combinazioni semplici}: $\{x,y\} = \{y,x\}$; $\{x,x\}$ non accettabile
+ & \textbf{Disposizioni semplici}: $(x,y) \neq (y,x)$; $(x,x)$ non accettabile \\ \midrule
+\textbf{Con ripetizioni}
+ & \textbf{Combinazioni con ripetizioni}: $\{x,y\} = \{y,x\}$; $\{x,x\}$ accettabile
+ & \textbf{Disposizioni con ripetizioni}: $(x,y) \neq (y,x)$; $(x,x)$ accettabile
+\end{tabular}
+\end{center}
+
+\section[Disposizioni, permutazioni e combinazioni semplici (Lezione 7 -- 12 ottobre 2026)]{Disposizioni, permutazioni e combinazioni semplici}
+\noindent\emph{Lezione 7 -- 12 ottobre 2026}
+\subsection{Disposizioni semplici}
+
+\begin{definizione}
+Una \emph{disposizione semplice} di $n$ oggetti in gruppi di $k$ ($k \leq n$) è una \emph{lista ordinata} formata da $k$ oggetti scelti tra gli $n$ in modo che non ci siano ripetizioni.
+\end{definizione}
+
+\begin{proposizione}
+Il numero di disposizioni semplici di $n$ oggetti in gruppi di $k$ è
+\[
+D_{n,k} = \underbrace{n \cdot (n-1)\cdot(n-2) \cdots (n-k+1)}_{k \text{ fattori}} .
+\]
+\end{proposizione}
+
+(Per la regola del prodotto: il primo oggetto della lista si sceglie in $n$ modi, il secondo in $n-1$, \dots, il $k$-esimo in $n-k+1$.)
+
+\begin{esempio}
+Gara di nuoto con $10$ partecipanti: quanti sono i podi possibili? Sono disposizioni semplici di $10$ elementi in gruppi da $3$, quindi i podi sono $10 \cdot 9 \cdot 8 = D_{10,3} = 720$.
+\end{esempio}
+
+\subsection{Permutazioni}
+
+\begin{osservazione}
+Una disposizione semplice di $n$ oggetti in gruppi di $n$ è detta \emph{permutazione}. Il numero di permutazioni di $n$ oggetti è
+\[
+n! = D_{n,n}.
+\]
+\end{osservazione}
+
+\begin{esempio}
+Nella gara di prima ci sono $10!$ possibili classifiche.
+\end{esempio}
+
+\subsection{Combinazioni semplici}
+
+\begin{definizione}
+Una \emph{combinazione semplice} di $n$ oggetti in gruppi di $k$ ($k \leq n$) è un \emph{insieme} di $k$ elementi scelti tra gli $n$ oggetti in modo tale che non ci siano ripetizioni.
+\end{definizione}
+
+\begin{proposizione}
+Il numero di combinazioni semplici di $n$ oggetti in gruppi di $k$ è dato da
+\[
+C_{n,k} = \binom{n}{k} = \frac{n!}{k!\,(n-k)!} = \frac{D_{n,k}}{k!} .
+\]
+\end{proposizione}
+
+\begin{esempio}
+Nella gara, in quanti modi $3$ atleti possono ricevere una medaglia qualsiasi (non interessa se arrivano primi o secondi)? L'ordine non conta:
+\[
+C_{10,3} = \binom{10}{3} = \frac{10!}{3!\,7!} = \frac{10 \cdot 9 \cdot 8}{3 \cdot 2} = 120 .
+\]
+\end{esempio}
+
+\begin{osservazione}
+Dato un insieme $A$ con $|A| = n$, $C_{n,k}$ è il numero di \emph{sottoinsiemi} di $A$ con $k$ elementi.
+\end{osservazione}
+
+\section[Calcolo combinatorio con ripetizioni (Lezione 7 -- 12 ottobre 2026)]{Calcolo combinatorio con ripetizioni}
+\noindent\emph{Lezione 7 -- 12 ottobre 2026}
+\subsection{Disposizioni con ripetizioni}
+
+\begin{definizione}
+Una \emph{disposizione con ripetizioni} di $n$ oggetti in gruppi di $k$ è una \emph{lista ordinata} di $k$ elementi scelti tra gli $n$ oggetti.
+\end{definizione}
+
+\begin{proposizione}
+Il numero di disposizioni con ripetizioni di $n$ oggetti in gruppi di $k$ è
+\[
+D'_{n,k} = n^k .
+\]
+\end{proposizione}
+
+\begin{esempio}
+Quanti numeri naturali esistono con $7$ cifre tutte dispari? Gli oggetti sono le cifre dispari $\{1, 3, 5, 7, 9\}$, cioè $n = 5$. Contiamo le disposizioni con ripetizioni di $5$ oggetti in gruppi di $7$: $D'_{5,7} = 5^7 = 78\,125$.
+\end{esempio}
+
+\subsection{Permutazioni con ripetizioni}
+
+\begin{definizione}
+Dati $k$ oggetti distinti $a_1, a_2, \dots, a_k$, una \emph{permutazione} di $a_1, \dots, a_k$ in cui l'oggetto $a_1$ si ripete $n_1$ volte, $a_2$ si ripete $n_2$ volte, \dots, $a_k$ si ripete $n_k$ volte è una lista di $n = n_1 + n_2 + \dots + n_k$ oggetti in cui $a_1$ compare $n_1$ volte, \dots, $a_k$ compare $n_k$ volte.
+\end{definizione}
+
+\begin{proposizione}
+Il numero di permutazioni di $k$ oggetti $a_1, \dots, a_k$ in cui $a_1$ si ripete $n_1$ volte, \dots, $a_k$ si ripete $n_k$ volte è
+\[
+\frac{n!}{n_1!\, n_2! \cdots n_k!} .
+\]
+\end{proposizione}
+
+\begin{esempio}[Anagrammi]
+\leavevmode
+\begin{itemize}
+    \item \emph{GUFO}: sono permutazioni di $4$ simboli distinti, quindi $4! = 4 \cdot 3 \cdot 2 = 24$ anagrammi (ad esempio UFOG, OFUG).
+    \item \emph{GATTO}: sono permutazioni dei $4$ simboli G, A, T, O in cui T si ripete $2$ volte (liste di $5$ lettere); gli anagrammi sono $\dfrac{5!}{2!} = 60$ (ad esempio OTTAG, GATOT).
+    \item \emph{MAMMA}: $A$ si ripete $2$ volte e $M$ si ripete $3$ volte, quindi $\dfrac{5!}{2!\,3!} = \dfrac{5 \cdot 4}{2} = 10$.
+\end{itemize}
+\end{esempio}
+
+\subsection{Combinazioni con ripetizioni}
+
+\begin{definizione}
+Una \emph{combinazione con ripetizioni} di $n$ oggetti in gruppi di $k$ è un \emph{insieme} di $k$ elementi scelti tra gli $n$ oggetti (un oggetto può essere scelto più volte).
+\end{definizione}
+
+\begin{esempio}[Frutta]
+Vogliamo comprare $3$ frutti e ci sono Mele, Pere, Kiwi, Arance, Banane. Rappresentiamo una scelta con \emph{stelle} (i frutti scelti) e \emph{barre} (i separatori tra i $5$ tipi di frutto). Ad esempio, scrivendo i tipi nell'ordine Mele $|$ Pere $|$ Kiwi $|$ Arance $|$ Banane:
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+$\ast \mid \ast \mid\ \mid \ast \mid\ $ & una mela, una pera, un'arancia \\
+$\ast\ast\ast \mid\ \mid\ \mid\ \mid\ $ & tre mele \\
+$\ \mid\ \mid \ast\ast \mid\ \mid \ast$ & due kiwi e una banana
+\end{tabular}
+\end{center}
+Dobbiamo allora contare le permutazioni di $2$ simboli, $\ast$ e $\mid$, con ripetizioni: $\ast$ si ripete $3$ volte e $\mid$ si ripete $4$ volte. Sono
+\[
+\frac{7!}{3!\,4!} = 35 .
+\]
+\end{esempio}
+
+\begin{proposizione}
+Il numero di combinazioni con ripetizioni di $n$ oggetti in gruppi di $k$ è dato da
+\[
+C'_{n,k} = \frac{(n+k-1)!}{k!\,(n-1)!} = C_{n+k-1,\,k} = \binom{n+k-1}{k} .
+\]
+\end{proposizione}
+
+(Nell'esempio $n = 5$ tipi e $k = 3$ frutti: $k$ stelle e $n - 1 = 4$ barre, in tutto $n + k - 1 = 7$ simboli.)
+
 \end{document}
