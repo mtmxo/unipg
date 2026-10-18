@@ -1,0 +1,184 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\NewTColorBox{osservazione}{}{nota,
+  before upper={\textbf{Osservazione.}\ }}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Progettazione di reti logiche combinatorie}
+\author{Marco Cerbella}
+\date{Lezione 4}
+
+\begin{document}
+\maketitle
+
+Una rete logica \emph{combinatoria} ha un comportamento che dipende solo dagli ingressi, perché è priva di memoria. Vediamo come si progetta e si ottimizza.
+
+\section{Le fasi della progettazione}
+
+Progettare un circuito combinatorio comporta quattro passi successivi.
+
+\begin{enumerate}
+    \item \textbf{Comprensione e analisi della specifica semi-formale.} La descrizione iniziale di un problema spesso non è completa e va riscritta per eliminare ogni ambiguità. Casi tipici: gestione delle condizioni limite o dei casi di errore, analisi dell'ambiente in cui la rete opera, scelta della codifica delle informazioni. Alla fine si ha ancora una specifica semi-formale, ma completa.
+    \item \textbf{Formalizzazione della specifica.} Si traduce la specifica in un linguaggio formale, più adatto alla manipolazione: le \emph{tabelle di verità}, che specificano la relazione richiesta tra ingressi e uscite.
+    \item \textbf{Sintesi.} Si passa dalle tabelle di verità a espressioni algebriche booleane. In questa fase si trascura ogni considerazione sulla qualità.
+    \item \textbf{Ottimizzazione.} Fissato un criterio di qualità, si manipola l'espressione ottenuta nella sintesi per avere un'espressione funzionalmente equivalente ma migliore.
+\end{enumerate}
+
+Le caratteristiche che misurano la qualità di una rete sono generalmente l'area della realizzazione fisica, il tempo necessario a produrre un risultato, la potenza e l'energia assorbita (\emph{metriche d'area}, \emph{metriche di tempo}, \dots). Alcune metriche d'area comuni sono il numero di porte logiche generiche, il numero di porte a due ingressi, il numero di implicanti/implicati e il numero di letterali.
+
+\section{Esempio: riconoscere pari e dispari}
+
+\emph{Si progetti una rete combinatoria in grado di discriminare i numeri pari dai numeri dispari.}
+
+\subsection*{Fase 1: specifica}
+
+\begin{itemize}
+    \item Ci interessano i numeri interi e dobbiamo fissare l'intervallo, in base all'applicazione. Scegliamo per semplicità i giorni della settimana, cioè l'intervallo $[0, 6]$.
+    \item Servono $\lceil \log_2 7 \rceil = 3$ bit per rappresentarlo.
+    \item L'uscita è binaria (pari o dispari), quindi basta un bit. Fissiamo la codifica $1 = $ pari e $0 = $ dispari.
+    \item Con l'intervallo $[0,6]$ l'ingresso $111$ (il numero $7$) non è valido. Introduciamo un secondo bit di uscita per segnalare l'errore.
+\end{itemize}
+
+La specifica semi-formale completa è: \emph{una rete combinatoria con un ingresso a tre bit $X = \{x_0, x_1, x_2\}$ che rappresenta un intero in $[0,6]$ in codifica binaria naturale e due uscite di un bit ciascuna: $z$ indica se il valore è pari ($z = 1$) o dispari ($z = 0$), $e$ indica un errore ($e = 1$) o il funzionamento corretto ($e = 0$).}
+
+\subsection*{Fase 2: formalizzazione}
+
+La rete realizza le funzioni $z(x_0,x_1,x_2)$ ed $e(x_0,x_1,x_2)$, con $x_0$ bit più significativo:
+\begin{center}
+\begin{tabular}{ccc|cc}
+\toprule
+$x_0$ & $x_1$ & $x_2$ & $z$ & $e$ \\
+\midrule
+0 & 0 & 0 & 1 & 0 \\
+0 & 0 & 1 & 0 & 0 \\
+0 & 1 & 0 & 1 & 0 \\
+0 & 1 & 1 & 0 & 0 \\
+1 & 0 & 0 & 1 & 0 \\
+1 & 0 & 1 & 0 & 0 \\
+1 & 1 & 0 & 1 & 0 \\
+1 & 1 & 1 & 0 & 1 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection*{Fase 3: sintesi}
+
+Dalle tabelle si ricavano le espressioni in prima forma canonica:
+\begin{align*}
+z &= x_0'x_1'x_2' + x_0'x_1x_2' + x_0x_1'x_2' + x_0x_1x_2', \\
+e &= x_0x_1x_2.
+\end{align*}
+Da qui si potrebbe già derivare un circuito, ma le proprietà dell'algebra booleana permettono di ottimizzare (in numero di letterali).
+
+\subsection*{Fase 4: ottimizzazione}
+
+Raccogliendo $x_2'$ e usando $y + y' = 1$ due volte:
+\[
+z = x_2'\,(x_0'x_1' + x_0'x_1 + x_0x_1' + x_0x_1) = x_2'\,\bigl(x_0'(x_1'+x_1) + x_0(x_1'+x_1)\bigr) = x_2'.
+\]
+Quindi $z = x_2'$: un numero è pari se e solo se l'ultimo bit è $0$. Le tecniche sistematiche di ottimizzazione sono oggetto delle lezioni successive (mappe di Karnaugh).
+
+\section{Secondo esempio: display a sette segmenti}
+
+Un display a $7$ segmenti è costituito da $7$ segmenti luminosi che si accendono o spengono a formare il simbolo di una cifra; per controllarlo servono $7$ segnali binari. Si progetti una rete combinatoria che gestisca un display a sette segmenti di una cifra decimale nell'intervallo $[0, 7]$ in codifica binaria naturale: la rete ha $3$ ingressi e $7$ uscite, una per segmento.
+
+\medskip
+\noindent\textbf{Riferimenti.} Libro di testo (C. Bolchini et al., \emph{Reti Logiche}, Maggioli): cap.\ 4, sottosezioni 4.1, 4.2, 4.3. Esercizi per casa: 4.1, 4.2, 4.5, 4.6, 4.7, 4.9.
+
+\end{document}

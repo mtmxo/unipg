@@ -1,0 +1,248 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\NewTColorBox{osservazione}{}{nota,
+  before upper={\textbf{Osservazione.}\ }}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Ottimizzazione: mappe di Karnaugh}
+\author{Marco Cerbella}
+\date{Lezione 5}
+
+\begin{document}
+\maketitle
+
+\section{Che cos'è una mappa di Karnaugh}
+
+Le mappe di Karnaugh sono un metodo \emph{grafico} per semplificare le espressioni booleane. Furono inventate nel 1953 da Maurice Karnaugh, ingegnere delle telecomunicazioni dei Bell Labs, e sono molto efficaci per ottimizzare reti combinatorie con poche variabili (fino a quattro).
+
+\begin{definizione}[Mappa di Karnaugh]
+Una \emph{mappa di Karnaugh} è una rappresentazione formale, alternativa alla tabella di verità, di una funzione booleana: una griglia con una cella per ogni configurazione delle variabili, in cui si scrive il valore della funzione.
+\end{definizione}
+
+\begin{esempio}
+Sia $f(x,y,z)$ con $f(001) = f(011) = 1$ e $f = 0$ altrove. Le righe della mappa indicano $x$ e le colonne indicano $yz$:
+\begin{center}
+\begin{tabular}{c|cccc}
+ & $00$ & $01$ & $11$ & $10$ \\
+\midrule
+$0$ & 0 & 1 & 1 & 0 \\
+$1$ & 0 & 0 & 0 & 0 \\
+\end{tabular}
+\end{center}
+Le due celle con $1$ sono quelle di $f(001)$ e $f(011)$.
+\end{esempio}
+
+\section{Codice di Gray}
+
+Nella mappa le configurazioni delle variabili non seguono l'ordine binario naturale ($00, 01, 10, 11$) ma un \emph{codice di Gray} (o codice a specchio): $00, 01, 11, 10$. Passando da una colonna alla successiva cambia un solo bit. Ciò è fondamentale perché mette in celle \emph{adiacenti} (con un lato in comune) i mintermini che danno luogo a semplificazioni.
+
+Per esempio, nella mappa precedente
+\[
+x'y'z + x'yz = x'z\,(y' + y) = x'z.
+\]
+
+\section{Perché funzionano}
+
+Due mintermini sono \emph{logicamente adiacenti} se sono uguali a meno di una variabile, che compare in forma naturale in uno e negata nell'altro (per esempio $x_1x_2'x_3$ e $x_1x_2x_3$). Se $p_1 + p_2$ è la somma di due mintermini logicamente adiacenti, allora $p_1 + p_2$ si può semplificare:
+\[
+x_1x_2'x_3 + x_1x_2x_3 = x_1x_3\,(x_2' + x_2) = x_1x_3.
+\]
+In una mappa di Karnaugh, a celle geometricamente adiacenti corrispondono mintermini logicamente adiacenti.
+
+\section{Come si usa}
+
+\begin{enumerate}
+    \item Si raggruppano gli $1$ che compaiono in celle adiacenti: ogni gruppo è un \emph{$k$-cubo}.
+    \item Da ogni $k$-cubo si ricava un \emph{implicante}, cioè un termine prodotto $p$ tale che, se $p$ vale $1$, allora $f$ vale $1$. L'implicante è il prodotto delle variabili che compaiono sempre in forma naturale (oppure sempre in forma negata) in tutte le celle del $k$-cubo.
+    \item Coperti tutti gli $1$, si sommano gli implicanti: si ottiene un'espressione ottimizzata, in forma di somma di prodotti, corrispondente a $f$.
+\end{enumerate}
+
+\subsection*{Regole per generare i $k$-cubi}
+
+\begin{enumerate}
+    \item La mappa si immagina \emph{arrotolata} su se stessa: l'ultima colonna è adiacente alla prima e l'ultima riga è adiacente alla prima.
+    \item I lati dei rettangoli in cui si raccolgono gli $1$ devono essere potenze di $2$.
+    \item Ogni $k$-cubo deve essere il più grande possibile.
+    \item Ogni $1$ deve stare in almeno un $k$-cubo.
+    \item Un $1$ può stare in più $k$-cubi, se serve per coprire tutti gli $1$.
+\end{enumerate}
+
+\section{Esempi}
+
+\begin{esempio}[Tre variabili]
+Mappa con righe $x$ e colonne $yz$ e $f = y'z' + yz$:
+\begin{center}
+\begin{tabular}{c|cccc}
+ & $00$ & $01$ & $11$ & $10$ \\
+\midrule
+$0$ & 1 & 0 & 1 & 0 \\
+$1$ & 1 & 0 & 1 & 0 \\
+\end{tabular}
+\end{center}
+I due $k$-cubi sono la colonna $00$ (implicante $y'z'$) e la colonna $11$ (implicante $yz$).
+\end{esempio}
+
+\begin{esempio}[Tre variabili, con la colonna $10$]
+\begin{center}
+\begin{tabular}{c|cccc}
+ & $00$ & $01$ & $11$ & $10$ \\
+\midrule
+$0$ & 0 & 1 & 1 & 1 \\
+$1$ & 1 & 1 & 0 & 1 \\
+\end{tabular}
+\end{center}
+Si hanno tre $k$-cubi: le celle $01,11$ della riga $0$ (implicante $x'z$), le celle $00,01$ della riga $1$ (implicante $xy'$) e la colonna $10$ (implicante $yz'$). Quindi
+\[
+f(x,y,z) = x'z + xy' + yz'.
+\]
+\end{esempio}
+
+\begin{esempio}[Quattro variabili]
+Righe $xy$, colonne $zw$:
+\begin{center}
+\begin{tabular}{c|cccc}
+ & $00$ & $01$ & $11$ & $10$ \\
+\midrule
+$00$ & 0 & 0 & 0 & 1 \\
+$01$ & 0 & 1 & 0 & 1 \\
+$11$ & 1 & 1 & 0 & 0 \\
+$10$ & 1 & 1 & 0 & 0 \\
+\end{tabular}
+\end{center}
+I $k$-cubi sono: le righe $11$ e $10$ nelle colonne $00,01$ (implicante $xz'$); le celle $01$ e $11$ della colonna $01$ (implicante $yz'w$); le celle $00$ e $01$ della colonna $10$ (implicante $x'zw'$). Quindi
+\[
+f(x,y,z,w) = xz' + yz'w + x'zw'.
+\]
+\end{esempio}
+
+\begin{esempio}[Quattro variabili, con celle ai bordi]
+\begin{center}
+\begin{tabular}{c|cccc}
+ & $00$ & $01$ & $11$ & $10$ \\
+\midrule
+$00$ & 1 & 0 & 0 & 1 \\
+$01$ & 0 & 1 & 0 & 1 \\
+$11$ & 1 & 1 & 0 & 0 \\
+$10$ & 1 & 1 & 0 & 0 \\
+\end{tabular}
+\end{center}
+Rispetto all'esempio precedente la cella $(00, 00)$ vale $1$. Va raccolta con la cella $(10, 00)$, perché la prima e l'ultima riga sono adiacenti: si ottiene l'implicante $y'z'w'$. Quindi
+\[
+f(x,y,z,w) = xz' + yz'w + x'zw' + y'z'w'.
+\]
+\end{esempio}
+
+\begin{esempio}[Quattro variabili, cubo grande]
+\begin{center}
+\begin{tabular}{c|cccc}
+ & $00$ & $01$ & $11$ & $10$ \\
+\midrule
+$00$ & 1 & 0 & 1 & 1 \\
+$01$ & 0 & 0 & 1 & 1 \\
+$11$ & 0 & 0 & 1 & 1 \\
+$10$ & 1 & 0 & 1 & 1 \\
+\end{tabular}
+\end{center}
+Le colonne $11$ e $10$ formano un $k$-cubo $4 \times 2$ (implicante $z$). Le quattro celle d'angolo (righe $00,10$ e colonne $00,10$) formano un secondo $k$-cubo, perché la mappa è arrotolata sia in orizzontale sia in verticale (implicante $y'w'$). Quindi
+\[
+f(x,y,z,w) = z + y'w'.
+\]
+\end{esempio}
+
+\end{document}

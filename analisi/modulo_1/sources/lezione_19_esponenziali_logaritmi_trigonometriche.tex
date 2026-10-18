@@ -1,0 +1,248 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\newrunin{osservazione}{Osservazione}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Funzioni esponenziali, logaritmiche e trigonometriche}
+\author{Marco Cerbella}
+\date{Lezione 7 -- 15 ottobre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Funzioni esponenziali}
+
+\begin{definizione}[Funzione esponenziale]
+Dato $a \in \mathbb{R}$, $a > 0$, $a \ne 1$, si chiama \emph{funzione esponenziale in base $a$} la funzione
+\[
+f(x) = a^x .
+\]
+Il dominio è $\mathbb{R}$ e l'immagine è $(0, +\infty)$.
+\end{definizione}
+
+Se $a = 1$ si avrebbe $f(x) = 1$, che è la funzione costante. Valgono le regole delle potenze:
+\[
+a^0 = 1, \qquad a^x > 0 \ \ \forall x \in \mathbb{R}, \qquad a^{x+y} = a^x \cdot a^y, \qquad (a^x)^y = a^{xy}.
+\]
+
+La funzione è \emph{strettamente crescente} se $a > 1$ e \emph{strettamente decrescente} se $a < 1$. È limitata inferiormente (da $0$) ma non superiormente.
+\begin{itemize}
+    \item Se $a > 1$: al crescere di $x$, $a^x$ diventa molto grande; per $x$ negativo grande in valore assoluto, $a^x = \dfrac{1}{a^{-x}}$ si avvicina a $0$.
+    \item Se $a < 1$: si ha $a^x = \left(\dfrac{1}{b}\right)^x = b^{-x}$ con $b = \dfrac{1}{a} > 1$. Il grafico di $a^x$ si ottiene dal grafico di $b^x$ con una \emph{riflessione rispetto all'asse $y$}.
+\end{itemize}
+
+\begin{esempio}[Test]
+$f(x) = e^{x+1}$ è una funzione: (1) limitata superiormente ma non inferiormente, (2) limitata inferiormente ma non superiormente, (3) pari, (4) dispari. La risposta corretta è la (2): $e^{x+1} > 0$ ma cresce senza limite.
+\end{esempio}
+
+\section{Funzioni logaritmiche}
+
+\begin{definizione}[Logaritmo]
+Per $a > 0$, $a \ne 1$, $b > 0$ e $c \in \mathbb{R}$,
+\[
+\log_a b = c \iff a^c = b .
+\]
+Il numero $a$ è la \emph{base} del logaritmo.
+\end{definizione}
+
+\begin{definizione}[Funzione logaritmica]
+Dato $a > 0$, $a \ne 1$, la \emph{funzione logaritmica in base $a$} è $f(x) = \log_a x$. Il dominio è $(0, +\infty)$ e l'immagine è $\mathbb{R}$.
+\end{definizione}
+
+La funzione è strettamente crescente se $a > 1$ e strettamente decrescente se $0 < a < 1$. Per $a > 1$, $\log_a x$ diventa molto grande per $x$ molto grande e molto negativo (tende a $-\infty$) per $x$ che si avvicina a $0$; per $0 < a < 1$ succede il contrario.
+
+\begin{proprieta}
+Per $a > 0$, $a \ne 1$:
+\begin{itemize}
+    \item $\log_a 1 = 0$ e $\log_a a = 1$;
+    \item $\log_a (xy) = \log_a x + \log_a y$ per $x, y > 0$;
+    \item $\log_a x^\alpha = \alpha \log_a x$ per $\alpha \in \mathbb{R}$, $x > 0$;
+    \item (cambio di base) $\log_b x = \dfrac{\log_a x}{\log_a b}$ per $b > 0$, $b \ne 1$, $x > 0$.
+\end{itemize}
+\end{proprieta}
+
+\subsection*{Relazione tra esponenziale e logaritmo}
+
+La funzione esponenziale $f : \mathbb{R} \to (0,+\infty)$, $f(x) = a^x$, è monotona, quindi invertibile. La funzione logaritmo $g : (0,+\infty) \to \mathbb{R}$, $g(x) = \log_a x$, è la sua \emph{inversa}: $g = f^{-1}$.
+
+\section{Funzioni trigonometriche}
+
+\subsection{La circonferenza goniometrica}
+
+La \emph{circonferenza goniometrica} è la circonferenza di centro $O$ e raggio $1$. Serve a rappresentare tutti gli angoli, da quello nullo ($0^\circ$) all'angolo giro ($360^\circ$): ogni angolo al centro individua un arco, e viceversa. Il punto di partenza è $A = (1, 0)$.
+
+Gli angoli si misurano in gradi o in \emph{radianti}: un radiante è l'angolo al centro che sottende un arco di lunghezza uguale al raggio, quindi l'angolo giro misura $2\pi$ radianti. Gli angoli positivi si ottengono percorrendo la circonferenza in senso antiorario a partire da $A$, quelli negativi in senso orario. Gli angoli oltre $2\pi$ ripassano sugli stessi punti: l'angolo $0$ coincide con $2\pi$.
+
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{@{}l|cccccccc@{}}
+\toprule
+$\theta$ (gradi) & $0$ & $30$ & $45$ & $60$ & $90$ & $180$ & $270$ & $360$ \\
+$\theta$ (radianti) & $0$ & $\frac{\pi}{6}$ & $\frac{\pi}{4}$ & $\frac{\pi}{3}$ & $\frac{\pi}{2}$ & $\pi$ & $\frac{3\pi}{2}$ & $2\pi$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Seno, coseno, tangente, cotangente}
+
+Sia $P = (x_P, y_P)$ il punto della circonferenza che corrisponde all'angolo $\theta$.
+\begin{itemize}
+    \item $\sin\theta$ è l'\emph{ordinata} di $P$ (il segmento $PH$ con segno);
+    \item $\cos\theta$ è l'\emph{ascissa} di $P$ (il segmento $OH$ con segno);
+    \item $\tan\theta$ è l'ordinata del punto di intersezione tra la retta parallela all'asse $y$ passante per $A$ e la retta che unisce $O$ a $P$. Non è definita per $P = (0, \pm 1)$, cioè $\theta = \frac{\pi}{2} + k\pi$;
+    \item $\cot\theta$ è l'ascissa del punto di intersezione tra la retta parallela all'asse $x$ passante per $M = (0, 1)$ e la retta $OP$. Non è definita per $P = (\pm 1, 0)$, cioè $\theta = k\pi$.
+\end{itemize}
+
+\subsection{Le funzioni}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}llllc@{}}
+\toprule
+Funzione & Dominio & Immagine & Periodo & Limitata \\
+\midrule
+$\sin x$ & $\mathbb{R}$ & $[-1, 1]$ & $2\pi$ & sì \\
+$\cos x$ & $\mathbb{R}$ & $[-1, 1]$ & $2\pi$ & sì \\
+$\tan x$ & $\mathbb{R} \setminus \{\frac{\pi}{2} + k\pi,\ k \in \mathbb{Z}\}$ & $\mathbb{R}$ & $\pi$ & no \\
+$\cot x$ & $\mathbb{R} \setminus \{k\pi,\ k \in \mathbb{Z}\}$ & $\mathbb{R}$ & $\pi$ & no \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Il seno è dispari e il coseno è pari.
+
+\subsection{Relazioni trigonometriche fondamentali}
+
+Per ogni $x, x_1, x_2 \in \mathbb{R}$:
+\begin{itemize}
+    \item $\cos^2 x + \sin^2 x = 1$ (teorema di Pitagora nel triangolo rettangolo $OPH$, con $OP = 1$);
+    \item $\cos(x_1 + x_2) = \cos x_1 \cos x_2 - \sin x_1 \sin x_2$;
+    \item $\sin(x_1 + x_2) = \sin x_1 \cos x_2 + \cos x_1 \sin x_2$.
+\end{itemize}
+Dalle formule di somma derivano
+\[
+\cos(-x) = \cos x, \quad \sin(-x) = -\sin x, \quad \cos 2x = \cos^2 x - \sin^2 x, \quad \sin 2x = 2\sin x \cos x.
+\]
+Dalle definizioni (triangoli simili) si ha inoltre
+\[
+\tan x = \frac{\sin x}{\cos x}, \qquad \cot x = \frac{\cos x}{\sin x}.
+\]
+
+\subsection{Funzioni trigonometriche inverse}
+
+Le funzioni trigonometriche non sono invertibili su tutto il dominio perché sono periodiche. Si restringe il dominio a un intervallo su cui sono strettamente monotone.
+\begin{center}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{@{}lll@{}}
+\toprule
+Restrizione & Funzione inversa & Dominio dell'inversa \\
+\midrule
+$y = \sin x$, $x \in \left[-\frac{\pi}{2}, \frac{\pi}{2}\right]$ & $x = \arcsin y$ & $y \in [-1, 1]$ \\
+$y = \cos x$, $x \in [0, \pi]$ & $x = \arccos y$ & $y \in [-1, 1]$ \\
+$y = \tan x$, $x \in \left(-\frac{\pi}{2}, \frac{\pi}{2}\right)$ & $x = \arctan y$ & $y \in \mathbb{R}$ \\
+$y = \cot x$, $x \in (0, \pi)$ & $x = \operatorname{arccot} y$ & $y \in \mathbb{R}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{esempio}[Test]
+$f(x) = \sin x + \cos x$ è una funzione: (1) limitata, (2) invertibile, (3) pari, (4) dispari. La risposta corretta è la (1): $|\sin x + \cos x| \le |\sin x| + |\cos x| \le 2$. Non è invertibile perché periodica e non è né pari né dispari, dato che $f(-x) = -\sin x + \cos x$.
+\end{esempio}
+
+\end{document}

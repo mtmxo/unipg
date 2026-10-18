@@ -757,4 +757,375 @@ Rappresentare $f$ mediante un'espressione booleana in prima forma canonica.
 Rappresentare $f'$ mediante un'espressione booleana in seconda forma canonica.
 \end{esercizio}
 
+\section[Porte logiche e circuiti logici (Lezione 3)]{Porte logiche e circuiti logici}
+\noindent\emph{Lezione 3}
+\subsection{Porte logiche}
+
+\begin{definizione}[Porta logica]
+Una \emph{porta logica} è un componente elettronico di base che opera su uno o più segnali di ingresso e genera un unico segnale in uscita. È la realizzazione fisica delle funzioni elementari introdotte dall'algebra (AND, OR, NOT).
+\end{definizione}
+
+Oltre alle porte AND, OR e NOT, si usano le porte NAND, NOR, XOR e XNOR.
+
+\begin{center}
+\begin{tabular}{cc|cccccc}
+\toprule
+$x_0$ & $x_1$ & AND & OR & NAND & NOR & XOR & XNOR \\
+\midrule
+0 & 0 & 0 & 0 & 1 & 1 & 0 & 1 \\
+0 & 1 & 0 & 1 & 1 & 0 & 1 & 0 \\
+1 & 0 & 0 & 1 & 1 & 0 & 1 & 0 \\
+1 & 1 & 1 & 1 & 0 & 0 & 0 & 1 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+La porta NOT ha un solo ingresso e restituisce $x'$.
+
+\subsubsection{NAND e NOR: operatori funzionalmente completi}
+
+La porta NAND realizza $(x_0 \cdot x_1)'$ e la porta NOR realizza $(x_0 + x_1)'$.
+
+\begin{proposizione}
+NAND e NOR sono \emph{funzionalmente completi}: qualsiasi funzione logica si può realizzare usando esclusivamente porte NAND, oppure esclusivamente porte NOR, invece di AND, OR e NOT.
+\end{proposizione}
+
+\begin{esempio}[NOT con una NAND]
+Collegando i due ingressi di una NAND alla stessa variabile $x$ si ottiene, per idempotenza,
+\[
+(x \cdot x)' = (x)' = x'.
+\]
+Quindi la porta NOT si realizza con una NAND.
+\end{esempio}
+
+\subsubsection{XOR e XNOR}
+
+Le porte XOR e XNOR corrispondono agli operatori booleani XOR e XNOR (OR e NOR \emph{esclusivi}): realizzano rispettivamente la funzione di \emph{disuguaglianza} e di \emph{uguaglianza} tra due bit. Lo XOR vale $1$ se e solo se i due ingressi sono diversi, lo XNOR vale $1$ se e solo se sono uguali.
+
+\subsubsection{Porte a $n$ ingressi}
+
+Accanto alle porte elementari a due ingressi, in genere si assume di avere a disposizione le stesse porte con un numero arbitrario di ingressi. In una AND a tre ingressi $x_0, x_1, x_2$ l'uscita $y$ vale $1$ se e solo se tutte le variabili in ingresso valgono $1$. In una OR a quattro ingressi $x_0, \dots, x_3$ l'uscita $y$ vale $1$ se almeno una variabile in ingresso vale $1$.
+
+\subsection{Circuiti logici}
+
+Le porte elementari si collegano per realizzare funzioni più complesse. A partire da un'espressione logica $e$ (ricavata, per esempio, dalla tabella di verità di una funzione booleana) si costruisce il circuito che realizza la funzione descritta da $e$.
+
+\begin{esempio}
+Il circuito per $x + y'z$ usa una porta NOT su $y$, una AND tra $y'$ e $z$ (uscita $y'z$) e una OR tra $x$ e $y'z$.
+\end{esempio}
+
+\subsubsection{Ritardi e cammino critico}
+
+Ogni porta logica ha un \emph{ritardo}: il tempo tra l'istante in cui si applicano i segnali in ingresso e l'istante in cui il segnale di uscita si stabilizza a un valore costante. Il ritardo dipende dalla realtà fisica dei componenti (i transistor).
+
+\begin{definizione}[Cammino critico]
+Il \emph{cammino critico} (\emph{critical path}) è il cammino dagli ingressi alle uscite che attraversa il maggior numero di porte in un circuito, trascurando i negatori, perché possono essere accorpati alla porta precedente o successiva.
+\end{definizione}
+
+\begin{esempio}
+In una rete divisa in tre livelli di porte, i cammini critici attraversano tre porte.
+\end{esempio}
+
+\subsubsection{Circuiti da forme canoniche}
+
+Le funzioni espresse in prima o in seconda forma canonica corrispondono sempre a circuiti logici \emph{a due livelli}, che usano porte a $n$ ingressi.
+\begin{itemize}
+    \item In \emph{prima forma canonica} il primo livello contiene le porte AND che calcolano i mintermini e il secondo livello un'unica porta OR che ne fa la somma.
+    \item In \emph{seconda forma canonica} il primo livello contiene le porte OR che calcolano i maxtermini e il secondo livello un'unica porta AND che ne fa il prodotto.
+\end{itemize}
+
+\begin{esempio}
+Sia $f(x,y,z)$ la funzione che vale $1$ solo per $011$, $101$, $110$:
+\begin{center}
+\begin{tabular}{ccc|c}
+\toprule
+$x$ & $y$ & $z$ & $f$ \\
+\midrule
+0 & 0 & 0 & 0 \\
+0 & 0 & 1 & 0 \\
+0 & 1 & 0 & 0 \\
+0 & 1 & 1 & 1 \\
+1 & 0 & 0 & 0 \\
+1 & 0 & 1 & 1 \\
+1 & 1 & 0 & 1 \\
+1 & 1 & 1 & 0 \\
+\bottomrule
+\end{tabular}
+\end{center}
+La prima forma canonica è $f = x'yz + xy'z + xyz'$. Il circuito ha tre NOT per le variabili negate, tre AND a tre ingressi (una per mintermine) e una OR a tre ingressi.
+\end{esempio}
+
+\subsection{Circuiti speciali: i sommatori}
+
+Con le porte logiche si costruiscono circuiti che eseguono operazioni aritmetiche. Vediamo tre sommatori.
+
+\subsubsection{Half adder}
+
+Un \emph{half adder} (HA) ha come ingressi due bit $a, b$ e come uscite due bit: $s$ (la somma) e $c$ (il riporto, \emph{carry}).
+\begin{center}
+\begin{tabular}{cc|cc}
+\toprule
+$a$ & $b$ & $s$ & $c$ \\
+\midrule
+0 & 0 & 0 & 0 \\
+0 & 1 & 1 & 0 \\
+1 & 0 & 1 & 0 \\
+1 & 1 & 0 & 1 \\
+\bottomrule
+\end{tabular}
+\end{center}
+La colonna $s$ è uno XOR, la colonna $c$ è un AND:
+\[
+s = a \oplus b, \qquad c = a \cdot b.
+\]
+Il circuito è quindi formato da una porta XOR e una porta AND con gli stessi ingressi.
+
+\subsubsection{Full adder}
+
+Un \emph{full adder} (FA) ha tre ingressi, $a$, $b$ e $c_{in}$ (bit e riporto in ingresso), e due uscite, $s$ e $c_{out}$ (somma e riporto in uscita).
+\begin{center}
+\begin{tabular}{ccc|cc}
+\toprule
+$a$ & $b$ & $c_{in}$ & $s$ & $c_{out}$ \\
+\midrule
+0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 1 & 1 & 0 \\
+0 & 1 & 0 & 1 & 0 \\
+0 & 1 & 1 & 0 & 1 \\
+1 & 0 & 0 & 1 & 0 \\
+1 & 0 & 1 & 0 & 1 \\
+1 & 1 & 0 & 0 & 1 \\
+1 & 1 & 1 & 1 & 1 \\
+\bottomrule
+\end{tabular}
+\end{center}
+Poiché la somma è associativa, $a + b + c_{in} = (a + b) + c_{in}$: si possono usare due half adder, il primo per $a + b$ e il secondo per sommare $c_{in}$ al risultato, e combinare i due riporti con una OR per ottenere $c_{out}$.
+
+\subsubsection{Sommatore a $n$ bit (ripple-carry)}
+
+Un \emph{sommatore a $n$ bit} ha come ingressi $2n$ bit, $a_{n-1} \dots a_0$ e $b_{n-1} \dots b_0$, e come uscite $n$ bit $s_{n-1} \dots s_0$ più il riporto finale $c$, tali che la sequenza in uscita rappresenti in binario la somma dei due numeri in ingresso. Si realizza collegando $n$ full adder in cascata: il riporto in uscita di ciascuno entra come riporto in ingresso del successivo (da cui il nome \emph{ripple-carry}).
+
+\begin{esempio}
+Per sommare due numeri a $3$ bit $X = x_2 x_1 x_0$ e $Y = y_2 y_1 y_0$ servono $3$ full adder in cascata. Ad esempio $100 + 110 = 1010$.
+\end{esempio}
+
+\medskip
+\noindent\textbf{Riferimenti.} Libro di testo (C. Bolchini et al., \emph{Reti Logiche}, Maggioli): cap.\ 2, sottosezioni 2.6 (porte logiche) e 2.7 (circuiti logici); cap.\ 5, sottosezione 5.2.1 (sommatori ripple-carry). Esercizi 2.24, 2.25, 2.26, 2.27.
+
+\section[Progettazione di reti logiche combinatorie (Lezione 4)]{Progettazione di reti logiche combinatorie}
+\noindent\emph{Lezione 4}
+Una rete logica \emph{combinatoria} ha un comportamento che dipende solo dagli ingressi, perché è priva di memoria. Vediamo come si progetta e si ottimizza.
+
+\subsection{Le fasi della progettazione}
+
+Progettare un circuito combinatorio comporta quattro passi successivi.
+
+\begin{enumerate}
+    \item \textbf{Comprensione e analisi della specifica semi-formale.} La descrizione iniziale di un problema spesso non è completa e va riscritta per eliminare ogni ambiguità. Casi tipici: gestione delle condizioni limite o dei casi di errore, analisi dell'ambiente in cui la rete opera, scelta della codifica delle informazioni. Alla fine si ha ancora una specifica semi-formale, ma completa.
+    \item \textbf{Formalizzazione della specifica.} Si traduce la specifica in un linguaggio formale, più adatto alla manipolazione: le \emph{tabelle di verità}, che specificano la relazione richiesta tra ingressi e uscite.
+    \item \textbf{Sintesi.} Si passa dalle tabelle di verità a espressioni algebriche booleane. In questa fase si trascura ogni considerazione sulla qualità.
+    \item \textbf{Ottimizzazione.} Fissato un criterio di qualità, si manipola l'espressione ottenuta nella sintesi per avere un'espressione funzionalmente equivalente ma migliore.
+\end{enumerate}
+
+Le caratteristiche che misurano la qualità di una rete sono generalmente l'area della realizzazione fisica, il tempo necessario a produrre un risultato, la potenza e l'energia assorbita (\emph{metriche d'area}, \emph{metriche di tempo}, \dots). Alcune metriche d'area comuni sono il numero di porte logiche generiche, il numero di porte a due ingressi, il numero di implicanti/implicati e il numero di letterali.
+
+\subsection{Esempio: riconoscere pari e dispari}
+
+\emph{Si progetti una rete combinatoria in grado di discriminare i numeri pari dai numeri dispari.}
+
+\subsubsection*{Fase 1: specifica}
+
+\begin{itemize}
+    \item Ci interessano i numeri interi e dobbiamo fissare l'intervallo, in base all'applicazione. Scegliamo per semplicità i giorni della settimana, cioè l'intervallo $[0, 6]$.
+    \item Servono $\lceil \log_2 7 \rceil = 3$ bit per rappresentarlo.
+    \item L'uscita è binaria (pari o dispari), quindi basta un bit. Fissiamo la codifica $1 = $ pari e $0 = $ dispari.
+    \item Con l'intervallo $[0,6]$ l'ingresso $111$ (il numero $7$) non è valido. Introduciamo un secondo bit di uscita per segnalare l'errore.
+\end{itemize}
+
+La specifica semi-formale completa è: \emph{una rete combinatoria con un ingresso a tre bit $X = \{x_0, x_1, x_2\}$ che rappresenta un intero in $[0,6]$ in codifica binaria naturale e due uscite di un bit ciascuna: $z$ indica se il valore è pari ($z = 1$) o dispari ($z = 0$), $e$ indica un errore ($e = 1$) o il funzionamento corretto ($e = 0$).}
+
+\subsubsection*{Fase 2: formalizzazione}
+
+La rete realizza le funzioni $z(x_0,x_1,x_2)$ ed $e(x_0,x_1,x_2)$, con $x_0$ bit più significativo:
+\begin{center}
+\begin{tabular}{ccc|cc}
+\toprule
+$x_0$ & $x_1$ & $x_2$ & $z$ & $e$ \\
+\midrule
+0 & 0 & 0 & 1 & 0 \\
+0 & 0 & 1 & 0 & 0 \\
+0 & 1 & 0 & 1 & 0 \\
+0 & 1 & 1 & 0 & 0 \\
+1 & 0 & 0 & 1 & 0 \\
+1 & 0 & 1 & 0 & 0 \\
+1 & 1 & 0 & 1 & 0 \\
+1 & 1 & 1 & 0 & 1 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsubsection*{Fase 3: sintesi}
+
+Dalle tabelle si ricavano le espressioni in prima forma canonica:
+\begin{align*}
+z &= x_0'x_1'x_2' + x_0'x_1x_2' + x_0x_1'x_2' + x_0x_1x_2', \\
+e &= x_0x_1x_2.
+\end{align*}
+Da qui si potrebbe già derivare un circuito, ma le proprietà dell'algebra booleana permettono di ottimizzare (in numero di letterali).
+
+\subsubsection*{Fase 4: ottimizzazione}
+
+Raccogliendo $x_2'$ e usando $y + y' = 1$ due volte:
+\[
+z = x_2'\,(x_0'x_1' + x_0'x_1 + x_0x_1' + x_0x_1) = x_2'\,\bigl(x_0'(x_1'+x_1) + x_0(x_1'+x_1)\bigr) = x_2'.
+\]
+Quindi $z = x_2'$: un numero è pari se e solo se l'ultimo bit è $0$. Le tecniche sistematiche di ottimizzazione sono oggetto delle lezioni successive (mappe di Karnaugh).
+
+\subsection{Secondo esempio: display a sette segmenti}
+
+Un display a $7$ segmenti è costituito da $7$ segmenti luminosi che si accendono o spengono a formare il simbolo di una cifra; per controllarlo servono $7$ segnali binari. Si progetti una rete combinatoria che gestisca un display a sette segmenti di una cifra decimale nell'intervallo $[0, 7]$ in codifica binaria naturale: la rete ha $3$ ingressi e $7$ uscite, una per segmento.
+
+\medskip
+\noindent\textbf{Riferimenti.} Libro di testo (C. Bolchini et al., \emph{Reti Logiche}, Maggioli): cap.\ 4, sottosezioni 4.1, 4.2, 4.3. Esercizi per casa: 4.1, 4.2, 4.5, 4.6, 4.7, 4.9.
+
+\section[Ottimizzazione: mappe di Karnaugh (Lezione 5)]{Ottimizzazione: mappe di Karnaugh}
+\noindent\emph{Lezione 5}
+\subsection{Che cos'è una mappa di Karnaugh}
+
+Le mappe di Karnaugh sono un metodo \emph{grafico} per semplificare le espressioni booleane. Furono inventate nel 1953 da Maurice Karnaugh, ingegnere delle telecomunicazioni dei Bell Labs, e sono molto efficaci per ottimizzare reti combinatorie con poche variabili (fino a quattro).
+
+\begin{definizione}[Mappa di Karnaugh]
+Una \emph{mappa di Karnaugh} è una rappresentazione formale, alternativa alla tabella di verità, di una funzione booleana: una griglia con una cella per ogni configurazione delle variabili, in cui si scrive il valore della funzione.
+\end{definizione}
+
+\begin{esempio}
+Sia $f(x,y,z)$ con $f(001) = f(011) = 1$ e $f = 0$ altrove. Le righe della mappa indicano $x$ e le colonne indicano $yz$:
+\begin{center}
+\begin{tabular}{c|cccc}
+ & $00$ & $01$ & $11$ & $10$ \\
+\midrule
+$0$ & 0 & 1 & 1 & 0 \\
+$1$ & 0 & 0 & 0 & 0 \\
+\end{tabular}
+\end{center}
+Le due celle con $1$ sono quelle di $f(001)$ e $f(011)$.
+\end{esempio}
+
+\subsection{Codice di Gray}
+
+Nella mappa le configurazioni delle variabili non seguono l'ordine binario naturale ($00, 01, 10, 11$) ma un \emph{codice di Gray} (o codice a specchio): $00, 01, 11, 10$. Passando da una colonna alla successiva cambia un solo bit. Ciò è fondamentale perché mette in celle \emph{adiacenti} (con un lato in comune) i mintermini che danno luogo a semplificazioni.
+
+Per esempio, nella mappa precedente
+\[
+x'y'z + x'yz = x'z\,(y' + y) = x'z.
+\]
+
+\subsection{Perché funzionano}
+
+Due mintermini sono \emph{logicamente adiacenti} se sono uguali a meno di una variabile, che compare in forma naturale in uno e negata nell'altro (per esempio $x_1x_2'x_3$ e $x_1x_2x_3$). Se $p_1 + p_2$ è la somma di due mintermini logicamente adiacenti, allora $p_1 + p_2$ si può semplificare:
+\[
+x_1x_2'x_3 + x_1x_2x_3 = x_1x_3\,(x_2' + x_2) = x_1x_3.
+\]
+In una mappa di Karnaugh, a celle geometricamente adiacenti corrispondono mintermini logicamente adiacenti.
+
+\subsection{Come si usa}
+
+\begin{enumerate}
+    \item Si raggruppano gli $1$ che compaiono in celle adiacenti: ogni gruppo è un \emph{$k$-cubo}.
+    \item Da ogni $k$-cubo si ricava un \emph{implicante}, cioè un termine prodotto $p$ tale che, se $p$ vale $1$, allora $f$ vale $1$. L'implicante è il prodotto delle variabili che compaiono sempre in forma naturale (oppure sempre in forma negata) in tutte le celle del $k$-cubo.
+    \item Coperti tutti gli $1$, si sommano gli implicanti: si ottiene un'espressione ottimizzata, in forma di somma di prodotti, corrispondente a $f$.
+\end{enumerate}
+
+\subsubsection*{Regole per generare i $k$-cubi}
+
+\begin{enumerate}
+    \item La mappa si immagina \emph{arrotolata} su se stessa: l'ultima colonna è adiacente alla prima e l'ultima riga è adiacente alla prima.
+    \item I lati dei rettangoli in cui si raccolgono gli $1$ devono essere potenze di $2$.
+    \item Ogni $k$-cubo deve essere il più grande possibile.
+    \item Ogni $1$ deve stare in almeno un $k$-cubo.
+    \item Un $1$ può stare in più $k$-cubi, se serve per coprire tutti gli $1$.
+\end{enumerate}
+
+\subsection{Esempi}
+
+\begin{esempio}[Tre variabili]
+Mappa con righe $x$ e colonne $yz$ e $f = y'z' + yz$:
+\begin{center}
+\begin{tabular}{c|cccc}
+ & $00$ & $01$ & $11$ & $10$ \\
+\midrule
+$0$ & 1 & 0 & 1 & 0 \\
+$1$ & 1 & 0 & 1 & 0 \\
+\end{tabular}
+\end{center}
+I due $k$-cubi sono la colonna $00$ (implicante $y'z'$) e la colonna $11$ (implicante $yz$).
+\end{esempio}
+
+\begin{esempio}[Tre variabili, con la colonna $10$]
+\begin{center}
+\begin{tabular}{c|cccc}
+ & $00$ & $01$ & $11$ & $10$ \\
+\midrule
+$0$ & 0 & 1 & 1 & 1 \\
+$1$ & 1 & 1 & 0 & 1 \\
+\end{tabular}
+\end{center}
+Si hanno tre $k$-cubi: le celle $01,11$ della riga $0$ (implicante $x'z$), le celle $00,01$ della riga $1$ (implicante $xy'$) e la colonna $10$ (implicante $yz'$). Quindi
+\[
+f(x,y,z) = x'z + xy' + yz'.
+\]
+\end{esempio}
+
+\begin{esempio}[Quattro variabili]
+Righe $xy$, colonne $zw$:
+\begin{center}
+\begin{tabular}{c|cccc}
+ & $00$ & $01$ & $11$ & $10$ \\
+\midrule
+$00$ & 0 & 0 & 0 & 1 \\
+$01$ & 0 & 1 & 0 & 1 \\
+$11$ & 1 & 1 & 0 & 0 \\
+$10$ & 1 & 1 & 0 & 0 \\
+\end{tabular}
+\end{center}
+I $k$-cubi sono: le righe $11$ e $10$ nelle colonne $00,01$ (implicante $xz'$); le celle $01$ e $11$ della colonna $01$ (implicante $yz'w$); le celle $00$ e $01$ della colonna $10$ (implicante $x'zw'$). Quindi
+\[
+f(x,y,z,w) = xz' + yz'w + x'zw'.
+\]
+\end{esempio}
+
+\begin{esempio}[Quattro variabili, con celle ai bordi]
+\begin{center}
+\begin{tabular}{c|cccc}
+ & $00$ & $01$ & $11$ & $10$ \\
+\midrule
+$00$ & 1 & 0 & 0 & 1 \\
+$01$ & 0 & 1 & 0 & 1 \\
+$11$ & 1 & 1 & 0 & 0 \\
+$10$ & 1 & 1 & 0 & 0 \\
+\end{tabular}
+\end{center}
+Rispetto all'esempio precedente la cella $(00, 00)$ vale $1$. Va raccolta con la cella $(10, 00)$, perché la prima e l'ultima riga sono adiacenti: si ottiene l'implicante $y'z'w'$. Quindi
+\[
+f(x,y,z,w) = xz' + yz'w + x'zw' + y'z'w'.
+\]
+\end{esempio}
+
+\begin{esempio}[Quattro variabili, cubo grande]
+\begin{center}
+\begin{tabular}{c|cccc}
+ & $00$ & $01$ & $11$ & $10$ \\
+\midrule
+$00$ & 1 & 0 & 1 & 1 \\
+$01$ & 0 & 0 & 1 & 1 \\
+$11$ & 0 & 0 & 1 & 1 \\
+$10$ & 1 & 0 & 1 & 1 \\
+\end{tabular}
+\end{center}
+Le colonne $11$ e $10$ formano un $k$-cubo $4 \times 2$ (implicante $z$). Le quattro celle d'angolo (righe $00,10$ e colonne $00,10$) formano un secondo $k$-cubo, perché la mappa è arrotolata sia in orizzontale sia in verticale (implicante $y'w'$). Quindi
+\[
+f(x,y,z,w) = z + y'w'.
+\]
+\end{esempio}
+
 \end{document}

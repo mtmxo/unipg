@@ -2271,4 +2271,138 @@ C'_{n,k} = \frac{(n+k-1)!}{k!\,(n-1)!} = C_{n+k-1,\,k} = \binom{n+k-1}{k} .
 
 (Nell'esempio $n = 5$ tipi e $k = 3$ frutti: $k$ stelle e $n - 1 = 4$ barre, in tutto $n + k - 1 = 7$ simboli.)
 
+\section[Inclusione-esclusione e conteggio (Lezione 8 -- 13 ottobre 2026)]{Inclusione-esclusione e conteggio}
+\noindent\emph{Lezione 8 -- 13 ottobre 2026}
+\subsection{Principio di inclusione-esclusione}
+
+\begin{proposizione}
+Siano $A, B$ due insiemi finiti. Allora
+\[
+|A \cup B| = |A| + |B| - |A \cap B|.
+\]
+\end{proposizione}
+
+\emph{Dimostrazione.} Sommando $|A|$ e $|B|$ gli elementi di $A \cap B$ vengono contati due volte. Perciò $|A \cup B| + |A \cap B| = |A| + |B|$, da cui la formula. \hfill $\square$
+
+\begin{esempio}
+Quanti numeri naturali positivi $\le 43$ sono divisibili per $4$ oppure per $5$?
+Sia $A = \{n \in \mathbb{N} : n \le 43,\ 4 \mid n\}$ e $B = \{n \in \mathbb{N} : n \le 43,\ 5 \mid n\}$. Allora $|A| = 10$ e $|B| = 8$. L'intersezione è
+\[
+A \cap B = \{n \le 43 : 5 \mid n \text{ e } 4 \mid n\} = \{n \le 43 : 20 \mid n\} = \{20, 40\},
+\]
+quindi $|A \cap B| = 2$ e $|A \cup B| = 10 + 8 - 2 = 16$.
+\end{esempio}
+
+\begin{proposizione}
+Siano $A, B, C$ tre insiemi finiti. Allora
+\[
+|A \cup B \cup C| = |A| + |B| + |C| - |A \cap B| - |A \cap C| - |B \cap C| + |A \cap B \cap C|.
+\]
+\end{proposizione}
+
+\begin{esempio}[Evento sportivo]
+Un evento ha tre gare e $20$ atleti partecipanti. Sia $A$ l'insieme degli atleti della gara $1$, $B$ della gara $2$, $C$ della gara $3$. Si sa che $|A| = 6$, $|B| = 10$, $|C| = 13$, $|A \cap B| = 4$, $|A \cap C| = 3$, $|B \cap C| = 5$. Quanti atleti partecipano a tutte e tre le gare?
+Il numero totale di atleti è $|A \cup B \cup C| = 20$. Ricavando $|A \cap B \cap C|$ dalla formula:
+\[
+|A \cap B \cap C| = |A \cup B \cup C| - |A| - |B| - |C| + |A \cap B| + |A \cap C| + |B \cap C| = 20 - 6 - 10 - 13 + 4 + 3 + 5 = 3.
+\]
+\end{esempio}
+
+\subsection{Contare le funzioni tra insiemi finiti}
+
+Siano $A, B$ insiemi finiti con $|A| = n$ e $|B| = k$.
+
+\begin{itemize}
+    \item \emph{Funzioni da $A$ a $B$}: per ogni elemento di $A$ si sceglie un'immagine tra i $k$ elementi di $B$. Sono le disposizioni con ripetizioni: $D'_{k,n} = k^n$.
+    \item \emph{Funzioni biunivoche} (possibili se $n = k$): sono le permutazioni di $n$ oggetti, $n! = n \cdot (n-1) \cdots 2 \cdot 1$.
+    \item \emph{Funzioni iniettive} (possibili se $n \le k$): sono le disposizioni semplici, $D_{k,n} = k(k-1)\cdots(k-n+1)$.
+    \item \emph{Funzioni suriettive} (possibili se $n \ge k$):
+    \begin{itemize}
+        \item se $|B| = 1$ c'è la sola funzione costante, che è suriettiva: $1$ funzione;
+        \item se $|B| = 2$ le funzioni sono $2^n$; non sono suriettive le $2$ funzioni costanti, quindi le suriettive sono $2^n - 2$;
+        \item se $|B| = 3$ le funzioni sono $3^n$. Quelle che lasciano fuori almeno un elemento di $B$ sono $3 \cdot 2^n - 3$: il termine $3 \cdot 2^n$ conta, per ciascuno dei $3$ elementi, le $2^n$ funzioni che lo escludono, ma le $3$ funzioni costanti (che escludono due elementi) sono state contate due volte, quindi se ne sottraggono $3$. Le suriettive sono
+        \[
+        3^n - (3 \cdot 2^n - 3) = 3^n - 3 \cdot 2^n + 3.
+        \]
+    \end{itemize}
+\end{itemize}
+
+\subsection{Cardinalità dell'insieme delle parti}
+
+\begin{proposizione}
+Se $A$ è un insieme finito con $|A| = n$, l'insieme delle parti $\mathcal{P}(A)$ ha cardinalità $2^n$.
+\end{proposizione}
+
+\emph{Dimostrazione} per induzione su $n$. Sia $P(n)$: se $|A| = n$ allora $|\mathcal{P}(A)| = 2^n$.
+
+\emph{Caso base} $n = 0$: $A = \emptyset$ e $\mathcal{P}(\emptyset) = \{\emptyset\}$, che ha $1 = 2^0$ elementi.
+
+\emph{Passo induttivo.} Ipotesi: $P(k)$, cioè un insieme con $k$ elementi ha $2^k$ sottoinsiemi. Sia $|A| = k + 1$; scegliamo $\bar a \in A$. I sottoinsiemi $X \subseteq A$ sono di due tipi:
+\begin{itemize}
+    \item $\bar a \notin X$: allora $X \subseteq A \setminus \{\bar a\}$, che ha $k$ elementi, e per ipotesi induttiva questi $X$ sono $2^k$;
+    \item $\bar a \in X$: allora $X = \{\bar a\} \cup Y$ con $Y \subseteq A \setminus \{\bar a\}$; di nuovo i possibili $Y$ sono $2^k$.
+\end{itemize}
+Quindi $|\mathcal{P}(A)| = 2^k + 2^k = 2 \cdot 2^k = 2^{k+1}$. \hfill $\square$
+
+\subsection{Esercizi di conteggio}
+
+\begin{esempio}[Carte]
+Un mazzo ha $40$ carte ($4$ semi, $10$ valori per ogni seme).
+\begin{enumerate}
+    \item Quante mani di $5$ carte? Combinazioni semplici: $\binom{40}{5} = \dfrac{40!}{5!\,35!}$.
+    \item Quante mani con $4$ assi? Le $4$ carte sono fissate, la quinta è una delle altre $36$: $\binom{36}{1} = 36$.
+    \item Quante mani con $4$ carte dello stesso valore? Si sceglie il valore ($10$ modi) e poi l'ultima carta ($36$ modi): $10 \cdot 36$.
+    \item Quante mani con \emph{esattamente} $2$ assi? Si scelgono i $2$ assi e poi $3$ carte che non sono assi: $\binom{4}{2}\binom{36}{3}$.
+    \item Quante mani con \emph{almeno} $2$ assi? Si sommano i casi con esattamente $2$, $3$ o $4$ assi:
+    \[
+    \binom{4}{2}\binom{36}{3} + \binom{4}{3}\binom{36}{2} + \binom{4}{4}\binom{36}{1}.
+    \]
+    \item Quante mani con $2$ coppie di valori diversi (più una quinta carta)? Si scelgono i due valori ($\binom{10}{2}$), poi $2$ carte per il primo valore ($\binom{4}{2}$), $2$ per il secondo ($\binom{4}{2}$) e la quinta carta tra le $32$ rimaste con altri valori:
+    \[
+    \binom{10}{2}\binom{4}{2}\binom{4}{2}\binom{32}{1}.
+    \]
+\end{enumerate}
+\end{esempio}
+
+\begin{esempio}[Panchina]
+In quanti modi $3$ maschi e $3$ femmine possono sedersi su una panchina?
+\begin{enumerate}
+    \item Senza vincoli: permutazioni di $6$ oggetti, $6!$.
+    \item Se i maschi stanno tutti vicini e le femmine tutte vicine: $2$ ordini dei due gruppi, $3!$ per i maschi, $3!$ per le femmine: $2 \cdot 3! \cdot 3!$.
+    \item Se solo i maschi stanno vicini: i $3$ maschi formano un blocco che, insieme alle $3$ femmine, dà $4$ oggetti da permutare ($4!$), poi si ordinano i maschi nel blocco ($3!$): $4! \cdot 3!$.
+    \item Se maschi e femmine si alternano: si sceglie chi inizia ($2$), poi si ordinano i maschi ($3!$) e le femmine ($3!$): $2 \cdot 3! \cdot 3!$.
+\end{enumerate}
+\end{esempio}
+
+\begin{esempio}[Urna]
+Un'urna contiene $20$ palline bianche e $10$ nere. Si fanno $5$ estrazioni e si vuole ottenere $3$ bianche e $2$ nere.
+\begin{enumerate}
+    \item \emph{Senza reimmissione}: combinazioni semplici, $\binom{20}{3}\binom{10}{2}$.
+    \item \emph{Con reimmissione} (si contano gli insiemi di palline scelte): combinazioni con ripetizioni,
+    \[
+    C'_{20,3}\cdot C'_{10,2} = \binom{22}{3}\binom{11}{2},
+    \]
+    perché $C'_{n,k} = C_{n+k-1,k}$.
+    \item \emph{Senza reimmissione, palline indistinguibili e si tiene conto dell'ordine} (sequenze come $BBBNN$, $NBBNB, \dots$): sono permutazioni con ripetizioni, $\dfrac{5!}{3!\,2!}$.
+\end{enumerate}
+\end{esempio}
+
+\subsection{Un esercizio di induzione}
+
+\begin{esercizio}
+Dimostrare per induzione che $25 \mid 2^{5n} - 7^n$ per ogni $n \ge 1$.
+\end{esercizio}
+
+\emph{Soluzione.} Sia $P(n)$: $25 \mid 2^{5n} - 7^n$.
+
+\emph{Caso base} $n = 1$: $2^5 - 7 = 32 - 7 = 25$ e $25 \mid 25$.
+
+\emph{Passo induttivo.} Ipotesi: $25 \mid 2^{5k} - 7^k$, cioè esiste $h \in \mathbb{Z}$ con $2^{5k} - 7^k = 25h$, ossia $2^{5k} = 25h + 7^k$. Dobbiamo dimostrare $25 \mid 2^{5(k+1)} - 7^{k+1}$. Si ha
+\begin{align*}
+2^{5k+5} - 7^{k+1} &= 2^5 \cdot 2^{5k} - 7 \cdot 7^k = 2^5 (25h + 7^k) - 7 \cdot 7^k \\
+&= 25 \cdot 2^5 h + 7^k (2^5 - 7) = 25 \cdot 2^5 h + 7^k \cdot 25 \\
+&= 25\,(2^5 h + 7^k),
+\end{align*}
+quindi $25 \mid 2^{5(k+1)} - 7^{k+1}$, che era la tesi. \hfill $\square$
+
 \end{document}

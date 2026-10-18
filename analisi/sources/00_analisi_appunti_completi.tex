@@ -2093,4 +2093,331 @@ f(x + T) = f(x) \quad \forall x \in D.
 $f(x) = x - [x]$ (la mantissa) è una funzione periodica di periodo $1$.
 \end{esempio}
 
+\section[Funzioni elementari (Lezione 6 -- 12 ottobre 2026)]{Funzioni elementari}
+\noindent\emph{Lezione 6 -- 12 ottobre 2026}
+\subsection{Trasformazioni geometriche dei grafici}
+
+Data $f : \mathbb{R} \to \mathbb{R}$, il \emph{valore assoluto} di $f$ è
+\[
+|f(x)| =
+\begin{cases}
+f(x) & \text{se } f(x) \ge 0, \\
+-f(x) & \text{se } f(x) < 0.
+\end{cases}
+\]
+Con semplici trasformazioni geometriche si disegna il grafico delle funzioni seguenti a partire da quello di $f$.
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}lp{9.5cm}@{}}
+\toprule
+Funzione & Effetto sul grafico di $f$ \\
+\midrule
+$y_1 = f(x) + a$, $a \in \mathbb{R}$ & traslazione in verticale: verso l'alto se $a > 0$, verso il basso se $a < 0$ \\
+$y_2 = f(x + a)$, $a \in \mathbb{R}$ & traslazione in orizzontale: verso sinistra se $a > 0$, verso destra se $a < 0$ \\
+$y_3 = k \cdot f(x)$, $k > 0$ & dilatazione in verticale se $k > 1$ (il grafico si allontana dall'asse $x$), contrazione se $0 < k < 1$ (si schiaccia sull'asse $x$) \\
+$y_4 = f(kx)$, $k > 0$ & dilatazione in orizzontale se $0 < k < 1$ (si allontana dall'asse $y$), contrazione se $k > 1$ (si schiaccia sull'asse $y$) \\
+$y_5 = |f(x)|$ & la parte di grafico con $f(x) < 0$ viene riflessa rispetto all'asse $x$ \\
+$y_6 = f(|x|)$ & si tiene la parte con $x \ge 0$ e la si riflette rispetto all'asse $y$ (la parte con $x < 0$ viene sostituita da questa riflessione) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{esempio}[Parabola]
+Sia $f(x) = x^2$. Allora $g(x) = x^2 + 1$ è la parabola traslata verso l'alto di $1$ e $h(x) = x^2 - 1$ quella traslata verso il basso di $1$. La funzione $g(x) = (x+1)^2$ si annulla per $x = -1$ (traslazione a sinistra di $1$) e $h(x) = (x-1)^2$ si annulla per $x = 1$ (traslazione a destra), mentre $f(0) = 0$.
+\end{esempio}
+
+\begin{esempio}[Seno]
+Per $x \in [0, 2\pi]$, sia $f(x) = \sin x$.
+\begin{itemize}
+    \item $g(x) = 2\sin x$ e $h(x) = \tfrac{1}{2}\sin x$ hanno gli stessi zeri di $f$ ($0, \pi, 2\pi$) ma massimo $2$ e $\tfrac12$ (in $x = \pi/2$), invece di $1$.
+    \item $g(x) = \sin(2x)$ si contrae in orizzontale: si annulla per $x = 0, \tfrac{\pi}{2}, \pi, \tfrac{3\pi}{2}, 2\pi$ e vale $1$ in $x = \tfrac{\pi}{4}$.
+    \item $h(x) = \sin\!\left(\tfrac{1}{2}x\right)$ si dilata in orizzontale: si annulla per $x = 0$ e $x = 2\pi$ e vale $1$ in $x = \pi$.
+\end{itemize}
+\end{esempio}
+
+\begin{osservazione}
+Per $y_5 = |f(x)|$ e $y_6 = f(|x|)$ la lezione mostra graficamente due casi: per $|f(x)|$ si ribalta sopra l'asse $x$ la parte di $f$ che sta sotto; per $f(|x|)$ si usa $f(|x|) = f(x)$ se $x \ge 0$ e $f(|x|) = f(-x)$ se $x < 0$.
+\end{osservazione}
+
+\subsection{Funzioni lineari e lineari affini}
+
+Si usa una \emph{funzione lineare} per esprimere una proporzionalità diretta tra due grandezze $x$ e $y$: al raddoppiare di $x$ raddoppia $y$, al triplicare di $x$ triplica $y$.
+
+La legge di una funzione lineare è $y = mx$, quella di una funzione lineare affine è $y = mx + q$, con $m, q \in \mathbb{R}$. Il dominio è $\mathbb{R}$.
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+ & $m > 0$ & $m = 0$ & $m < 0$ \\
+\midrule
+Monotonia & str.\ crescente & costante & str.\ decrescente \\
+Limitatezza & non limitata & limitata & non limitata \\
+$q = 0$ (lineare) & dispari & pari & dispari \\
+$q \ne 0$ (affine) & non simmetrica & pari & non simmetrica \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Per $m \ne 0$ la funzione è illimitata, strettamente monotona e quindi invertibile. Per $q = 0$ e $m \neq 0$ la funzione è dispari, perché $f(-x) = m(-x) = -mx = -f(x)$. Per $q \ne 0$ non è simmetrica: $f(-x) = -mx + q$ e $-f(x) = -mx - q$ sono diversi.
+
+\subsection{Funzione valore assoluto}
+
+Il valore assoluto (o modulo) di $x$ è
+\[
+f(x) = |x| =
+\begin{cases}
+x & \text{se } x \ge 0, \\
+-x & \text{se } x < 0.
+\end{cases}
+\]
+Si ha $|x| \ge 0$ per ogni $x \in \mathbb{R}$ e $|x| = 0 \iff x = 0$. La funzione è \emph{pari} ($f(-x) = |-x| = |x| = f(x)$), limitata inferiormente ma non superiormente, e \emph{non monotona}.
+
+\subsection{Proporzionalità inversa}
+
+L'altro tipo di proporzionalità tra due grandezze è la \emph{proporzionalità inversa}: $xy = k$, con $k \in \mathbb{R}$. Il prodotto delle due grandezze rimane costante al variare dell'una o dell'altra. Per $k = 1$ si ottiene
+\[
+f : \mathbb{R} \setminus \{0\} \to \mathbb{R}, \qquad f(x) = \frac{1}{x}.
+\]
+È illimitata, decrescente per $x > 0$ e per $x < 0$ (non su tutto il dominio) e \emph{dispari}, perché $f(-x) = \dfrac{1}{-x} = -\dfrac{1}{x} = -f(x)$.
+
+\subsection{Funzioni potenza}
+
+Le funzioni potenza sono del tipo
+\[
+f(x) = k\,x^{\alpha}, \qquad \alpha \ne 0,\ k, \alpha \in \mathbb{R}.
+\]
+Il valore $f(x)$ è proporzionale, con costante di proporzionalità $k$, a $x^\alpha$. Si studia $x^\alpha$ al variare di $\alpha$.
+
+\subsubsection*{Esponente naturale $\alpha = n \in \mathbb{N}$}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}lll@{}}
+\toprule
+ & $n$ pari (es.\ $x^2, x^4$) & $n$ dispari (es.\ $x^3, x^5$) \\
+\midrule
+Dominio & $\mathbb{R}$ & $\mathbb{R}$ \\
+Immagine & $[0,+\infty)$ & $\mathbb{R}$ \\
+Simmetria & pari & dispari \\
+Invertibile & no & sì \\
+\bottomrule
+\end{tabular}
+\end{center}
+Per $n$ dispari la funzione è anche illimitata.
+
+\subsubsection*{Esponente razionale positivo $\alpha = \frac{m}{n}$, $m, n \in \mathbb{N}$}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}llll@{}}
+\toprule
+ & $n$ pari & $n$ dispari, $m$ dispari & $n$ dispari, $m$ pari \\
+\midrule
+Esempi & $x^{1/2}, x^{3/2}, x^{5/2}$ & $x^{1/3}, x^{5/3}$ & $x^{2/3}$ \\
+Dominio & $[0,+\infty)$ & $\mathbb{R}$ & $\mathbb{R}$ \\
+Immagine & $[0,+\infty)$ & $\mathbb{R}$ & $[0,+\infty)$ \\
+Simmetria & dominio non simmetrico & dispari & pari \\
+Invertibile & su $[0,+\infty)$ & sì & no \\
+\bottomrule
+\end{tabular}
+\end{center}
+Quando il dominio non è simmetrico non ha senso dire pari o dispari.
+
+\subsubsection*{Esponente razionale negativo $\alpha = -\frac{m}{n}$, $m, n \in \mathbb{N}$}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}llll@{}}
+\toprule
+ & $n$ pari & $n$ dispari, $m$ dispari & $n$ dispari, $m$ pari \\
+\midrule
+Dominio & $]0,+\infty)$ & $\mathbb{R} \setminus \{0\}$ & $\mathbb{R} \setminus \{0\}$ \\
+Immagine & $]0,+\infty)$ & $\mathbb{R} \setminus \{0\}$ & $]0,+\infty)$ \\
+Simmetria & dominio non simmetrico & dispari & pari \\
+Invertibile & su $]0,+\infty)$ & su $\mathbb{R} \setminus \{0\}$ & no \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsubsection*{Esponente irrazionale $\alpha \in \mathbb{R} \setminus \mathbb{Q}$}
+
+Se si prende come dominio $[0,+\infty)$ oppure $]0,+\infty)$ si possono considerare anche potenze con esponente non razionale.
+\begin{itemize}
+    \item $\alpha > 0$: dominio $[0,+\infty)$, immagine $[0,+\infty)$, dominio non simmetrico, invertibile su $[0,+\infty)$.
+    \item $\alpha < 0$: dominio $]0,+\infty)$, immagine $]0,+\infty)$, dominio non simmetrico. La funzione è strettamente decrescente, quindi invertibile (le slide del corso riportano per errore ``non invertibile'').
+\end{itemize}
+
+\subsubsection*{Riepilogo del dominio}
+
+$x^\alpha$ è definita per:
+\begin{itemize}
+    \item $x \in \mathbb{R}$ se $\alpha = \frac{m}{n}$ con $m, n \in \mathbb{N}$ e $n$ dispari;
+    \item $x \ge 0$ se $\alpha = \frac{m}{n}$ con $m, n \in \mathbb{N}$ e $n$ pari;
+    \item $x \ne 0$ se $\alpha = -\frac{m}{n}$ con $m, n \in \mathbb{N}$ e $n$ dispari;
+    \item $x > 0$ se $\alpha = -\frac{m}{n}$ con $m, n \in \mathbb{N}$ e $n$ pari;
+    \item $x \ge 0$ se $\alpha \in \mathbb{R} \setminus \mathbb{Q}$ e $\alpha > 0$;
+    \item $x > 0$ se $\alpha \in \mathbb{R} \setminus \mathbb{Q}$ e $\alpha < 0$.
+\end{itemize}
+
+\subsection{Funzioni polinomiali e razionali}
+
+Una \emph{funzione polinomiale} (o \emph{polinomio}) è una funzione del tipo
+\[
+P(x) = a_n x^n + \dots + a_1 x + a_0, \qquad a_i \in \mathbb{R},\ a_n \ne 0.
+\]
+Il \emph{grado} del polinomio è l'esponente della potenza più alta, qui $n$. Il dominio è $\mathbb{R}$.
+\begin{itemize}
+    \item $P$ è pari se e solo se tutti i coefficienti di indice dispari sono nulli (per esempio $x^4 + x^2$);
+    \item $P$ è dispari se e solo se tutti i coefficienti di indice pari sono nulli.
+\end{itemize}
+
+Una \emph{funzione razionale} è una funzione del tipo $\dfrac{P(x)}{Q(x)}$ con $P, Q$ polinomi. Il dominio è $\mathbb{R}$ privato degli zeri del denominatore.
+
+\begin{esempio}[Test]
+$f(x) = x^2 - 1$ è una funzione: (1) monotona, (2) invertibile, (3) pari, (4) limitata? La risposta corretta è la (3): $f(-x) = (-x)^2 - 1 = f(x)$, mentre $f$ non è monotona, non è iniettiva ($f(1) = f(-1)$) e non è limitata superiormente.
+\end{esempio}
+
+\section[Funzioni esponenziali, logaritmiche e trigonometriche (Lezione 7 -- 15 ottobre 2026)]{Funzioni esponenziali, logaritmiche e trigonometriche}
+\noindent\emph{Lezione 7 -- 15 ottobre 2026}
+\subsection{Funzioni esponenziali}
+
+\begin{definizione}[Funzione esponenziale]
+Dato $a \in \mathbb{R}$, $a > 0$, $a \ne 1$, si chiama \emph{funzione esponenziale in base $a$} la funzione
+\[
+f(x) = a^x .
+\]
+Il dominio è $\mathbb{R}$ e l'immagine è $(0, +\infty)$.
+\end{definizione}
+
+Se $a = 1$ si avrebbe $f(x) = 1$, che è la funzione costante. Valgono le regole delle potenze:
+\[
+a^0 = 1, \qquad a^x > 0 \ \ \forall x \in \mathbb{R}, \qquad a^{x+y} = a^x \cdot a^y, \qquad (a^x)^y = a^{xy}.
+\]
+
+La funzione è \emph{strettamente crescente} se $a > 1$ e \emph{strettamente decrescente} se $a < 1$. È limitata inferiormente (da $0$) ma non superiormente.
+\begin{itemize}
+    \item Se $a > 1$: al crescere di $x$, $a^x$ diventa molto grande; per $x$ negativo grande in valore assoluto, $a^x = \dfrac{1}{a^{-x}}$ si avvicina a $0$.
+    \item Se $a < 1$: si ha $a^x = \left(\dfrac{1}{b}\right)^x = b^{-x}$ con $b = \dfrac{1}{a} > 1$. Il grafico di $a^x$ si ottiene dal grafico di $b^x$ con una \emph{riflessione rispetto all'asse $y$}.
+\end{itemize}
+
+\begin{esempio}[Test]
+$f(x) = e^{x+1}$ è una funzione: (1) limitata superiormente ma non inferiormente, (2) limitata inferiormente ma non superiormente, (3) pari, (4) dispari. La risposta corretta è la (2): $e^{x+1} > 0$ ma cresce senza limite.
+\end{esempio}
+
+\subsection{Funzioni logaritmiche}
+
+\begin{definizione}[Logaritmo]
+Per $a > 0$, $a \ne 1$, $b > 0$ e $c \in \mathbb{R}$,
+\[
+\log_a b = c \iff a^c = b .
+\]
+Il numero $a$ è la \emph{base} del logaritmo.
+\end{definizione}
+
+\begin{definizione}[Funzione logaritmica]
+Dato $a > 0$, $a \ne 1$, la \emph{funzione logaritmica in base $a$} è $f(x) = \log_a x$. Il dominio è $(0, +\infty)$ e l'immagine è $\mathbb{R}$.
+\end{definizione}
+
+La funzione è strettamente crescente se $a > 1$ e strettamente decrescente se $0 < a < 1$. Per $a > 1$, $\log_a x$ diventa molto grande per $x$ molto grande e molto negativo (tende a $-\infty$) per $x$ che si avvicina a $0$; per $0 < a < 1$ succede il contrario.
+
+\begin{proprieta}
+Per $a > 0$, $a \ne 1$:
+\begin{itemize}
+    \item $\log_a 1 = 0$ e $\log_a a = 1$;
+    \item $\log_a (xy) = \log_a x + \log_a y$ per $x, y > 0$;
+    \item $\log_a x^\alpha = \alpha \log_a x$ per $\alpha \in \mathbb{R}$, $x > 0$;
+    \item (cambio di base) $\log_b x = \dfrac{\log_a x}{\log_a b}$ per $b > 0$, $b \ne 1$, $x > 0$.
+\end{itemize}
+\end{proprieta}
+
+\subsubsection*{Relazione tra esponenziale e logaritmo}
+
+La funzione esponenziale $f : \mathbb{R} \to (0,+\infty)$, $f(x) = a^x$, è monotona, quindi invertibile. La funzione logaritmo $g : (0,+\infty) \to \mathbb{R}$, $g(x) = \log_a x$, è la sua \emph{inversa}: $g = f^{-1}$.
+
+\subsection{Funzioni trigonometriche}
+
+\subsubsection{La circonferenza goniometrica}
+
+La \emph{circonferenza goniometrica} è la circonferenza di centro $O$ e raggio $1$. Serve a rappresentare tutti gli angoli, da quello nullo ($0^\circ$) all'angolo giro ($360^\circ$): ogni angolo al centro individua un arco, e viceversa. Il punto di partenza è $A = (1, 0)$.
+
+Gli angoli si misurano in gradi o in \emph{radianti}: un radiante è l'angolo al centro che sottende un arco di lunghezza uguale al raggio, quindi l'angolo giro misura $2\pi$ radianti. Gli angoli positivi si ottengono percorrendo la circonferenza in senso antiorario a partire da $A$, quelli negativi in senso orario. Gli angoli oltre $2\pi$ ripassano sugli stessi punti: l'angolo $0$ coincide con $2\pi$.
+
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{@{}l|cccccccc@{}}
+\toprule
+$\theta$ (gradi) & $0$ & $30$ & $45$ & $60$ & $90$ & $180$ & $270$ & $360$ \\
+$\theta$ (radianti) & $0$ & $\frac{\pi}{6}$ & $\frac{\pi}{4}$ & $\frac{\pi}{3}$ & $\frac{\pi}{2}$ & $\pi$ & $\frac{3\pi}{2}$ & $2\pi$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsubsection{Seno, coseno, tangente, cotangente}
+
+Sia $P = (x_P, y_P)$ il punto della circonferenza che corrisponde all'angolo $\theta$.
+\begin{itemize}
+    \item $\sin\theta$ è l'\emph{ordinata} di $P$ (il segmento $PH$ con segno);
+    \item $\cos\theta$ è l'\emph{ascissa} di $P$ (il segmento $OH$ con segno);
+    \item $\tan\theta$ è l'ordinata del punto di intersezione tra la retta parallela all'asse $y$ passante per $A$ e la retta che unisce $O$ a $P$. Non è definita per $P = (0, \pm 1)$, cioè $\theta = \frac{\pi}{2} + k\pi$;
+    \item $\cot\theta$ è l'ascissa del punto di intersezione tra la retta parallela all'asse $x$ passante per $M = (0, 1)$ e la retta $OP$. Non è definita per $P = (\pm 1, 0)$, cioè $\theta = k\pi$.
+\end{itemize}
+
+\subsubsection{Le funzioni}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}llllc@{}}
+\toprule
+Funzione & Dominio & Immagine & Periodo & Limitata \\
+\midrule
+$\sin x$ & $\mathbb{R}$ & $[-1, 1]$ & $2\pi$ & sì \\
+$\cos x$ & $\mathbb{R}$ & $[-1, 1]$ & $2\pi$ & sì \\
+$\tan x$ & $\mathbb{R} \setminus \{\frac{\pi}{2} + k\pi,\ k \in \mathbb{Z}\}$ & $\mathbb{R}$ & $\pi$ & no \\
+$\cot x$ & $\mathbb{R} \setminus \{k\pi,\ k \in \mathbb{Z}\}$ & $\mathbb{R}$ & $\pi$ & no \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Il seno è dispari e il coseno è pari.
+
+\subsubsection{Relazioni trigonometriche fondamentali}
+
+Per ogni $x, x_1, x_2 \in \mathbb{R}$:
+\begin{itemize}
+    \item $\cos^2 x + \sin^2 x = 1$ (teorema di Pitagora nel triangolo rettangolo $OPH$, con $OP = 1$);
+    \item $\cos(x_1 + x_2) = \cos x_1 \cos x_2 - \sin x_1 \sin x_2$;
+    \item $\sin(x_1 + x_2) = \sin x_1 \cos x_2 + \cos x_1 \sin x_2$.
+\end{itemize}
+Dalle formule di somma derivano
+\[
+\cos(-x) = \cos x, \quad \sin(-x) = -\sin x, \quad \cos 2x = \cos^2 x - \sin^2 x, \quad \sin 2x = 2\sin x \cos x.
+\]
+Dalle definizioni (triangoli simili) si ha inoltre
+\[
+\tan x = \frac{\sin x}{\cos x}, \qquad \cot x = \frac{\cos x}{\sin x}.
+\]
+
+\subsubsection{Funzioni trigonometriche inverse}
+
+Le funzioni trigonometriche non sono invertibili su tutto il dominio perché sono periodiche. Si restringe il dominio a un intervallo su cui sono strettamente monotone.
+\begin{center}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{@{}lll@{}}
+\toprule
+Restrizione & Funzione inversa & Dominio dell'inversa \\
+\midrule
+$y = \sin x$, $x \in \left[-\frac{\pi}{2}, \frac{\pi}{2}\right]$ & $x = \arcsin y$ & $y \in [-1, 1]$ \\
+$y = \cos x$, $x \in [0, \pi]$ & $x = \arccos y$ & $y \in [-1, 1]$ \\
+$y = \tan x$, $x \in \left(-\frac{\pi}{2}, \frac{\pi}{2}\right)$ & $x = \arctan y$ & $y \in \mathbb{R}$ \\
+$y = \cot x$, $x \in (0, \pi)$ & $x = \operatorname{arccot} y$ & $y \in \mathbb{R}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{esempio}[Test]
+$f(x) = \sin x + \cos x$ è una funzione: (1) limitata, (2) invertibile, (3) pari, (4) dispari. La risposta corretta è la (1): $|\sin x + \cos x| \le |\sin x| + |\cos x| \le 2$. Non è invertibile perché periodica e non è né pari né dispari, dato che $f(-x) = -\sin x + \cos x$.
+\end{esempio}
+
 \end{document}
