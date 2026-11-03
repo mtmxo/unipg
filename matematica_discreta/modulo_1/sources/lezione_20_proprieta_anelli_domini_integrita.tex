@@ -1,0 +1,188 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\newrunin{osservazione}{Osservazione}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Proprietà degli anelli e domini di integrità}
+\author{Marco Cerbella}
+\date{Lezione 10 -- 20 ottobre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Proprietà degli anelli}
+
+Sia $(A, \oplus, \otimes)$ un anello e $a, b, c \in A$. Valgono le seguenti proprietà:
+\begin{enumerate}
+  \item $a \oplus b = a \oplus c \iff b = c$ (legge di cancellazione per $\oplus$);
+  \item $a \otimes 0 = 0 \otimes a = 0$;
+  \item $(-a)\otimes b = a \otimes (-b) = -(a \otimes b)$;
+  \item $(-a)\otimes(-b) = a \otimes b$;
+  \item $(a \ominus b)\otimes c = a \otimes c \ominus b \otimes c$ e $a \otimes (b \ominus c) = a \otimes b \ominus a \otimes c$ (dove $a \ominus b = a \oplus (-b)$);
+  \item $(na)\otimes b = n\,(a \otimes b) = a \otimes (nb)$ per $n > 0$, dove $na = \underbrace{a \oplus a \oplus \dots \oplus a}_{n\text{ volte}}$;
+  \item $(na)\otimes(mb) = (nm)(a \otimes b)$ per $n, m \in \mathbb{Z}$ (con $ka = \underbrace{(-a)\oplus\dots\oplus(-a)}_{|k|\text{ volte}}$ per $k$ negativo);
+  \item se esiste l'unità $1 \in A$, allora $\forall a \in A$: $-a = (-1)\otimes a$.
+\end{enumerate}
+
+\section{Domini di integrità e divisori dello zero}
+
+\begin{definizione}[Legge di annullamento del prodotto]
+Sia $(A, \oplus, \otimes)$ un anello. Vale la \emph{legge di annullamento del prodotto} se
+\[
+  \forall a, b \in A \qquad a \otimes b = 0 \implies (a = 0 \ \text{oppure}\ b = 0).
+\]
+\end{definizione}
+
+\begin{definizione}[Dominio di integrità]
+Un anello $(A, \oplus, \otimes)$ è detto \emph{dominio di integrità} se vale la legge di annullamento del prodotto.
+\end{definizione}
+
+\begin{definizione}[Divisore dello zero]
+Sia $(A, \oplus, \otimes)$ un anello. Un elemento $a \in A$ è detto \emph{divisore dello zero} se $a \neq 0$ e $\exists b \neq 0$, $b \in A$, tale che $a \otimes b = 0$ oppure $b \otimes a = 0$.
+\end{definizione}
+
+\begin{proposizione}
+Sia $(A, \oplus, \otimes)$ un anello. Sono equivalenti:
+\begin{enumerate}
+  \item in $A$ vale la legge di annullamento del prodotto;
+  \item in $A$ non ci sono divisori dello zero;
+  \item l'insieme $A\setminus\{0\}$ è stabile per $\otimes$ (cioè $\otimes$ è un'operazione interna a $A\setminus\{0\}$).
+\end{enumerate}
+\end{proposizione}
+
+\begin{proof}
+$1) \Rightarrow 2)$. Per assurdo sia $a$ un divisore dello zero, cioè $a \neq 0$ ed esiste $b \neq 0$ tale che $a \otimes b = 0$. Per la legge di annullamento del prodotto allora $a = 0$ (impossibile) oppure $b = 0$ (impossibile): assurdo. Dunque non esistono divisori dello zero.
+
+$2) \Rightarrow 3)$. Siano $a, b \in A\setminus\{0\}$; possiamo avere $a \otimes b = 0$? Se fosse $a \otimes b = 0$ allora $a \neq 0$, $b \neq 0$ e $a$ sarebbe un divisore dello zero, ma non esistono per ipotesi. Quindi $a \otimes b \neq 0$, cioè $a \otimes b \in A\setminus\{0\}$, cioè $\otimes$ è interna ad $A\setminus\{0\}$.
+
+$3) \Rightarrow 1)$. Siano $a, b \in A$ tali che $a \otimes b = 0$. Per assurdo siano $a \neq 0$ e $b \neq 0$, cioè $a, b \in A\setminus\{0\}$; poiché $\otimes$ è interna a $A\setminus\{0\}$ si avrebbe $a \otimes b \neq 0$: impossibile. Quindi $a = 0$ oppure $b = 0$, cioè vale la legge di annullamento del prodotto.
+\end{proof}
+
+\begin{osservazione}
+\begin{itemize}
+  \item $(\mathbb{Z}, +, \cdot)$, $(\mathbb{Q}, +, \cdot)$, $(\mathbb{R}, +, \cdot)$ sono domini di integrità.
+  \item In un campo (o in un corpo) vale la legge di annullamento del prodotto.
+  \item In un dominio di integrità vale: se $a \neq 0$, allora $a \otimes b = a \otimes c \iff b = c$ (legge di cancellazione del prodotto).
+\end{itemize}
+\end{osservazione}
+
+\begin{proof}[Dimostrazione della cancellazione]
+$\Leftarrow$ Vale sempre. $\Rightarrow$ Da $a \otimes b = a \otimes c$ segue $0 = a \otimes c - a \otimes b = a \otimes (c - b)$. Per la legge di annullamento del prodotto $a = 0$ oppure $c - b = 0$; ma $a \neq 0$, quindi non può succedere la prima, dunque $c - b = 0$, cioè $c = b$.
+\end{proof}
+
+\subsection{Notazione per i campi}
+
+Si indica un campo con $(\mathbb{K}, +, \cdot)$: $(\mathbb{K}, +, \cdot)$ è un anello commutativo con unità, e posto $\mathbb{K}^* = \mathbb{K}\setminus\{0\}$, ogni $k \in \mathbb{K}^*$ ha inverso $k^{-1}$. In un campo l'inverso moltiplicativo è unico.
+
+\begin{esempio}[Divisori dello zero in $\mathbb{Z}_{12}$]
+In $\mathbb{Z}_{12}$ la tavola del prodotto è
+\[
+\begin{array}{c|cccccc}
+  \cdot & [1] & [2] & [3] & [4] & \cdots & [12] \\ \hline
+  \relax[1] & [1] & [2] & [3] & [4] & \cdots & [12] \\
+  \relax[2] & [2] & [4] & [6] & [8] & \cdots & [12] \\
+  \relax[3] & [3] & [6] & [9] & [12] & \cdots & [12]
+\end{array}
+\]
+$(\mathbb{Z}_{12}, +, \cdot)$ è un anello commutativo con unità; $[12]$ è l'elemento neutro per la somma, cioè $[0]$. Si ha $[3]\cdot[4] = [12] = [0]$, ma $[3] \neq [12]$ e $[4] \neq [12]$: non vale la legge di annullamento del prodotto e $[3]$, $[4]$ sono divisori dello zero.
+
+Inoltre $[2]\cdot[1] = [2] = [2]\cdot[7]$ ma $[1] \neq [7]$: non vale la cancellazione del prodotto.
+\end{esempio}
+
+\end{document}

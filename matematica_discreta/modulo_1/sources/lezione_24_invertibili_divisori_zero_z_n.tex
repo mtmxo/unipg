@@ -1,0 +1,217 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\newrunin{osservazione}{Osservazione}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Invertibili e divisori dello zero modulo $n$}
+\author{Marco Cerbella}
+\date{Lezione 13 -- 2 novembre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Divisibilità, invertibili e divisori dello zero in $\mathbb{Z}_n$}
+
+\begin{definizione}
+Siano $[a]_n, [b]_n \in \mathbb{Z}_n$.
+\begin{itemize}
+  \item Diciamo che $[a]_n$ \emph{divide} $[b]_n$ ($[a]_n \mid [b]_n$) se $\exists [c]_n \in \mathbb{Z}_n$ tale che $[b]_n = [a]_n\cdot[c]_n$.
+  \item $[a]_n \in \mathbb{Z}_n$ è \emph{invertibile} se $\exists [a']_n \in \mathbb{Z}_n$ tale che $[a]_n\cdot[a']_n = [1]_n$.
+  \item $[a]_n \in \mathbb{Z}_n$, $[a]_n \neq [0]_n$, è un \emph{divisore dello zero} se $\exists [b]_n \neq [0]_n$ tale che $[a]_n\cdot[b]_n = [0]_n$.
+\end{itemize}
+\end{definizione}
+
+\begin{osservazione}
+In generale $\mathbb{Z}_n$ non è un dominio di integrità, cioè in $\mathbb{Z}_n$ non vale la legge di annullamento del prodotto: ad esempio $[2]_6\cdot[3]_6 = [6]_6 = [0]_6$.
+
+Non sempre vale la legge di cancellazione del prodotto. Ad esempio in $\mathbb{Z}_{12}$: $[5]\cdot[8] = [40] = [4]$ e $[8]\cdot[8] = [64] = [4]$ ($64 = 12\cdot 5 + 4$), quindi $[5]\cdot[8] = [8]\cdot[8]$ ma $[5] \neq [8]$.
+
+Però $\mathbb{Z}_2$, $\mathbb{Z}_3$, $\mathbb{Z}_5$ sono campi.
+\end{osservazione}
+
+\section{Proprietà delle congruenze}
+
+\begin{proprieta}[Corollario]
+Sia $n > 0$ e $\forall a, b, c \in \mathbb{Z}$. Se $a \equiv b \bmod n$, allora
+\[
+  a + c \equiv b + c \bmod n, \qquad a\cdot c \equiv b\cdot c \bmod n, \qquad a^i \equiv b^i \bmod n .
+\]
+In termini di classi: $[a]_n = [b]_n \Rightarrow [a + c]_n = [b + c]_n$, $[ac]_n = [bc]_n$, $[a^i]_n = [b^i]_n$.
+\end{proprieta}
+
+\begin{proprieta}
+\begin{itemize}
+  \item $ac \equiv bc \bmod n$ e $\operatorname{MCD}(c, n) = 1 \Rightarrow a \equiv b \bmod n$ (cioè $[ac]_n = [bc]_n$ e $\operatorname{MCD}(c, n) = 1 \Rightarrow [a]_n = [b]_n$).
+  \item $ac \equiv bc \bmod n$ e $\operatorname{MCD}(c, n) = d \Rightarrow a\cdot\frac{c}{d} \equiv b\cdot\frac{c}{d} \bmod \frac{n}{d} \Rightarrow a \equiv b \bmod \frac{n}{d}$.
+  \item $a \equiv b \bmod n$ e $p \mid n \Rightarrow a \equiv b \bmod p$.
+  \item $a \equiv b \bmod r$ e $a \equiv b \bmod s \Rightarrow a \equiv b \bmod \operatorname{mcm}(r, s)$.
+\end{itemize}
+\end{proprieta}
+
+\begin{osservazione}[Rappresentanti di $\mathbb{Z}_n$]
+Si può rappresentare $\mathbb{Z}_n$ con qualunque insieme di $n$ interi consecutivi. Ad esempio
+\[
+  \mathbb{Z}_6 = \{[0], [1], [2], [3], [4], [5]\} = \{[7], [8], [9], [10], [11], [12]\} = \{[-2], [-1], [0], [1], [2], [3]\},
+\]
+in generale $\mathbb{Z}_n = \{[c]_n, [c + 1]_n, \dots, [c + (n-1)]_n\}$. Per esempio in $\mathbb{Z}_6$: $[0]_6 = \{6k \mid k \in \mathbb{Z}\} = [6]_6 = [12]_6 = \{\dots, -6, 0, 6, 12, \dots\}$; $[1]_6 = \{6k + 1\} = [7]_6 = \{\dots, -11, -5, 1, 7, 13, \dots\}$; $[2]_6 = \{6k + 2\} = [8]_6 = [-4]_6 = \{\dots, -10, -4, 2, 8, \dots\}$.
+\end{osservazione}
+
+\begin{proposizione}
+Sia $c$ tale che $\operatorname{MCD}(c, n) = 1$. Allora
+\[
+  \mathbb{Z}_n = \{[c\cdot 0], [c\cdot 1], [c\cdot 2], \dots, [c(n-1)]\} .
+\]
+\end{proposizione}
+
+\begin{esempio}
+In $\mathbb{Z}_6$, con $c = 5$ e $\operatorname{MCD}(5, 6) = 1$:
+\[
+  \mathbb{Z}_6 = \{[5\cdot 0], [5\cdot 1], [5\cdot 2], [5\cdot 3], [5\cdot 4], [5\cdot 5]\} = \{[0], [5], [10], [15], [20], [25]\}.
+\]
+\end{esempio}
+
+\section{Invertibili e divisori dello zero}
+
+\begin{proposizione}
+Sia $[a]_n \in \mathbb{Z}_n$, $[a]_n \neq [0]_n$. Allora
+\[
+  [a]_n \text{ è un divisore dello zero} \iff [a]_n \text{ non è invertibile.}
+\]
+\end{proposizione}
+
+\begin{proof}
+$\Rightarrow$ Sia $[a]$ un divisore dello zero, cioè $\exists [b] \neq [0]$ tale che $[a]\cdot[b] = [0]$. Se $[a]$ fosse invertibile, esisterebbe $[a']$ con $[a]\cdot[a'] = [1]$ e
+\[
+  [a']\cdot[a]\cdot[b] = [a']\cdot[0] \ \Rightarrow\ [1]\cdot[b] = [b] = [0] ,
+\]
+ma $[b] \neq [0]$: assurdo.
+
+$\Leftarrow$ Sia $[a]$ non invertibile, cioè $\forall [b] \in \{[0], \dots, [n-1]\}$ si ha $[a]\cdot[b] \neq [1]$. Allora gli $n$ prodotti $[a]\cdot[b]$ assumono al più $n - 1$ valori distinti, quindi devono esserci due classi $[b_1] \neq [b_2]$ tali che $[a]\cdot[b_1] = [a]\cdot[b_2]$, cioè $[ab_1] = [ab_2]$, cioè $ab_1 \equiv ab_2 \bmod n$, cioè $\exists k \in \mathbb{Z}$ tale che $ab_1 - ab_2 = kn$. Cioè $a(b_1 - b_2) \equiv 0 \bmod n$, cioè $[a]\cdot[b_1 - b_2] = [0]$, con $[a] \neq [0]$ per ipotesi e $[b_1 - b_2] \neq [0]$ perché $b_1 \neq b_2$ (come classi). Quindi $[a]$ è un divisore dello zero.
+\end{proof}
+
+\begin{proposizione}
+In $\mathbb{Z}_n$ la classe $[c]_n$ è invertibile se e solo se $\operatorname{MCD}(c, n) = 1$.
+\end{proposizione}
+
+\begin{proof}
+$\Rightarrow$ Sia $[c]$ invertibile: $\exists [c'] \in \mathbb{Z}_n$ con $[c]\cdot[c'] = [1]$, cioè $[c\cdot c'] = [1]$, cioè $c\cdot c' - 1 = kn$ per qualche $k$, cioè $c\cdot c' - kn = 1$. Allora $\operatorname{MCD}(c, n) \mid (c\cdot c' - kn) = 1$, cioè $\operatorname{MCD}(c, n) = 1$.
+
+$\Leftarrow$ Sia $\operatorname{MCD}(c, n) = 1$. Per il teorema di Bézout esistono $\alpha, \beta \in \mathbb{Z}$ tali che $1 = \operatorname{MCD}(c, n) = \alpha c + \beta n$, cioè $\alpha c - 1 = -\beta n$, cioè $\alpha c \equiv 1 \bmod n$, cioè $[\alpha]_n\cdot[c]_n = [1]_n$. Quindi $[\alpha]$ è l'inverso di $[c]$ modulo $n$.
+\end{proof}
+
+\begin{esempio}[Inverso di $[13]_{30}$ in $\mathbb{Z}_{30}$]
+Si usa l'algoritmo di Euclide \emph{esteso} tra $13$ e $30$. Si costruisce la tabella con colonne $q$, $r$, $s$, $t$ (si parte con $r = 30, 13$; $s = 1, 0$; $t = 0, 1$; e ad ogni passo $q$ è il quoziente, $r$ il resto, $s_{\text{nuovo}} = s_{\text{prec-prec}} - q\cdot s_{\text{prec}}$, e analogamente per $t$):
+\[
+\begin{array}{c|rrr}
+  q & r & s & t \\ \hline
+  - & 30 & 1 & 0 \\
+  - & 13 & 0 & 1 \\
+  2 & 4 & 1 & -2 \\
+  3 & 1 & -3 & 7 \\
+  4 & 0 & 13 & -30
+\end{array}
+\]
+L'ultimo resto non nullo è $1 = \operatorname{MCD}(30, 13)$, con $s = -3$ e $t = 7$:
+\[
+  1 = 30\cdot(-3) + 13\cdot 7 .
+\]
+Quindi $[7]_{30}$ è l'inverso di $[13]_{30}$. Verifica: $[7]\cdot[13] = [91] = [1]_{30}$, perché $91 = 3\cdot 30 + 1$.
+\end{esempio}
+
+\end{document}

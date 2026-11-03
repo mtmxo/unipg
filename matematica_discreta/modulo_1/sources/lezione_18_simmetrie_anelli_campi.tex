@@ -1,0 +1,204 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\newrunin{osservazione}{Osservazione}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Simmetrie, anelli e campi}
+\author{Marco Cerbella}
+\date{Lezione 10 -- 20 ottobre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Il gruppo delle simmetrie del rettangolo}
+
+Riprendiamo le simmetrie del rettangolo $ABCD$: $\mathrm{Id}$, $\tau$ (rotazione di $180^\circ$), $a_1$ (simmetria rispetto all'asse verticale) e $a_2$ (simmetria rispetto all'asse orizzontale):
+\[
+  \begin{gathered}
+  (ABCD) \xrightarrow{a_1} (BADC), \qquad
+  (ABCD) \xrightarrow{a_2} (DCBA), \\
+  (ABCD) \xrightarrow{\tau} (CDAB), \qquad
+  (ABCD) \xrightarrow{\mathrm{Id}} (ABCD).
+  \end{gathered}
+\]
+La tavola della composizione è
+\[
+\begin{array}{c|cccc}
+  * & \mathrm{Id} & \tau & a_1 & a_2 \\ \hline
+  \mathrm{Id} & \mathrm{Id} & \tau & a_1 & a_2 \\
+  \tau & \tau & \mathrm{Id} & a_2 & a_1 \\
+  a_1 & a_1 & a_2 & \mathrm{Id} & \tau \\
+  a_2 & a_2 & a_1 & \tau & \mathrm{Id}
+\end{array}
+\]
+Ad esempio $a_1 * a_2\,(ABCD) = a_1\big(a_2(ABCD)\big) = a_1(DCBA) = (CDAB)$, cioè $a_1 * a_2 = \tau$.
+
+\begin{esempio}[Gruppo \emph{non} ciclico]
+Questo è un gruppo non ciclico: vale $\tau * \tau = \mathrm{Id}$, $a_1 * a_1 = \mathrm{Id}$, $a_2 * a_2 = \mathrm{Id}$, quindi nessun elemento, composto con se stesso, genera tutti gli altri.
+\end{esempio}
+
+\begin{esempio}[Simmetrie del triangolo equilatero]
+Sia $ABC$ un triangolo equilatero. Le sue simmetrie sono le tre riflessioni $a_1, a_2, a_3$ rispetto agli assi, la rotazione $\tau$ di $120^\circ$, la rotazione $\tau^2$ di $240^\circ$ e l'identità. Ad esempio
+\[
+  (ABC) \xrightarrow{a_1} (ACB), \qquad (ABC) \xrightarrow{\tau} (CAB), \qquad \tau * \tau = \tau^2 .
+\]
+La tavola della composizione ($\mathrm{Id}, a_1, a_2, a_3, \tau, \tau^2$) è stata solo impostata a lezione.
+\end{esempio}
+
+\section{Anelli}
+
+\begin{definizione}[Anello]
+Una struttura $(A, \oplus, \otimes)$ è un \emph{anello} se
+\begin{enumerate}
+  \item $(A, \oplus)$ è un gruppo abeliano (con $0$ elemento neutro per $\oplus$ e, per $a \in A$, l'opposto indicato con $-a$);
+  \item valgono le \emph{distributive}:
+  \[
+    (a \oplus b) \otimes c = (a \otimes c) \oplus (b \otimes c), \qquad
+    a \otimes (b \oplus c) = (a \otimes b) \oplus (a \otimes c);
+  \]
+  \item $(A, \otimes)$ è un semigruppo ($\otimes$ è associativa).
+\end{enumerate}
+\end{definizione}
+
+\begin{itemize}
+  \item Se inoltre esiste l'elemento neutro per $\otimes$ (indicato con $1$) l'anello è detto \emph{unitario} (anello con unità).
+  \item Se $\otimes$ è commutativa, l'anello è detto \emph{anello commutativo}.
+\end{itemize}
+
+\begin{definizione}[Corpo e campo]
+Sia $(A, \oplus, \otimes)$ un anello unitario.
+\begin{itemize}
+  \item È detto \emph{corpo} se $\forall a \in A$, $a \neq 0$, esiste l'inverso $a^{-1}$, con $a^{-1} \otimes a = a \otimes a^{-1} = 1$.
+  \item È detto \emph{campo} se $\forall a \in A$, $a \neq 0$, esiste l'inverso $a^{-1}$ e inoltre $(A, \otimes)$ è commutativa.
+\end{itemize}
+\end{definizione}
+
+\begin{esempio}[$2\mathbb{Z}$]
+$2\mathbb{Z} = \{2k \mid k \in \mathbb{Z}\} = \{\dots, -4, -2, 0, 2, 4, \dots\}$. È $(2\mathbb{Z}, +, \cdot)$ un anello?
+\begin{enumerate}
+  \item $(2\mathbb{Z}, +)$ è un gruppo abeliano? $+$ è associativa; esiste l'elemento neutro $0$; $\forall 2k \in 2\mathbb{Z}$, $-2k$ è l'opposto; $+$ è commutativa. Sì.
+  \item Le distributive valgono.
+  \item Il prodotto è associativo e commutativo.
+\end{enumerate}
+Dunque $(2\mathbb{Z}, +, \cdot)$ è un anello commutativo (senza unità).
+\end{esempio}
+
+\begin{esempio}
+\begin{itemize}
+  \item $(\mathbb{R}, +, \cdot)$ e $(\mathbb{Q}, +, \cdot)$ sono \emph{campi}.
+  \item $(\mathbb{Z}, +, \cdot)$ è un anello commutativo unitario, ma non è un campo (gli unici elementi invertibili sono $+1$ e $-1$).
+  \item $\mathbb{Z}_2 = \{0, 1\}$ con le operazioni
+  \[
+  \begin{array}{c|cc}
+    + & 0 & 1 \\ \hline
+    0 & 0 & 1 \\
+    1 & 1 & 0
+  \end{array}
+  \qquad
+  \begin{array}{c|cc}
+    \cdot & 0 & 1 \\ \hline
+    0 & 0 & 0 \\
+    1 & 0 & 1
+  \end{array}
+  \]
+  Per $+$ l'elemento neutro è $0$, per $\cdot$ è $1$: $(\mathbb{Z}_2, +, \cdot)$ è un campo.
+\end{itemize}
+\end{esempio}
+
+\end{document}

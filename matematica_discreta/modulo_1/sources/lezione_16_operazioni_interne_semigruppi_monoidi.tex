@@ -1,0 +1,259 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\newrunin{osservazione}{Osservazione}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Operazioni interne, semigruppi e monoidi}
+\author{Marco Cerbella}
+\date{Lezione 9 -- 19 ottobre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Operazioni interne e gruppoidi}
+
+\begin{definizione}
+Una \emph{operazione interna} su un insieme $A$ è una funzione
+\[
+  * : A \times A \to A, \qquad (x, y) \mapsto x * y = {*}(x, y).
+\]
+L'insieme $A$ con l'operazione interna $*$ si chiama \emph{gruppoide} e si indica con $(A, *)$.
+\end{definizione}
+
+\begin{esempio}
+\begin{itemize}
+  \item $(\mathbb{Z}, +)$ con $+ : \mathbb{Z}\times\mathbb{Z} \to \mathbb{Z}$, $(h, k) \mapsto h + k$, è un gruppoide; è commutativo e associativo.
+  \item $(\mathbb{N}, \cdot)$ con $\cdot : \mathbb{N}\times\mathbb{N} \to \mathbb{N}$, $(a, b) \mapsto a\cdot b$, è commutativo e associativo.
+  \item $(\mathbb{N}, -)$ \emph{non} è un gruppoide: $-: \mathbb{N}\times\mathbb{N} \to \mathbb{Z}$, $(a, b) \mapsto a - b$ non ha valori in $\mathbb{N}$.
+  \item $(\mathbb{Z}, -)$ è un gruppoide, ma non è commutativo e non è associativo: $(5-2)-6 = 3 - 6 = -3$, mentre $5 - (2 - 6) = 5 - (-4) = 9$.
+  \item $(\mathbb{N}\setminus\{0\}, :)$ \emph{non} è un gruppoide: $: (a, b) \mapsto a : b = \frac{a}{b}$ va da $\mathbb{N}\setminus\{0\} \times \mathbb{N}\setminus\{0\}$ in $\mathbb{Q}$.
+  \item Sia $A$ un insieme e $\mathcal{P}(A)$ l'insieme delle sue parti: $\cup : \mathcal{P}(A)\times\mathcal{P}(A) \to \mathcal{P}(A)$, $(X, Y) \mapsto X \cup Y$ è un'operazione interna; $(\mathcal{P}(A), \cup)$ è un gruppoide, commutativo e associativo (e lo stesso vale per $\cap$).
+\end{itemize}
+\end{esempio}
+
+\subsection{Tavola di un'operazione}
+
+Se $A = \{x_1, \dots, x_n\}$ è finito possiamo costruire la \emph{tavola} associata all'operazione $*$: nella riga di $x_i$ e colonna di $x_j$ si scrive $x_i * x_j$.
+\[
+\begin{array}{c|cccc}
+  * & x_1 & x_2 & \cdots & x_n \\ \hline
+  x_1 & x_1 * x_1 & x_1 * x_2 & \cdots & x_1 * x_n \\
+  x_2 & x_2 * x_1 & x_2 * x_2 & \cdots & x_2 * x_n \\
+  \vdots & \vdots & \vdots & \ddots & \vdots \\
+  x_n & x_n * x_1 & x_n * x_2 & \cdots & x_n * x_n
+\end{array}
+\]
+Se la tavola è simmetrica rispetto alla diagonale l'operazione è commutativa.
+
+\begin{esempio}[$A = \{a\}$]
+$\mathcal{P}(A) = \{\emptyset, \{a\}\} = \{\emptyset, A\}$. Le tavole di $\cap$ e $\cup$ sono
+\[
+\begin{array}{c|cc}
+  \cap & \emptyset & A \\ \hline
+  \emptyset & \emptyset & \emptyset \\
+  A & \emptyset & A
+\end{array}
+\qquad\qquad
+\begin{array}{c|cc}
+  \cup & \emptyset & A \\ \hline
+  \emptyset & \emptyset & A \\
+  A & A & A
+\end{array}
+\]
+Entrambe sono simmetriche rispetto alla diagonale, quindi le operazioni sono commutative. Per $\cap$ l'elemento $A$ è l'elemento neutro, per $\cup$ lo è $\emptyset$.
+\end{esempio}
+
+\begin{esempio}[$A = \{a, b\}$, differenza insiemistica]
+Sia $|\mathcal{P}(A)| = 2^{|A|} = 2^2 = 4$. La tavola di $(\mathcal{P}(A), \setminus)$ è
+\[
+\begin{array}{c|cccc}
+  \setminus & \emptyset & \{a\} & \{b\} & A \\ \hline
+  \emptyset & \emptyset & \emptyset & \emptyset & \emptyset \\
+  \{a\} & \{a\} & \emptyset & \{a\} & \emptyset \\
+  \{b\} & \{b\} & \{b\} & \emptyset & \emptyset \\
+  A & A & \{b\} & \{a\} & \emptyset
+\end{array}
+\]
+Non è commutativa ($\{a\}\setminus\{b\} = \{a\}$ ma $\{b\}\setminus\{a\} = \{b\}$) e non esiste l'elemento neutro.
+\end{esempio}
+
+\begin{esempio}
+Sia $A = \{e, a, b\}$ con l'operazione $*$ definita dalla tavola
+\[
+\begin{array}{c|ccc}
+  * & e & a & b \\ \hline
+  e & e & a & b \\
+  a & a & e & e \\
+  b & b & e & e
+\end{array}
+\]
+$*$ è un'operazione interna, definita dalla tavola; è commutativa (la tavola è simmetrica) e $e$ è l'elemento neutro. \emph{Non} vale l'associatività perché $a$ ha due inversi: $a * a = e$ e $a * b = e$. Oppure: $(b * a) * a = e * a = a$ mentre $b * (a * a) = b * e = b$, quindi l'operazione non è associativa.
+\end{esempio}
+
+\section{Proprietà delle operazioni interne}
+
+\begin{definizione}
+Un gruppoide $(A, *)$ è detto
+\begin{itemize}
+  \item \emph{commutativo} se $\forall a, b \in A$: $a * b = b * a$;
+  \item \emph{associativo} se $\forall a, b, c \in A$: $(a * b) * c = a * (b * c)$.
+\end{itemize}
+Un gruppoide associativo $(A, *)$ è detto \emph{semigruppo}.
+\end{definizione}
+
+\begin{definizione}[Elemento neutro]
+Sia $(A, *)$ un gruppoide. Un elemento $e \in A$ è \emph{elemento neutro} per $*$ se
+\[
+  \forall a \in A \qquad a * e = e * a = a .
+\]
+\end{definizione}
+
+\begin{definizione}[Elemento invertibile]
+Se esiste l'elemento neutro $e \in A$, dato $a \in A$ l'\emph{inverso} di $a$ (se esiste) è l'elemento $a'$ tale che
+\[
+  a * a' = a' * a = e .
+\]
+Allora $a$ è detto \emph{elemento invertibile}.
+\end{definizione}
+
+\begin{esempio}
+\begin{itemize}
+  \item $(\mathbb{N}, +)$: $0$ è l'elemento neutro; $0$ ha inverso, nessun altro numero ha inverso.
+  \item $(\mathbb{Z}, +)$: $0$ è l'elemento neutro; tutti i numeri sono invertibili (l'inverso di $k$ è $-k$).
+  \item $(\mathbb{N}\setminus\{0\}, +)$: non c'è elemento neutro.
+  \item $(\mathbb{N}, \cdot)$: $1$ è l'elemento neutro e $1$ è invertibile.
+  \item $(\mathcal{P}(A), \cap)$: $A$ è l'elemento neutro ($X \subseteq A \Rightarrow A \cap X = X = X \cap A$). Non c'è inverso: solo $A$ è invertibile.
+  \item $(\mathcal{P}(A), \cup)$: $\emptyset$ è l'elemento neutro. Non c'è inverso: solo $\emptyset$ è invertibile.
+\end{itemize}
+\end{esempio}
+
+\begin{esempio}[$h * k = h + k + hk$ su $\mathbb{Z}$]
+Sia $* : \mathbb{Z}\times\mathbb{Z} \to \mathbb{Z}$, $(h, k) \mapsto h * k = h + k + hk$. Cerchiamo, se esiste, un elemento neutro $x \in \mathbb{Z}$. Deve valere $x * k = k$, cioè $x + k + xk = k$, quindi $x(1 + k) = 0$. Poiché $k$ è un numero qualsiasi, $x$ deve essere zero. Verifichiamo che $x = 0$ sia elemento neutro: $0 * k = 0 + k + 0\cdot k = k$ e $h * 0 = h + 0 + h\cdot 0 = h$. Dunque $0$ è elemento neutro.
+\end{esempio}
+
+\begin{esempio}[$h * k = h^2 + k^2$ su $\mathbb{Z}$]
+Esiste un elemento neutro? Se $x \in \mathbb{Z}$ fosse neutro, dovrebbe valere $x * k = k$, cioè $x^2 + k^2 = k$, cioè $x^2 = k - k^2$ per ogni $k$. Ma il secondo membro varia con $k$, quindi anche $x$ varierebbe: non ci sarà mai elemento neutro. (Ad esempio $0 * k = 0^2 + k^2 = k^2 \neq k$.)
+\end{esempio}
+
+\begin{definizione}[Monoide]
+Un \emph{monoide} è un semigruppo $(A, *)$ con elemento neutro.
+\end{definizione}
+
+\begin{proposizione}
+\begin{enumerate}
+  \item Sia $(A, *)$ un gruppoide. Se esiste l'elemento neutro, è unico.
+  \item Sia $(A, *)$ un monoide. Se $a$ è invertibile, allora l'inverso di $a$ è unico.
+\end{enumerate}
+\end{proposizione}
+
+\begin{proof}
+1) Siano $e_1, e_2 \in A$ elementi neutri in $(A, *)$. Poiché $e_1$ è neutro, $\forall x \in A$ vale $e_1 * x = x * e_1 = x$; poiché $e_2$ è neutro, $\forall x \in A$ vale $e_2 * x = x * e_2 = x$. Prendendo $x = e_2$ nella prima e $x = e_1$ nella seconda:
+\[
+  e_1 = e_1 * e_2 = e_2 ,
+\]
+cioè l'elemento neutro è unico.
+
+2) Sia $a$ invertibile, con $a_1'$ e $a_2'$ inversi, cioè $a * a_1' = e = a_1' * a$ e $a * a_2' = e = a_2' * a$. Allora, usando l'associatività,
+\[
+  a_1' = a_1' * e = a_1' * (a * a_2') = (a_1' * a) * a_2' = e * a_2' = a_2' ,
+\]
+cioè $a_1' = a_2'$ e l'inverso è unico.
+\end{proof}
+
+\end{document}

@@ -1,0 +1,203 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\newrunin{osservazione}{Osservazione}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Intorni e limiti all'infinito}
+\author{Marco Cerbella}
+\date{Lezione 9 -- 22 ottobre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Intorni}
+
+\begin{definizione}[Intorno]
+Dato un punto $x_0 \in \mathbb{R}$, un \emph{intorno di ampiezza $\varepsilon > 0$} di $x_0$ è un intervallo aperto di lunghezza $2\varepsilon$ che contiene $x_0$, cioè
+\[
+I_\varepsilon(x_0) = \,]x_0 - \varepsilon,\ x_0 + \varepsilon[ .
+\]
+\end{definizione}
+
+La \emph{famiglia degli intorni di $x_0$} è l'insieme degli intorni del punto $x_0$ ottenuta al variare di $\varepsilon$ in $]0, +\infty)$.
+
+\begin{proprieta}[degli intorni]
+\begin{itemize}
+    \item Se $r_1 < r_2$ allora $I_{r_1}(x_0) \subset I_{r_2}(x_0)$.
+    \item Dati $x_1, x_2 \in \mathbb{R}$, $x_1 \neq x_2$, esiste sempre $r > 0$ tale che $I_r(x_1) \cap I_r(x_2) = \emptyset$ (basta che $r \le \tfrac{1}{2}|x_1 - x_2|$).
+\end{itemize}
+\end{proprieta}
+
+\section{Limiti di funzioni per $x \to \pm\infty$}
+
+\begin{definizione}[Limite finito per $x \to +\infty$]
+Si dice che $f : D \to \mathbb{R}$ \emph{tende al limite finito} $\ell \in \mathbb{R}$ per $x$ tendente a $+\infty$ e si scrive $\displaystyle\lim_{x \to +\infty} f(x) = \ell$ se
+\[
+\forall \varepsilon > 0,\ \exists K > 0 \text{ tale che } \forall x \in D : x > K \text{ si ha } |f(x) - \ell| < \varepsilon .
+\]
+\end{definizione}
+
+La condizione $|f(x) - \ell| < \varepsilon$ significa $f(x) \in I_\varepsilon(\ell)$, cioè $\ell - \varepsilon < f(x) < \ell + \varepsilon$: da un certo punto in poi il grafico di $f$ sta nella striscia di ampiezza $2\varepsilon$ attorno alla retta $y = \ell$.
+
+\begin{definizione}[Limite $+\infty$ per $x \to +\infty$]
+Si dice che $f : D \to \mathbb{R}$ \emph{tende a $+\infty$} per $x$ tendente a $+\infty$ e si scrive $\displaystyle\lim_{x \to +\infty} f(x) = +\infty$ se
+\[
+\forall M > 0,\ \exists K > 0 \text{ tale che } \forall x \in D : x > K \text{ si ha } f(x) > M .
+\]
+\end{definizione}
+
+\begin{definizione}[Limiti per $x \to -\infty$]
+Si dice che $f : D \to \mathbb{R}$ \emph{tende al limite finito} $\ell \in \mathbb{R}$ per $x$ tendente a $-\infty$ e si scrive $\displaystyle\lim_{x \to -\infty} f(x) = \ell$ se
+\[
+\forall \varepsilon > 0,\ \exists K > 0 \text{ tale che } \forall x \in D : x < -K \text{ si ha } |f(x) - \ell| < \varepsilon .
+\]
+Si dice che $f$ \emph{tende a $-\infty$} per $x$ tendente a $-\infty$ e si scrive $\displaystyle\lim_{x \to -\infty} f(x) = -\infty$ se
+\[
+\forall M > 0,\ \exists K > 0 \text{ tale che } \forall x \in D : x < -K \text{ si ha } f(x) < -M .
+\]
+\end{definizione}
+
+\begin{osservazione}
+Nelle slide la condizione per $x \to -\infty$ è scritta $x < K$ e $f(x) < M$; nelle verifiche svolte a lezione si usa però, come sopra, $x < -K$ (e $f(x) < -M$ per il limite $-\infty$), con $K, M > 0$.
+\end{osservazione}
+
+Il caso $\lim_{x\to-\infty} f(x) = +\infty$ e quello $\lim_{x\to+\infty} f(x) = -\infty$ si definiscono in modo analogo, combinando le condizioni su $x$ e su $f(x)$.
+
+\section{Verifiche con la definizione}
+
+\begin{esempio}[$\lim_{x\to+\infty}\frac{x^2+2x}{2x^2+1} = \frac{1}{2}$]
+Il campo di esistenza: $2x^2 + 1 \neq 0$ per ogni $x \in \mathbb{R}$, quindi $D = \mathbb{R}$ e $x$ può tendere a $+\infty$ perché $D$ non è limitato superiormente.
+
+Fissato $\varepsilon > 0$, la condizione $|f(x) - \ell| < \varepsilon$ si traduce in
+\[
+\left| \frac{x^2 + 2x}{2x^2 + 1} - \frac{1}{2} \right| < \varepsilon .
+\]
+Calcoliamo la differenza:
+\[
+\frac{x^2 + 2x}{2x^2 + 1} - \frac{1}{2} = \frac{2x^2 + 4x - 2x^2 - 1}{2(2x^2 + 1)} = \frac{4x - 1}{2(2x^2 + 1)} .
+\]
+Supponiamo $x > \tfrac{1}{4}$, così togliamo il valore assoluto:
+\[
+\frac{4x - 1}{2(2x^2 + 1)} < \frac{4x}{2(2x^2 + 1)} = \frac{2x}{2x^2 + 1} < \frac{2x}{2x^2} = \frac{1}{x} .
+\]
+Se $\dfrac{1}{x} < \varepsilon$, cioè $x > \dfrac{1}{\varepsilon}$, la disuguaglianza è verificata. Basta quindi prendere
+\[
+K = \max\left\{ \tfrac{1}{4},\ \tfrac{1}{\varepsilon} \right\},
+\]
+perché se $x > K$ allora $x > \tfrac{1}{4}$ e $x > \tfrac{1}{\varepsilon}$, e quindi $\left|\dfrac{4x-1}{2(2x^2+1)}\right| < \varepsilon$.
+\end{esempio}
+
+\begin{esempio}[$\lim_{x\to+\infty}\sqrt{x} = +\infty$]
+Il campo di esistenza è $x \ge 0$, cioè $D = [0, +\infty)$. Fissato $M > 0$, la condizione $f(x) > M$ si traduce in $\sqrt{x} > M$, cioè $x > M^2$. Basta considerare $K = M^2$: per ogni $M > 0$, considerando $K = M^2$, per ogni $x > M^2$ si ha $\sqrt{x} > M$.
+\end{esempio}
+
+\begin{esempio}[$\lim_{x\to-\infty}\frac{1}{\sqrt{1-x}} = 0$]
+Campo di esistenza: $\sqrt{1-x} \neq 0$ e $1 - x \ge 0$, cioè $x \ne 1$ e $x \le 1$, quindi $x < 1$ e $D = (-\infty, 1)$.
+
+Fissato $\varepsilon > 0$,
+\[
+|f(x) - \ell| = \left| \frac{1}{\sqrt{1-x}} \right| = \frac{1}{\sqrt{1-x}} < \varepsilon
+\iff \sqrt{1-x} > \frac{1}{\varepsilon}
+\iff 1 - x > \frac{1}{\varepsilon^2}
+\iff x < 1 - \frac{1}{\varepsilon^2} .
+\]
+Si prende $K = \max\left\{0,\ \dfrac{1}{\varepsilon^2} - 1\right\}$: per ogni $x < -K$ si ha $\dfrac{1}{\sqrt{1-x}} < \varepsilon$.
+\end{esempio}
+
+\end{document}

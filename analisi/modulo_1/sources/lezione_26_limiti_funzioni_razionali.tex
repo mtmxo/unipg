@@ -1,0 +1,232 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\newrunin{osservazione}{Osservazione}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Limiti di funzioni razionali}
+\author{Marco Cerbella}
+\date{Lezione 12 -- 2 novembre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Limiti di funzioni razionali}
+
+Siano
+\[
+\begin{aligned} P_n(x) &= a_n x^n + a_{n-1}x^{n-1} + \dots + a_1 x + a_0, & a_n &\neq 0, \\ Q_m(x) &= b_m x^m + b_{m-1}x^{m-1} + \dots + b_1 x + b_0, & b_m &\neq 0 , \end{aligned}
+\]
+e $f(x) = \dfrac{P_n(x)}{Q_m(x)}$.
+
+\begin{proprieta}[Limite per $x \to \pm\infty$]
+Per calcolare il limite di $f(x)$ per $x \to \pm\infty$ basta calcolare il limite del rapporto dei \emph{monomi di grado massimo}:
+\[
+\lim_{x\to\pm\infty}\frac{P_n(x)}{Q_m(x)} = \lim_{x\to\pm\infty}\frac{a_n x^n}{b_m x^m} =
+\begin{cases} \pm\infty & \text{se } n > m \ (\text{segno: regola dei segni}) \\ a_n/b_m & \text{se } n = m \\ 0 & \text{se } n < m . \end{cases}
+\]
+\end{proprieta}
+
+\begin{proprieta}[Limite per $x \to 0$]
+Per calcolare il limite di $f(x)$ per $x \to 0$ basta calcolare il limite del rapporto dei \emph{monomi di grado minimo}, di gradi $r$ (al numeratore) e $s$ (al denominatore):
+\[
+\lim_{x\to 0}\frac{P(x)}{Q(x)} = \lim_{x\to 0}\frac{a_r x^r}{b_s x^s} =
+\begin{cases} 0 & \text{se } r > s \\ a_r/b_s & \text{se } r = s \\ \infty & \text{se } r < s . \end{cases}
+\]
+\end{proprieta}
+
+\section{Esempi per $x \to \pm\infty$}
+
+Tutti i limiti seguenti sono forme indeterminate $\frac{\infty}{\infty}$; si raccoglie la potenza di grado massimo al numeratore e al denominatore, e i termini rimanenti tendono a $0$.
+
+\begin{esempio}
+\[
+\lim_{x\to+\infty}\frac{3x^3 - 2x}{x - x^2} \quad (\text{F.I. } \tfrac{\infty}{\infty})
+\]
+Raccogliamo $3x^3$ al numeratore e $-x^2$ al denominatore:
+\[
+\begin{aligned}\lim_{x\to+\infty}\frac{3x^3\left(1 - \dfrac{2}{3}\cdot\dfrac{1}{x^2}\right)}{-x^2\left(-\dfrac{1}{x} + 1\right)}
+&= \lim_{x\to+\infty}(-3)\cdot x\cdot\frac{(1 - 0)}{(0 + 1)} \\ &= -\infty .\end{aligned}
+\]
+In pratica:
+\[
+\lim_{x\to+\infty}\frac{3x^3 - 2x}{x - x^2} = \lim_{x\to+\infty}\frac{3x^3}{-x^2} = \lim_{x\to+\infty}(-3)\,x = -\infty .
+\]
+\end{esempio}
+
+\begin{esempio}
+\[
+\lim_{x\to-\infty}\frac{-4x^5 + 2x^3}{8x^5 - x^4 + 5x} \quad (\text{F.I. } \tfrac{\infty}{\infty})
+\]
+Raccogliendo $-4x^5$ al numeratore e $8x^5$ al denominatore, le parentesi tendono a $1$:
+\[
+\lim_{x\to-\infty}\frac{-4x^5\left(1 - \dfrac{1}{2}\cdot\dfrac{1}{x^2}\right)}{8x^5\left(1 - \dfrac{1}{8}\cdot\dfrac{1}{x} + \dfrac{5}{8}\cdot\dfrac{1}{x^4}\right)} = -\frac{1}{2},
+\qquad\text{cioè}\qquad
+\lim_{x\to-\infty}\frac{-4x^5}{8x^5} = -\frac{4}{8} = -\frac{1}{2}.
+\]
+\end{esempio}
+
+\begin{esempio}
+\[
+\lim_{x\to-\infty}\frac{6x^2 - x}{-x^3} \quad (\text{F.I. } \tfrac{\infty}{\infty}) = 0
+\]
+Raccogliendo $6x^2$ al numeratore: $\dfrac{6x^2\left(1 - \frac{1}{6}\cdot\frac{1}{x}\right)}{-x^3} = \dfrac{6}{-x}\cdot\left(1 - \dfrac{1}{6x}\right)\to 0$. In pratica $\displaystyle\lim_{x\to-\infty}\frac{6x^2}{-x^3} = \lim_{x\to-\infty}\frac{-6}{x} = 0$.
+\end{esempio}
+
+\begin{esempio}
+\[
+\lim_{x\to+\infty}\frac{\sqrt{x} + x}{x} \quad (\text{F.I. } \tfrac{\infty}{\infty}) = 1
+\]
+Il termine di grado massimo è $x$ (e $\sqrt x = x^{1/2}$): raccogliendo $x$ si ha
+\[
+\lim_{x\to+\infty}\frac{x\left(\dfrac{\sqrt{x}}{x} + 1\right)}{x} = \lim_{x\to+\infty}\left(\frac{1}{\sqrt{x}} + 1\right) = 1,
+\]
+perché $\frac{\sqrt{x} + x}{x} = \frac{\sqrt x}{x} + \frac{x}{x} = \frac{1}{\sqrt x} + 1$. In pratica $\displaystyle\lim_{x\to+\infty}\frac{\sqrt{x} + x}{x} = \lim_{x\to+\infty}\frac{x}{x} = 1$.
+\end{esempio}
+
+\section{Esempi per $x \to 0$}
+
+Le forme indeterminate sono $\frac{0}{0}$: si raccoglie la potenza di grado \emph{minimo}.
+
+\begin{esempio}
+\[
+\lim_{x\to 0}\frac{3x^3 - 2x}{x - x^2} \quad (\text{F.I. } \tfrac{0}{0}) = -2
+\]
+Raccogliendo $-2x$ al numeratore e $x$ al denominatore:
+\[
+\lim_{x\to 0}\frac{-2x\left(-\dfrac{3}{2}x^2 + 1\right)}{x(1 - x)} = \lim_{x\to 0}\frac{-2x}{x} = -2 .
+\]
+\end{esempio}
+
+\begin{esempio}
+\[
+\lim_{x\to 0}\frac{-4x^5 + 2x^3}{8x^5 - x^4 + 5x} \quad (\text{F.I. } \tfrac{0}{0}) = 0
+\]
+I monomi di grado minimo sono $2x^3$ e $5x$:
+\[
+\lim_{x\to 0}\frac{2x^3}{5x} = \lim_{x\to 0}\frac{2}{5}x^2 = 0 .
+\]
+\end{esempio}
+
+\begin{esempio}
+\[
+\lim_{x\to 0}\frac{6x^2 - x}{-x^3} \quad (\text{F.I. } \tfrac{0}{0}) = +\infty
+\]
+Raccogliendo $-x$ al numeratore: $\dfrac{-x\,(-6x + 1)}{-x^3} \to \lim_{x\to 0}\dfrac{-x}{-x^3} = \lim_{x\to 0}\dfrac{1}{x^2} = +\infty$.
+\end{esempio}
+
+\begin{esempio}
+\[
+\lim_{x\to 0^+}\frac{\sqrt{x} + x}{x} \quad (\text{F.I. } \tfrac{0}{0}) = +\infty
+\]
+Si considera $x \to 0^+$ perché ci si può avvicinare a $0$ solo con valori non negativi, dato che c'è $\sqrt{x}$. Raccogliendo $\sqrt x$:
+\[
+\lim_{x\to 0^+}\frac{\sqrt{x}\left(1 + \dfrac{x}{\sqrt{x}}\right)}{x} = \lim_{x\to 0^+}\frac{\sqrt{x}\,(1 + \sqrt{x})}{x} = \lim_{x\to 0^+}\frac{\sqrt{x}}{x} = \lim_{x\to 0^+}\frac{1}{\sqrt{x}} = +\infty .
+\]
+\end{esempio}
+
+\section{Confronto tra potenze}
+
+Disegnando i grafici di $x$, $x^2$, $x^3$, $x^4$ si vede che:
+\begin{itemize}
+    \item per $x \to +\infty$ vanno a $+\infty$ più velocemente le potenze più grandi di $x$;
+    \item per $x \to 0$ vanno a $0$ più velocemente le potenze più piccole di $x$ (cioè con esponente maggiore): $x^4 < x^3 < x^2 < x$ per $0 < x < 1$.
+\end{itemize}
+Per $x > 1$ si ha invece $x < x^2 < x^3 < x^4$.
+
+\end{document}

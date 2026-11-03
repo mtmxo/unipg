@@ -1,0 +1,347 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\NewTColorBox{osservazione}{}{nota,
+  before upper={\textbf{Osservazione.}\ }}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Operatori bit a bit, altri operatori e sequence point}
+\author{Marco Cerbella}
+\date{Lezione 12 -- 19 ottobre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Operatori bit a bit}
+
+Gli operatori bit a bit permettono di manipolare i singoli bit di un byte o di un'unità di dati più grande.
+
+\begin{center}
+\begin{tabular}{l p{3.2cm} l p{5.6cm}}
+\toprule
+Operatore & Significato & Esempio & Risultato (per ogni posizione di bit)\\
+\midrule
+\lstinline|&| & AND bit a bit & \lstinline|x & y| & $1$ se $1$ sia in $x$ sia in $y$; $0$ se $0$ in $x$ o in $y$, o in entrambi\\
+\lstinline/|/ & OR bit a bit & \lstinline/x | y/ & $1$ se $1$ in $x$ o in $y$, o in entrambi; $0$ se $0$ in entrambi\\
+\lstinline|^| & XOR bit a bit (OR esclusivo) & \lstinline|x ^ y| & $1$ se $1$ in $x$ o in $y$ ma non in entrambi; $0$ se i due bit sono uguali\\
+\lstinline|~| & NOT bit a bit (complemento a uno) & \lstinline|~x| & $1$ se $0$ in $x$; $0$ se $1$ in $x$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{esempio}
+Con \lstinline|int a = 6;| e \lstinline|int b = 11;| (mostrati gli ultimi $5$ bit, gli altri valgono~$0$ tranne che in $\sim a$, dove valgono~$1$):
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+Espressione & Schema di bit\\
+\midrule
+\lstinline|a = 6|  & \texttt{0\,0\,1\,1\,0}\\
+\lstinline|b = 11| & \texttt{0\,1\,0\,1\,1}\\
+\lstinline|a & b|  & \texttt{0\,0\,0\,1\,0}\\
+\lstinline/a | b/  & \texttt{0\,1\,1\,1\,1}\\
+\lstinline|a ^ b|  & \texttt{0\,1\,1\,0\,1}\\
+\lstinline|~a|     & \texttt{1\,1\,0\,0\,1}\\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{esempio}
+
+Un uso tipico degli assegnamenti composti bit a bit è la \emph{maschera}:
+\begin{codice}
+a &= 0xFF;    // equivale a a = a & 0xFF; azzera tutti i bit tranne gli otto meno significativi
+\end{codice}
+
+\subsection{Rappresentazione in memoria e nel processore}
+
+In memoria i valori sono rappresentati in \emph{little endian}; nel processore gli stessi valori vengono tradotti in \emph{big endian}. Tutte le operazioni nel processore sono quindi eseguite in big endian e, quando il risultato viene riscritto in memoria, viene salvato in little endian.
+
+\section{Operatori di shift}
+
+Gli operatori di shift traslano lo schema di bit dell'operando sinistro del numero di posizioni indicato dall'operando destro.
+
+Gli operandi degli operatori di shift devono essere interi. Prima dello shift vengono eseguite su entrambi le promozioni intere. Il valore dell'operando destro non deve essere negativo e deve essere minore della larghezza (in bit) dell'operando sinistro dopo la promozione intera.
+
+\begin{esempio}
+\begin{codice}
+unsigned long n = 0xB,   // schema di bit: 0 ... 0 0 0 1 0 1 1
+              result = 0;
+result = n << 2;         // 0 ... 0 1 0 1 1 0 0
+result = n >> 2;         // 0 ... 0 0 0 0 0 1 0
+\end{codice}
+\end{esempio}
+
+\begin{osservazione}
+Uno shift a sinistra di $y$ posizioni equivale a moltiplicare l'operando sinistro per $2^{y}$; uno shift a destra di $y$ posizioni equivale a dividere per $2^{y}$ (divisione intera): $x / 2^{y}$.
+\end{osservazione}
+
+\section{Altri operatori}
+
+In C ci sono altri sei operatori che non rientrano nelle categorie viste.
+
+\begin{center}
+\begin{tabular}{l p{3.6cm} l p{5.2cm}}
+\toprule
+Operatore & Significato & Esempio & Risultato\\
+\midrule
+\lstinline|()| & chiamata di funzione & \lstinline|log(x)| & passa il controllo alla funzione specificata, con gli argomenti specificati\\
+\lstinline|sizeof| & dimensione in byte di un oggetto o di un tipo & \lstinline|sizeof x| & numero di byte occupati da $x$ in memoria\\
+\lstinline|(tipo)| & conversione esplicita di tipo (cast) & \lstinline|(short) x| & il valore di $x$ convertito al tipo specificato\\
+\lstinline|?:| & valutazione condizionale & \lstinline|x ? y : z| & il valore di $y$ se $x$ è vero (diverso da $0$), altrimenti il valore di $z$\\
+\lstinline|,| & valutazione sequenziale & \lstinline|x, y| & valuta prima $x$, poi $y$; il risultato è il valore di $y$\\
+\bottomrule
+\end{tabular}
+\end{center}
+(gli altri due operatori, di selezione dei membri e di indicizzazione, sono già nella tabella di precedenza.)
+
+\subsection{Operatore condizionale}
+
+L'operatore condizionale è detto anche operatore \emph{ternario}, perché è l'unico che ha tre operandi:
+\[
+\texttt{condizione ? espressione1 : espressione2}
+\]
+L'operazione valuta prima la condizione. Poi, a seconda del risultato, valuta una delle due espressioni alternative. Dopo la valutazione della condizione c'è un \emph{sequence point}. Se il risultato è diverso da $0$ (la condizione è vera) viene valutato \emph{solo} il secondo operando, \texttt{espressione1}, e l'intera operazione assume il suo valore. Se invece la condizione è $0$ (falsa) viene valutato solo il terzo operando, \texttt{espressione2}, e l'operazione assume il suo valore.
+
+\begin{esempio}
+\begin{codice}
+int a = 6;
+int b = 12;
+int c;
+c = b > a ? 100 : 150;     // c diventa 100
+c = a == b ? 100 : 150;    // c diventa 150
+\end{codice}
+\end{esempio}
+
+Il primo operando, la condizione, deve avere tipo aritmetico. Se entrambe le espressioni alternative hanno tipo aritmetico, il tipo del risultato è quello che si ottiene applicando agli operandi le usuali conversioni aritmetiche:
+\begin{codice}
+int a = 6;
+int b = 12;
+int c;
+c = (b > a) ? 100 : 150LL;   // l'intera espressione ha tipo long long
+\end{codice}
+
+\subsection{Operatore virgola}
+
+L'operatore virgola è un operatore binario:
+\[
+\texttt{espressione1 , espressione2}
+\]
+Garantisce un'elaborazione sequenziale: prima viene valutato l'operando sinistro, poi quello destro. Il risultato dell'intera espressione ha il tipo e il valore dell'operando destro. L'operando sinistro viene valutato solo per i suoi effetti collaterali; il suo valore viene scartato.
+
+\begin{esempio}
+\begin{codice}
+int a = 6;
+int b = 12;
+int c;
+c = (a++, a + 7);   // a diventa 7, c diventa 14
+\end{codice}
+Il valore dell'intera espressione tra parentesi è $14$.
+\end{esempio}
+
+\section{Sequence point ed effetti collaterali}
+
+Una funzione o un'espressione ha un \emph{effetto collaterale} se, oltre a restituire un valore, modifica uno stato o ha un'interazione osservabile con le funzioni chiamanti o con il mondo esterno.
+
+\begin{definizione}
+Un \emph{sequence point} è un punto dell'esecuzione di un programma in cui è garantito che
+\begin{itemize}
+    \item tutti gli effetti collaterali delle valutazioni precedenti sono già stati eseguiti, e
+    \item nessun effetto collaterale delle valutazioni successive è ancora stato eseguito.
+\end{itemize}
+In altre parole, è un punto in cui tutti gli effetti collaterali sono stati valutati prima di passare al passo successivo.
+\end{definizione}
+
+\subsection{Attenzione agli assegnamenti}
+
+La modifica dell'operando sinistro è un effetto collaterale di un'espressione di assegnamento. Il valore dell'intera espressione di assegnamento è uguale al valore assegnato all'operando sinistro, e l'espressione ha il tipo dell'operando sinistro. A differenza dell'operando sinistro, però, l'espressione di assegnamento \emph{non è un lvalue}.
+
+\begin{esempio}
+\begin{codice}
+int a = 6;
+int b = 12;
+int c;
+c = (b = a);
+\end{codice}
+L'espressione \lstinline|(b = a)| ha valore $6$ e, come effetto collaterale, cambia il valore di \lstinline|b| in memoria; poi l'assegnamento a \lstinline|c| ha a sua volta come effetto collaterale la modifica di \lstinline|c|.
+\end{esempio}
+
+\begin{esempio}
+\begin{codice}
+int a = 6;
+int b = 12;
+int c;
+(c = b) = a;     // errore di compilazione
+\end{codice}
+Il compilatore segnala un errore perché \lstinline|(c = b)| è un rvalue e non un lvalue: non si può assegnargli il valore di \lstinline|a|.
+\end{esempio}
+
+\begin{esempio}[Quanti effetti collaterali?]
+\begin{codice}
+int a = 3;
+int b = 4;
+a = b++;
+\end{codice}
+L'espressione \lstinline|a = b++| ha due effetti collaterali: uno su \lstinline|b| e uno su \lstinline|a|.
+\end{esempio}
+
+\subsection{Regola da ricordare}
+
+Un programmatore deve ricordarsi di \emph{non modificare la stessa variabile più di una volta tra due sequence point consecutivi}.
+
+\begin{codice}
+i = 1;       // OK
+i = i++;     // SBAGLIATO: due modifiche di i; il comportamento è indefinito
+\end{codice}
+Poiché l'assegnamento e l'incremento nell'ultima istruzione possono avvenire in un ordine qualunque, il valore risultante di \lstinline|i| è indefinito.
+\begin{codice}
+int i = i++;   // OK, qualunque cosa significhi: è la creazione di i
+               // seguita dalla sua inizializzazione; il primo "=" non è
+               // un operatore di assegnamento
+\end{codice}
+
+\subsection{Dove si trovano i sequence point}
+
+I sequence point più importanti si trovano nelle posizioni seguenti:
+\begin{itemize}
+    \item alla fine di un comando (\lstinline|;|);
+    \item dopo la valutazione di tutti gli argomenti di una chiamata di funzione e prima che il controllo passi alle istruzioni della funzione;
+    \item alla fine di un'espressione che non fa parte di un'espressione più grande: per esempio ognuna delle tre espressioni di controllo di un \lstinline|for|, la condizione di un \lstinline|if| o di un \lstinline|while|, l'espressione di un \lstinline|return| e gli inizializzatori (dopo la valutazione di $5$ in \lstinline|int a = 5;|);
+    \item dopo la valutazione del primo operando di ciascuno dei seguenti operatori: \lstinline|&&| (AND logico), \lstinline/||/ (OR logico), \lstinline|?:| (condizionale) e \lstinline|,| (virgola).
+\end{itemize}
+
+\begin{esempio}
+\begin{itemize}
+    \item L'espressione \lstinline|++i < 100 ? f(i++) : (i = 0)| è ammessa, perché c'è un sequence point tra la prima modifica di \lstinline|i| e quella delle altre due che viene eseguita.
+    \item Anche \lstinline|a++ && a++| è corretta (sequence point dopo il primo operando di \lstinline|&&|).
+    \item \lstinline|a++ + b++| è corretta, perché ha un effetto collaterale su \lstinline|a| e uno su \lstinline|b|, cioè su due variabili diverse.
+\end{itemize}
+\end{esempio}
+
+\begin{esercizio}
+Che cosa stampa il programma seguente?
+\begin{codice}
+int main()
+{
+    int i = 0;
+    int k = i++, j = i++;
+    printf("%d %d %d\n", k, j, i);
+    int l = 0;
+    int m = ++l, n = ++l;
+    printf("%d %d %d\n", m, n, l);
+    int q;
+    q = ++q;
+    printf("%d\n", q);
+}
+\end{codice}
+\begin{risultato}
+0 1 2
+1 2 2
+\end{risultato}
+Nelle prime due dichiarazioni c'è un sequence point alla fine di ciascun inizializzatore, quindi i valori sono ben definiti. L'ultima istruzione, invece, modifica \lstinline|q| due volte senza sequence point intermedio: il compilatore avverte con
+\texttt{warning: multiple unsequenced modifications to 'q' [-Wunsequenced]} e il comportamento è indefinito.
+\end{esercizio}
+
+\section{Riferimenti}
+
+Sul libro: sezioni 2.5, 2.6, 3.11, 3.12, 4.9, 4.10, 7.7, 10.9, appendice~A, pag.~77 (espressione condizionale), pag.~87 (cast), pag.~135 (lvalue e rvalue), pag.~243 (virgola). Per effetti collaterali e sequence point:
+\begin{itemize}
+    \item {\footnotesize\url{https://learn.microsoft.com/it-it/cpp/c-language/side-effects?view=msvc-170}}
+    \item {\footnotesize\url{https://learn.microsoft.com/it-it/cpp/c-language/c-sequence-points?view=msvc-170}}
+\end{itemize}
+
+\end{document}

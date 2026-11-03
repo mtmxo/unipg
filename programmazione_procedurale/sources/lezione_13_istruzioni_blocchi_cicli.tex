@@ -1,0 +1,360 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\NewTColorBox{osservazione}{}{nota,
+  before upper={\textbf{Osservazione.}\ }}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Istruzioni, blocchi e cicli}
+\author{Marco Cerbella}
+\date{Lezione 13 -- 26 ottobre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Istruzioni}
+
+Un'\emph{istruzione} (\emph{statement}) specifica una o più azioni da eseguire, come assegnare un valore a una variabile, passare il controllo a una funzione o saltare a un'altra istruzione. L'insieme di tutte le istruzioni di un programma determina ciò che il programma fa.
+
+I salti e i cicli sono istruzioni che controllano il flusso del programma. Eccetto quando queste istruzioni di controllo producono dei salti, le istruzioni vengono eseguite in sequenza, cioè nell'ordine in cui compaiono nel programma. Un'istruzione semplice è un'espressione seguita da un punto e virgola:
+\[
+\texttt{[espressione] ;}
+\]
+
+\begin{esempio}
+\lstinline|a + 3| è un'\emph{espressione}; \lstinline|a + 3;| è un \emph{comando} (istruzione). Si veda la differenza:
+\begin{codice}
+int a = 3;
+a = a + 2;        // istruzione: espressione seguita da ;
+if (a + 3;) { }   // SBAGLIATO: dentro le parentesi dell'if serve un'espressione, non un'istruzione
+\end{codice}
+\end{esempio}
+
+\subsection{Programmazione imperativa e procedurale}
+
+In informatica la \emph{programmazione imperativa} è un paradigma di programmazione che usa istruzioni che cambiano lo stato del programma. La \emph{programmazione procedurale} è un paradigma derivato dalla programmazione strutturata, basato sul concetto di chiamata di procedura. Le procedure sono dette anche routine, sottoprogrammi o funzioni. Il C è un linguaggio imperativo e procedurale.
+
+\subsection{Altri paradigmi}
+
+La \emph{programmazione dichiarativa} è un paradigma che esprime la logica di una computazione senza descriverne il flusso di controllo: descrivendo \emph{che cosa} il programma deve ottenere, piuttosto che \emph{come} ottenerlo, si cerca di minimizzare o eliminare gli effetti collaterali. Un esempio in Prolog:
+\begin{codice}
+mother_child(trude, sally).
+father_child(tom, sally).
+father_child(tom, erica).
+father_child(mike, tom).
+sibling(X, Y) :- parent_child(Z, X), parent_child(Z, Y).
+parent_child(X, Y) :- father_child(X, Y).
+parent_child(X, Y) :- mother_child(X, Y).
+
+?- sibling(sally, erica).
+Yes
+\end{codice}
+
+\section{Istruzione composta (blocco)}
+
+Un'\emph{istruzione composta}, detta in breve \emph{blocco}, raggruppa una serie di istruzioni e dichiarazioni tra parentesi graffe in modo da formare un'unica istruzione:
+\[
+\texttt{\{ [lista di dichiarazioni e istruzioni] \}}
+\]
+A differenza delle istruzioni semplici, i blocchi \emph{non} sono terminati da un punto e virgola.
+
+Un blocco si usa dove la sintassi richiede una sola istruzione, ma lo scopo del programma ne richiede più di una.
+\begin{codice}
+{
+    int a = 5, b = 4, c = 0;
+    c = a + b;
+}
+\end{codice}
+
+\begin{esempio}
+Senza le graffe l'\lstinline|if| controlla soltanto la prima istruzione che lo segue:
+\begin{codice}
+int a = -4;
+if (a < 0)
+    printf("%d is less than 0", a);
+    a = -a;
+    printf("a now is %d", a);
+\end{codice}
+\begin{risultato}
+-4 is less than 0 a now is 4
+\end{risultato}
+Con \lstinline|int a = 4;| nello stesso codice \lstinline|a = -a;| e la seconda \lstinline|printf| vengono comunque eseguite, perché non sono sotto il controllo dell'\lstinline|if|; l'output è \texttt{a now is -4}. Per controllare tutte e tre le istruzioni occorre un blocco:
+\begin{codice}
+int a = 4;
+if (a < 0) {
+    printf("%d is less than 0", a);
+    a = -a;
+    printf("a now is %d", a);
+}
+\end{codice}
+\end{esempio}
+
+\subsection{Blocchi e scope}
+
+\begin{codice}
+{   double result = 0.0, x = 0.0;
+    long status = 0;
+    int limit;
+    ++x;                    // istruzioni
+    if (status == 0)
+    {                       // nuovo blocco
+        int i = 0;
+        { int k = 3; }      // un altro blocco
+    }
+}
+\end{codice}
+I nomi dichiarati all'interno di un blocco hanno \emph{block scope}: sono visibili solo dalla loro dichiarazione fino alla fine del blocco. All'interno di questo scope, una dichiarazione può anche nascondere un oggetto con lo stesso nome dichiarato fuori dal blocco.
+
+\section{Istruzioni di definizione}
+
+Servono a definire variabili. La definizione di una variabile equivale alla sua creazione in memoria. Nello stesso scope le variabili devono avere nomi diversi.
+
+\begin{codice}
+int main() {
+    int a = 4;      // corretto
+}
+\end{codice}
+\begin{codice}
+int main() {
+    int a = 4;
+    float a = 5;    // errore: a è già definita in questo scope
+}
+\end{codice}
+Non si possono usare come espressioni:
+\begin{codice}
+int main() {
+    int a = int b = 3;    // errore
+}
+\end{codice}
+
+\section{Cicli}
+
+Si usa un \emph{ciclo} per eseguire un gruppo di istruzioni, detto \emph{corpo del ciclo}, più di una volta. In C un ciclo si introduce con una delle tre istruzioni di iterazione:
+\begin{enumerate}
+    \item \lstinline|while|;
+    \item \lstinline|do ... while|;
+    \item \lstinline|for|.
+\end{enumerate}
+Il numero di iterazioni del corpo è controllato da una condizione, l'\emph{espressione di controllo}: un'espressione di tipo scalare, cioè un'espressione aritmetica o un puntatore. La condizione del ciclo è vera se il valore dell'espressione di controllo è diverso da $0$, altrimenti è considerata falsa.
+
+\subsection{Istruzione while}
+
+Un'istruzione \lstinline|while| esegue un'istruzione ripetutamente finché l'espressione di controllo è vera:
+\[
+\texttt{while ( espressione ) istruzione}
+\]
+Il \lstinline|while| è un ciclo \emph{a controllo in testa} (\emph{top-driven}): prima si valuta la condizione del ciclo (l'espressione di controllo). Se è vera, si esegue il corpo e si valuta di nuovo l'espressione di controllo. Se la condizione è falsa, l'esecuzione prosegue con l'istruzione che segue il corpo del ciclo.
+
+Sintatticamente il corpo del ciclo è \emph{una} istruzione; se ne servono più d'una si raggruppano in un blocco.
+
+\begin{esempio}
+\begin{codice}
+#include <stdio.h>
+int main() {
+    int a = 10;
+
+    while (a < 20) {
+        printf("value of a: %d\n", a);
+        a++;
+    }
+    return 0;
+}
+\end{codice}
+\begin{risultato}
+value of a: 10
+value of a: 11
+value of a: 12
+value of a: 13
+value of a: 14
+value of a: 15
+value of a: 16
+value of a: 17
+value of a: 18
+value of a: 19
+\end{risultato}
+\end{esempio}
+
+\subsection{Istruzione for}
+
+Come il \lstinline|while|, l'istruzione \lstinline|for| è un ciclo a controllo in testa, ma con più logica del ciclo contenuta nell'istruzione stessa:
+\[
+\texttt{for ( [espressione1]; [espressione2]; [espressione3] ) istruzione}
+\]
+\begin{itemize}
+    \item \texttt{espressione1}: \emph{inizializzazione}. Viene valutata una sola volta, prima della prima valutazione dell'espressione di controllo, per eseguire le inizializzazioni necessarie.
+    \item \texttt{espressione2}: \emph{espressione di controllo}. Viene verificata prima di ogni iterazione; l'esecuzione del ciclo termina quando vale falso.
+    \item \texttt{espressione3}: \emph{aggiustamento}, per esempio l'incremento di un contatore, eseguito dopo ogni iterazione del ciclo e prima che l'espressione di controllo venga verificata di nuovo.
+\end{itemize}
+
+\begin{esempio}
+\begin{codice}
+int a = 0;
+int i;
+for (i = 0; i < 4; ++i) {
+    a = a + 2;
+    printf("%d", a);
+}
+\end{codice}
+\begin{risultato}
+2468
+\end{risultato}
+La variabile \lstinline|i| vale successivamente $0, 1, 2, 3$ (e $4$, quando il ciclo termina). Lo stesso comportamento si ottiene con \lstinline|for (i = 1; i <= 4; ++i)|.
+\end{esempio}
+
+Ognuna delle tre espressioni nell'intestazione del \lstinline|for| può essere omessa; la forma più breve possibile è quindi \lstinline|for (;;)|. Un'espressione di controllo mancante è considerata sempre vera e definisce quindi un ciclo infinito. \lstinline|for (; espressione; )| equivale a \lstinline|while (espressione)|. Ogni \lstinline|for| si può riscrivere come \lstinline|while| e viceversa:
+\begin{codice}
+int a = 0, i = 0;
+while (i < 4)
+{
+    a = a + 2;
+    ++i;
+}
+\end{codice}
+
+\subsubsection*{Dichiarazione al posto di espressione1}
+
+Dallo standard C99 si può usare una dichiarazione al posto di \texttt{espressione1}. In tal caso lo scope della variabile dichiarata è limitato al ciclo \lstinline|for|:
+\begin{codice}
+for (int i = 0; i < 4; ++i) {
+    a = a + 2;
+}
+\end{codice}
+La variabile \lstinline|i| dichiarata in questo ciclo non esiste più dopo la fine del ciclo.
+
+\subsection{Istruzione do \dots{} while}
+
+L'istruzione \lstinline|do ... while| è un ciclo \emph{a controllo in coda} (\emph{bottom-driven}):
+\[
+\texttt{do istruzione while ( espressione );}
+\]
+Il corpo del ciclo viene eseguito una volta prima che l'espressione di controllo sia valutata per la prima volta. A differenza di \lstinline|while| e \lstinline|for|, il \lstinline|do ... while| garantisce che venga eseguita \emph{almeno una} iterazione del corpo. Se l'espressione di controllo è vera segue un'altra iterazione; se è falsa il ciclo termina.
+
+\begin{esempio}
+\begin{codice}
+#include <stdio.h>
+int main()
+{
+    double number, sum = 0;
+
+    do   // il corpo viene eseguito almeno una volta
+    {
+        printf("Enter a number: ");
+        scanf("%lf", &number);
+        sum += number;
+    }
+    while (number != 0.0);
+
+    printf("Sum = %.2lf", sum);
+    return 0;
+}
+\end{codice}
+\begin{risultato}
+Enter a number: 1.5
+Enter a number: 2.4
+Enter a number: -3.4
+Enter a number: 4.2
+Enter a number: 0
+Sum = 4.70
+\end{risultato}
+\end{esempio}
+
+\section{Riferimenti}
+
+Sul libro: scope o campo di azione, sezione 5.13; sezioni 3.4--3.10, 4.1--4.8 (cicli e istruzioni); sezione 15.9 (da poi scordare immediatamente).
+
+\end{document}

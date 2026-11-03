@@ -2420,4 +2420,669 @@ $y = \cot x$, $x \in (0, \pi)$ & $x = \operatorname{arccot} y$ & $y \in \mathbb{
 $f(x) = \sin x + \cos x$ è una funzione: (1) limitata, (2) invertibile, (3) pari, (4) dispari. La risposta corretta è la (1): $|\sin x + \cos x| \le |\sin x| + |\cos x| \le 2$. Non è invertibile perché periodica e non è né pari né dispari, dato che $f(-x) = -\sin x + \cos x$.
 \end{esempio}
 
+\section[Intorni e limiti all'infinito (Lezione 9 -- 22 ottobre 2026)]{Intorni e limiti all'infinito}
+\noindent\emph{Lezione 9 -- 22 ottobre 2026}
+\subsection{Intorni}
+
+\begin{definizione}[Intorno]
+Dato un punto $x_0 \in \mathbb{R}$, un \emph{intorno di ampiezza $\varepsilon > 0$} di $x_0$ è un intervallo aperto di lunghezza $2\varepsilon$ che contiene $x_0$, cioè
+\[
+I_\varepsilon(x_0) = \,]x_0 - \varepsilon,\ x_0 + \varepsilon[ .
+\]
+\end{definizione}
+
+La \emph{famiglia degli intorni di $x_0$} è l'insieme degli intorni del punto $x_0$ ottenuta al variare di $\varepsilon$ in $]0, +\infty)$.
+
+\begin{proprieta}[degli intorni]
+\begin{itemize}
+    \item Se $r_1 < r_2$ allora $I_{r_1}(x_0) \subset I_{r_2}(x_0)$.
+    \item Dati $x_1, x_2 \in \mathbb{R}$, $x_1 \neq x_2$, esiste sempre $r > 0$ tale che $I_r(x_1) \cap I_r(x_2) = \emptyset$ (basta che $r \le \tfrac{1}{2}|x_1 - x_2|$).
+\end{itemize}
+\end{proprieta}
+
+\subsection{Limiti di funzioni per $x \to \pm\infty$}
+
+\begin{definizione}[Limite finito per $x \to +\infty$]
+Si dice che $f : D \to \mathbb{R}$ \emph{tende al limite finito} $\ell \in \mathbb{R}$ per $x$ tendente a $+\infty$ e si scrive $\displaystyle\lim_{x \to +\infty} f(x) = \ell$ se
+\[
+\forall \varepsilon > 0,\ \exists K > 0 \text{ tale che } \forall x \in D : x > K \text{ si ha } |f(x) - \ell| < \varepsilon .
+\]
+\end{definizione}
+
+La condizione $|f(x) - \ell| < \varepsilon$ significa $f(x) \in I_\varepsilon(\ell)$, cioè $\ell - \varepsilon < f(x) < \ell + \varepsilon$: da un certo punto in poi il grafico di $f$ sta nella striscia di ampiezza $2\varepsilon$ attorno alla retta $y = \ell$.
+
+\begin{definizione}[Limite $+\infty$ per $x \to +\infty$]
+Si dice che $f : D \to \mathbb{R}$ \emph{tende a $+\infty$} per $x$ tendente a $+\infty$ e si scrive $\displaystyle\lim_{x \to +\infty} f(x) = +\infty$ se
+\[
+\forall M > 0,\ \exists K > 0 \text{ tale che } \forall x \in D : x > K \text{ si ha } f(x) > M .
+\]
+\end{definizione}
+
+\begin{definizione}[Limiti per $x \to -\infty$]
+Si dice che $f : D \to \mathbb{R}$ \emph{tende al limite finito} $\ell \in \mathbb{R}$ per $x$ tendente a $-\infty$ e si scrive $\displaystyle\lim_{x \to -\infty} f(x) = \ell$ se
+\[
+\forall \varepsilon > 0,\ \exists K > 0 \text{ tale che } \forall x \in D : x < -K \text{ si ha } |f(x) - \ell| < \varepsilon .
+\]
+Si dice che $f$ \emph{tende a $-\infty$} per $x$ tendente a $-\infty$ e si scrive $\displaystyle\lim_{x \to -\infty} f(x) = -\infty$ se
+\[
+\forall M > 0,\ \exists K > 0 \text{ tale che } \forall x \in D : x < -K \text{ si ha } f(x) < -M .
+\]
+\end{definizione}
+
+\begin{osservazione}
+Nelle slide la condizione per $x \to -\infty$ è scritta $x < K$ e $f(x) < M$; nelle verifiche svolte a lezione si usa però, come sopra, $x < -K$ (e $f(x) < -M$ per il limite $-\infty$), con $K, M > 0$.
+\end{osservazione}
+
+Il caso $\lim_{x\to-\infty} f(x) = +\infty$ e quello $\lim_{x\to+\infty} f(x) = -\infty$ si definiscono in modo analogo, combinando le condizioni su $x$ e su $f(x)$.
+
+\subsection{Verifiche con la definizione}
+
+\begin{esempio}[$\lim_{x\to+\infty}\frac{x^2+2x}{2x^2+1} = \frac{1}{2}$]
+Il campo di esistenza: $2x^2 + 1 \neq 0$ per ogni $x \in \mathbb{R}$, quindi $D = \mathbb{R}$ e $x$ può tendere a $+\infty$ perché $D$ non è limitato superiormente.
+
+Fissato $\varepsilon > 0$, la condizione $|f(x) - \ell| < \varepsilon$ si traduce in
+\[
+\left| \frac{x^2 + 2x}{2x^2 + 1} - \frac{1}{2} \right| < \varepsilon .
+\]
+Calcoliamo la differenza:
+\[
+\frac{x^2 + 2x}{2x^2 + 1} - \frac{1}{2} = \frac{2x^2 + 4x - 2x^2 - 1}{2(2x^2 + 1)} = \frac{4x - 1}{2(2x^2 + 1)} .
+\]
+Supponiamo $x > \tfrac{1}{4}$, così togliamo il valore assoluto:
+\[
+\frac{4x - 1}{2(2x^2 + 1)} < \frac{4x}{2(2x^2 + 1)} = \frac{2x}{2x^2 + 1} < \frac{2x}{2x^2} = \frac{1}{x} .
+\]
+Se $\dfrac{1}{x} < \varepsilon$, cioè $x > \dfrac{1}{\varepsilon}$, la disuguaglianza è verificata. Basta quindi prendere
+\[
+K = \max\left\{ \tfrac{1}{4},\ \tfrac{1}{\varepsilon} \right\},
+\]
+perché se $x > K$ allora $x > \tfrac{1}{4}$ e $x > \tfrac{1}{\varepsilon}$, e quindi $\left|\dfrac{4x-1}{2(2x^2+1)}\right| < \varepsilon$.
+\end{esempio}
+
+\begin{esempio}[$\lim_{x\to+\infty}\sqrt{x} = +\infty$]
+Il campo di esistenza è $x \ge 0$, cioè $D = [0, +\infty)$. Fissato $M > 0$, la condizione $f(x) > M$ si traduce in $\sqrt{x} > M$, cioè $x > M^2$. Basta considerare $K = M^2$: per ogni $M > 0$, considerando $K = M^2$, per ogni $x > M^2$ si ha $\sqrt{x} > M$.
+\end{esempio}
+
+\begin{esempio}[$\lim_{x\to-\infty}\frac{1}{\sqrt{1-x}} = 0$]
+Campo di esistenza: $\sqrt{1-x} \neq 0$ e $1 - x \ge 0$, cioè $x \ne 1$ e $x \le 1$, quindi $x < 1$ e $D = (-\infty, 1)$.
+
+Fissato $\varepsilon > 0$,
+\[
+|f(x) - \ell| = \left| \frac{1}{\sqrt{1-x}} \right| = \frac{1}{\sqrt{1-x}} < \varepsilon
+\iff \sqrt{1-x} > \frac{1}{\varepsilon}
+\iff 1 - x > \frac{1}{\varepsilon^2}
+\iff x < 1 - \frac{1}{\varepsilon^2} .
+\]
+Si prende $K = \max\left\{0,\ \dfrac{1}{\varepsilon^2} - 1\right\}$: per ogni $x < -K$ si ha $\dfrac{1}{\sqrt{1-x}} < \varepsilon$.
+\end{esempio}
+
+\section[Continuità e limite in un punto (Lezione 9 -- 22 ottobre 2026)]{Continuità e limite in un punto}
+\noindent\emph{Lezione 9 -- 22 ottobre 2026}
+\subsection{Funzioni continue e limite per $x \to x_0$}
+
+\begin{definizione}[Funzione continua in un punto]
+Si dice che $f : D \to \mathbb{R}$ è \emph{continua} in $x_0 \in D$ se
+\[
+\forall \varepsilon > 0,\ \exists \delta > 0 \text{ tale che } \forall x \in D : |x - x_0| < \delta \text{ si ha } |f(x) - f(x_0)| < \varepsilon .
+\]
+\end{definizione}
+
+La condizione $|f(x) - f(x_0)| < \varepsilon$ significa $f(x) \in I_\varepsilon(f(x_0))$, cioè $f(x_0) - \varepsilon < f(x) < f(x_0) + \varepsilon$.
+
+\begin{definizione}[Limite per $x \to x_0$]
+Sia $f : D \to \mathbb{R}$ definita in un intorno di $x_0 \in \mathbb{R}$ tranne eventualmente nel punto $x_0$. Si dice che $f$ \emph{ha limite} $\ell \in \mathbb{R}$ (o tende a $\ell$) per $x$ tendente a $x_0$ e si scrive $\displaystyle\lim_{x \to x_0} f(x) = \ell$ se
+\[
+\forall \varepsilon > 0,\ \exists \delta > 0 \text{ tale che } \forall x \in D \setminus \{x_0\} : |x - x_0| < \delta \text{ si ha } |f(x) - \ell| < \varepsilon .
+\]
+\end{definizione}
+
+\begin{osservazione}
+Il limite si calcola per i valori $x_0$ che sono \emph{punti di accumulazione}. Il punto $x_0$ può non appartenere al dominio, ma deve essere di accumulazione. Nella condizione del limite il punto $x_0$ \emph{non c'è} (si considera $x \in D \setminus \{x_0\}$).
+\end{osservazione}
+
+\subsection{Punti di accumulazione}
+
+\begin{definizione}[Punto di accumulazione]
+Dato un insieme $A$, si dice che $x_0$ è un \emph{punto di accumulazione} per $A$ se per ogni $\varepsilon > 0$ esiste un intorno di ampiezza $\varepsilon$ di $x_0$ tale che $(I_\varepsilon(x_0) \setminus \{x_0\}) \cap A \neq \emptyset$.
+\end{definizione}
+
+\begin{proposizione}
+Un numero $x_0 \in \mathbb{R}$ è di accumulazione per un insieme $A \subseteq \mathbb{R}$ se e solo se in ogni intorno di $x_0$ cadono infiniti punti di $A$ distinti da $x_0$.
+\end{proposizione}
+
+\begin{esempio}
+\begin{itemize}
+    \item Se $A = [a, b]$ ogni punto $x_0 \in A$ è di accumulazione per $A$.
+    \item Se $A = \,]a, b[$ tutti i punti di $A$ sono punti di accumulazione, ma lo sono anche il punto $a$ e il punto $b$.
+    \item Se $a \in \mathbb{R}$ e $A = \{a\}$ allora $A$ non ha punti di accumulazione.
+    \item Se $A = \left\{ x \in \mathbb{R} : \exists n \in \mathbb{N} : x = \tfrac{1}{n} \right\} = \left\{1, \tfrac{1}{2}, \tfrac{1}{3}, \tfrac{1}{4}, \dots \right\}$ allora $x_0 = 0$ è il solo punto di accumulazione.
+    \item Se $A = \mathbb{N}$ non ci sono punti di accumulazione.
+    \item Se $A = \mathbb{Q}$ ogni numero reale è di accumulazione per $A$: ogni numero reale si può approssimare con numeri razionali.
+\end{itemize}
+\end{esempio}
+
+\subsection{Confronto tra continuità e limite}
+
+Data una funzione $f : D \to \mathbb{R}$ e sia $x_0$ un punto di accumulazione per $D$:
+\begin{enumerate}
+    \item nella definizione di continuità i valori vengono confrontati con $f(x_0)$; in quella di limite con un valore $\ell$ che può essere diverso da $f(x_0)$;
+    \item la condizione di continuità è verificata per $x = x_0$, mentre nella definizione di limite si esclude dal confronto il punto $x = x_0$;
+    \item $f$ è continua in $x_0$ equivale a dire che $f$ ha limite $\ell = f(x_0)$ per $x$ tendente a $x_0$;
+    \item entrambe le definizioni se sono vere per un certo $\delta > 0$ saranno vere per ogni $\delta' < \delta$.
+\end{enumerate}
+
+\subsection{Esempi}
+
+\begin{esempio}[$f(x) = 1 + x^3$ è continua in $x_0 = 0$]
+$D = \mathbb{R}$ e $f(0) = 1 + 0^3 = 1$. Fissato $\varepsilon > 0$:
+\[
+|f(x) - f(0)| = |1 + x^3 - 1| = |x^3| < \varepsilon \iff |x| < \sqrt[3]{\varepsilon} .
+\]
+Basta considerare $\delta = \sqrt[3]{\varepsilon}$: per ogni $\varepsilon > 0$, con $\delta = \sqrt[3]{\varepsilon}$, se $|x - x_0| = |x| < \delta = \sqrt[3]{\varepsilon}$ allora $|(1 + x^3) - 1| < \varepsilon$, cioè $|f(x) - f(0)| < \varepsilon$. Dunque $f$ è continua in $x_0 = 0$ e $\lim_{x \to 0} f(x) = f(0)$.
+\end{esempio}
+
+\begin{esempio}[Funzione non continua]
+Sia
+\[
+g(x) = \begin{cases} x & x \neq 0 \\ 1 & x = 0 \end{cases}
+\qquad D = \mathbb{R} .
+\]
+\emph{$g$ è continua in $x_0 = 0$?} No. Per ogni $\varepsilon > 0$ dovrebbe esistere $\delta > 0$ tale che per ogni $x \in \mathbb{R}$ con $|x - x_0| = |x| < \delta$ si abbia $|g(x) - g(x_0)| < \varepsilon$. Ma $g(0) = 1$ e per $x \ne 0$ vale $|g(x) - g(x_0)| = |x - 1| < \varepsilon$, cioè $1 - \varepsilon < x < 1 + \varepsilon$. Se scegliamo $\varepsilon$ in modo che $1 - \varepsilon > 0$, per esempio $\varepsilon = \tfrac{1}{3}$, si ha $1 - \varepsilon = \tfrac{2}{3}$ e la condizione diventa $\tfrac{2}{3} < x < \tfrac{4}{3}$. Ma qualsiasi $\delta > 0$ dà $|x| < \delta$, cioè $-\delta < x < \delta$, e nell'intervallo $]-\delta, \delta[$ ci sono dei valori di $x$ per cui $x < \tfrac{2}{3} = 1 - \varepsilon$. Quindi per $\varepsilon = \tfrac{1}{3}$ \emph{non} c'è nessun $\delta > 0$ che soddisfa la definizione di continuità: quando $x$ si avvicina a $0$, $g(x)$ \emph{non} si avvicina a $g(0)$.
+
+\emph{$g$ ha limite per $x \to 0$?} Sì, $\displaystyle\lim_{x\to 0} g(x) = 0$. Verifichiamo con la definizione: per ogni $\varepsilon > 0$ deve esistere $\delta > 0$ tale che per ogni $x \in D \setminus \{x_0\}$ con $|x - x_0| < \delta$ si abbia $|g(x) - \ell| < \varepsilon$. Con $\ell = 0$: $|g(x) - \ell| = |x - 0| < \varepsilon \iff -\varepsilon < x < \varepsilon$. Basta scegliere $\delta = \varepsilon$. Il limite $\ell = 0$ è diverso da $g(0) = 1$.
+\end{esempio}
+
+\begin{esempio}[$h(x) = \dfrac{\sin x}{x}$]
+Il campo di esistenza è $x \neq 0$, $D = (-\infty, 0) \cup (0, +\infty)$. La funzione $h$ \emph{non è definita} in $x_0 = 0$, quindi non ha senso chiedersi se $h$ è continua in $x_0 = 0$. Tuttavia $x_0 = 0$ è un punto di accumulazione per $D$ e
+\[
+\lim_{x \to 0} \frac{\sin x}{x} = 1 .
+\]
+\end{esempio}
+
+\section[Limiti infiniti, limite destro e sinistro (Lezione 10 -- 26 ottobre 2026)]{Limiti infiniti, limite destro e sinistro}
+\noindent\emph{Lezione 10 -- 26 ottobre 2026}
+\subsection{Limiti infiniti per $x \to x_0$}
+
+\begin{definizione}[Limite $\pm\infty$ in un punto]
+Sia $f : D \to \mathbb{R}$ e $x_0$ di accumulazione. Si dice che $f$ \emph{ha limite $+\infty$} (o tende a $+\infty$) per $x$ tendente a $x_0$ e si scrive $\displaystyle\lim_{x\to x_0} f(x) = +\infty$ se
+\[
+\forall M > 0,\ \exists \delta > 0 \text{ tale che } \forall x \in D \setminus \{x_0\} : |x - x_0| < \delta \text{ si ha } f(x) > M .
+\]
+Si dice che $f$ \emph{ha limite $-\infty$} per $x \to x_0$ e si scrive $\displaystyle\lim_{x\to x_0} f(x) = -\infty$ se
+\[
+\forall M > 0,\ \exists \delta > 0 \text{ tale che } \forall x \in D \setminus \{x_0\} : |x - x_0| < \delta \text{ si ha } f(x) < -M .
+\]
+\end{definizione}
+
+Graficamente: vicino alla retta verticale $x = x_0$ (\emph{asintoto verticale}) il grafico di $f$ supera ogni retta orizzontale $y = M$ (o scende sotto ogni retta $y = -M$).
+
+\begin{esempio}[$\lim_{x\to 3}\frac{1}{(x-3)^2} = +\infty$]
+Qui $x_0 = 3$. Fissato $M > 0$:
+\[
+\frac{1}{(x-3)^2} > M \iff (x-3)^2 < \frac{1}{M} \iff \sqrt{(x-3)^2} < \sqrt{\frac{1}{M}} \iff |x - 3| < \frac{1}{\sqrt{M}} .
+\]
+Basta considerare $\delta = \dfrac{1}{\sqrt{M}}$: per ogni $M > 0$, preso $\delta = \dfrac{1}{\sqrt M}$, per ogni $x \in D$ con $|x - 3| < \dfrac{1}{\sqrt M}$ si ha $\dfrac{1}{(x-3)^2} > M$.
+\end{esempio}
+
+\subsection{Limite destro e sinistro}
+
+\begin{esempio}[$f(x) = \frac{1}{x}$ non ha limite per $x \to 0$]
+Per $x > 0$, vicini a $0$, $\frac{1}{x}$ si avvicina a $+\infty$; per $x < 0$, vicini a $0$, $\frac{1}{x}$ si avvicina a $-\infty$. Quindi $\displaystyle\lim_{x\to 0}\frac{1}{x}$ \emph{non esiste}.
+\end{esempio}
+
+Serve allora distinguere da che parte $x$ si avvicina a $x_0$.
+
+\begin{definizione}[Limite destro e sinistro]
+Sia $f : D \to \mathbb{R}$ definita in un intorno di $x_0 \in \mathbb{R}$ tranne eventualmente nel punto $x_0$.
+
+Si dice che $f$ ha \emph{limite destro} $\ell \in \mathbb{R}$ per $x$ tendente a $x_0$ e si scrive $\displaystyle\lim_{x\to x_0^+} f(x) = \ell$ se
+\begin{gather*}
+\forall \varepsilon > 0,\ \exists \delta > 0 \text{ tale che } \forall x \in D \setminus \{x_0\} : \\ 0 < x - x_0 < \delta \ (x_0 < x < x_0 + \delta) \text{ si ha } |f(x) - \ell| < \varepsilon .
+\end{gather*}
+Si dice che $f$ ha \emph{limite sinistro} $\ell \in \mathbb{R}$ per $x$ tendente a $x_0$ e si scrive $\displaystyle\lim_{x\to x_0^-} f(x) = \ell$ se
+\begin{gather*}
+\forall \varepsilon > 0,\ \exists \delta > 0 \text{ tale che } \forall x \in D \setminus \{x_0\} : \\ -\delta < x - x_0 < 0 \ (x_0 - \delta < x < x_0) \text{ si ha } |f(x) - \ell| < \varepsilon .
+\end{gather*}
+\end{definizione}
+
+Le definizioni con limite $\pm\infty$ si danno in modo analogo, con la condizione $f(x) > M$ o $f(x) < -M$ al posto di $|f(x) - \ell| < \varepsilon$.
+
+\begin{esempio}[$\lim_{x\to 0^+}\frac{1}{x} = +\infty$ e $\lim_{x\to 0^-}\frac{1}{x} = -\infty$]
+\emph{Limite destro.} Fissato $M > 0$ consideriamo $\frac{1}{x} > M$, cioè (per $x > 0$) $x < \frac{1}{M}$. Quindi $0 < x - 0 < \delta$ con $\delta = \frac{1}{M}$.
+
+\emph{Limite sinistro.} Fissato $M > 0$ consideriamo $\frac{1}{x} < -M$. Ponendo $x = -y$ con $y > 0$ si ha $-\frac{1}{y} < -M$, cioè $\frac{1}{y} > M$, cioè $y < \frac{1}{M}$, e tornando a $x$ ($y = -x$): $-x < \frac{1}{M}$, cioè $x > -\frac{1}{M}$. Quindi $\delta = \frac{1}{M}$ e la condizione è $-\delta < x < 0$.
+\end{esempio}
+
+\subsection{Intorno destro e sinistro; continuità laterale}
+
+\begin{definizione}[Intorni destro e sinistro]
+L'\emph{intorno destro} di $x_0$ di ampiezza $r > 0$ è
+\[
+I_r^+(x_0) = [x_0, x_0 + r[ \;= \{x \in \mathbb{R} : 0 \le x - x_0 < r\},
+\]
+l'\emph{intorno sinistro} di $x_0$ di ampiezza $r > 0$ è
+\[
+I_r^-(x_0) = \,]x_0 - r, x_0] = \{x \in \mathbb{R} : -r < x - x_0 \le 0\}.
+\]
+\end{definizione}
+
+\begin{definizione}[Continuità da destra e da sinistra]
+Sia $f : D \to \mathbb{R}$ definita in un intorno destro di $x_0 \in \mathbb{R}$. Si dice che $f$ è \emph{continua da destra} in $x_0$ se
+\[
+\lim_{x\to x_0^+} f(x) = f(x_0).
+\]
+Sia $f$ definita in un intorno sinistro di $x_0$. Si dice che $f$ è \emph{continua da sinistra} in $x_0$ se
+\[
+\lim_{x\to x_0^-} f(x) = f(x_0).
+\]
+\end{definizione}
+
+\begin{proposizione}
+Sia $f$ una funzione definita in un intorno di $x_0 \in \mathbb{R}$ tranne eventualmente in $x_0$. La funzione $f$ ha limite $L$ (finito o infinito) per $x$ tendente a $x_0$ se e solo se esistono i limiti destro e sinistro di $f$ per $x \to x_0$ e tali limiti sono entrambi uguali a $L$.
+
+Una funzione $f$ definita in un intorno di $x_0$ è continua in $x_0$ se e solo se è continua da destra e da sinistra in $x_0$.
+\end{proposizione}
+
+Se $f$ è continua in tutti i punti di $D$ si dice che $f$ è \emph{continua}. Cioè, dato $x_0 \in D$, $f$ è continua in $x_0$ se per $x$ vicino a $x_0$ si ha che $f(x)$ è arbitrariamente vicino a $f(x_0)$, oppure $x_0$ è un punto isolato.
+
+\section[Discontinuità (Lezione 10 -- 26 ottobre 2026)]{Discontinuità}
+\noindent\emph{Lezione 10 -- 26 ottobre 2026}
+\subsection{Discontinuità}
+
+Una funzione non continua in un punto $x_0$ si dice \emph{discontinua} in $x_0$.
+
+\begin{definizione}[Tipi di discontinuità]
+\begin{itemize}
+    \item \emph{Discontinuità eliminabile}: esiste finito il limite $\displaystyle\lim_{x\to x_0} f(x) \neq f(x_0)$.
+    \item \emph{Discontinuità a salto (o di prima specie)}: esistono finiti i limiti $\displaystyle\lim_{x\to x_0^+} f(x) = \ell_1$ e $\displaystyle\lim_{x\to x_0^-} f(x) = \ell_2$, ma sono diversi fra loro. Il \emph{salto} in $x_0$ è $\ell_1 - \ell_2$.
+    \item \emph{Discontinuità di seconda specie}: uno dei due limiti $\displaystyle\lim_{x\to x_0^+} f(x)$, $\displaystyle\lim_{x\to x_0^-} f(x)$ non esiste oppure è infinito.
+\end{itemize}
+\end{definizione}
+
+\subsection{Esempi}
+
+\begin{esempio}[Discontinuità eliminabile]
+Sia
+\[
+g(x) = \begin{cases} x & x \neq 0 \\ 1 & x = 0 .\end{cases}
+\]
+Si ha $\displaystyle\lim_{x\to 0} g(x) = \lim_{x\to 0} x = 0 \neq g(0) = 1$, quindi $g$ non è continua in $x_0 = 0$: ha una discontinuità eliminabile.
+
+Cambiando $g$ in un punto, ponendo $\bar g(0) = \lim_{x\to 0} g(x) = 0$, cioè
+\[
+\bar g(x) = \begin{cases} x & x \neq 0 \\ 0 & x = 0 ,\end{cases}
+\]
+si ha $\bar g(x) = g(x)$ tranne che in $x = 0$ e $\bar g$ è continua.
+\end{esempio}
+
+\begin{esempio}[Funzione mantissa]
+La funzione \emph{mantissa} è $M(x) = x - [x]$, dove $[x] = m$ è l'intero tale che $m \le x < m + 1$, con $x \in \mathbb{R}$, $m \in \mathbb{Z}$. Quindi:
+\[
+\text{se } 0 \le x < 1 \Rightarrow [x] = 0, \qquad \text{se } 1 \le x < 2 \Rightarrow [x] = 1, \dots
+\qquad
+M(x) = \begin{cases} x & 0 \le x < 1 \\ x - 1 & 1 \le x < 2 \\ x - 2 & 2 \le x < 3 \\ \dots \end{cases}
+\]
+Il grafico è una successione di segmenti paralleli alla bisettrice, ciascuno da $0$ (incluso) fino a $1$ (escluso).
+
+Consideriamo $M$ con $x \in\, ]0, 2[$:
+\[
+M(x)\big|_{]0,2[} = \begin{cases} x & 0 < x < 1 \\ x - 1 & 1 \le x < 2 .\end{cases}
+\]
+Studiamo $x_0 = 1$:
+\begin{itemize}
+    \item $\displaystyle\lim_{x\to 1^-} M(x) = \lim_{x\to 1^-} x = 1$ e $M(1) = 1 - 1 = 0$, quindi $\lim_{x\to 1^-} M(x) \neq M(1)$: esiste il limite sinistro ma $M$ non è continua da sinistra;
+    \item $\displaystyle\lim_{x\to 1^+} M(x) = \lim_{x\to 1^+} (x-1) = 0 = M(1)$: esiste il limite destro ed è uguale a $M(1)$, quindi $M$ è continua da destra;
+    \item $\displaystyle\nexists \lim_{x\to 1} M(x)$ perché il limite destro e il limite sinistro sono diversi.
+\end{itemize}
+Poiché $\lim_{x\to 1^-} M(x) \neq \lim_{x\to 1^+} M(x)$, la funzione $M$ in $x_0 = 1$ ha una \emph{discontinuità di prima specie}, con salto
+\[
+\lim_{x\to 1^+} M(x) - \lim_{x\to 1^-} M(x) = 0 - 1 = -1 .
+\]
+\end{esempio}
+
+\begin{esempio}[Discontinuità di seconda specie]
+Sia
+\[
+h(x) = \begin{cases} \dfrac{1}{x} & x \neq 0 \\ 0 & x = 0 .\end{cases}
+\]
+Poiché $\displaystyle\lim_{x\to 0^+}\frac{1}{x} = +\infty$ e $\displaystyle\lim_{x\to 0^-}\frac{1}{x} = -\infty$, la funzione in $x_0 = 0$ ha una discontinuità di seconda specie.
+
+Sia
+\[
+\ell(x) = \begin{cases} \dfrac{1}{x} & x > 0 \\ 0 & x \le 0 .\end{cases}
+\]
+Si ha $\displaystyle\lim_{x\to 0^+}\ell(x) = \lim_{x\to 0^+}\frac{1}{x} = +\infty$ e $\displaystyle\lim_{x\to 0^-}\ell(x) = \lim_{x\to 0^-} 0 = 0$: la funzione $\ell$ in $x_0 = 0$ ha una discontinuità di seconda specie (basta che uno dei due limiti sia infinito).
+\end{esempio}
+
+\section[Continuità delle funzioni elementari (Lezione 11 -- 29 ottobre 2026)]{Continuità delle funzioni elementari}
+\noindent\emph{Lezione 11 -- 29 ottobre 2026}
+\subsection{Continuità delle funzioni elementari}
+
+Le funzioni elementari:
+\begin{itemize}
+    \item funzioni potenza,
+    \item funzioni esponenziali,
+    \item funzioni logaritmiche,
+    \item funzioni trigonometriche e loro inverse,
+\end{itemize}
+sono continue nel loro dominio.
+
+\subsection{Verifiche di continuità con la definizione}
+
+\begin{esempio}[$f(x) = ax + b$ è continua in ogni $x_0 \in \mathbb{R}$, con $a, b \in \mathbb{R}$]
+Fissato $\varepsilon > 0$ consideriamo la disuguaglianza $|f(x) - f(x_0)| < \varepsilon$:
+\[
+|f(x) - f(x_0)| = |ax + b - (ax_0 + b)| = |ax - ax_0| = |a|\cdot|x - x_0| .
+\]
+Vogliamo trovare $\delta > 0$ per cui se $|x - x_0| < \delta$ allora $|a|\cdot|x - x_0| < \varepsilon$.
+\begin{itemize}
+    \item Se $a = 0$: $|a|\cdot|x-x_0| = 0 < \varepsilon$ per ogni $x$.
+    \item Se $a \neq 0$: $|a|\cdot|x - x_0| < \varepsilon \iff |x - x_0| < \dfrac{\varepsilon}{|a|}$; si sceglie $\delta = \dfrac{\varepsilon}{|a|}$ e la definizione è verificata.
+\end{itemize}
+\end{esempio}
+
+\begin{esempio}[$f(x) = x^2$ è continua in $x_0 = 2$]
+Fissato $\varepsilon > 0$:
+\[
+|f(x) - f(x_0)| = |x^2 - 4| = |x - 2|\cdot|x + 2| ,
+\]
+usando $a^2 - b^2 = (a - b)(a + b)$ per ogni $a, b \in \mathbb{R}$. Possiamo considerare $x \in I_1(2)$, cioè $2 - 1 < x < 2 + 1$; allora $1 < x < 3$ e quindi $|x + 2| < 5$. Dunque
+\[
+|x - 2|\,|x + 2| < |x - 2| \cdot 5 < \varepsilon \iff |x - 2| < \frac{\varepsilon}{5} .
+\]
+Consideriamo $\delta = \min\{1, \frac{\varepsilon}{5}\}$ e abbiamo che la definizione di continuità è soddisfatta, quindi $f(x) = x^2$ è continua in $x_0 = 2$. In realtà $f(x) = x^2$ è continua per ogni $x \in \mathbb{R}$.
+\end{esempio}
+
+\begin{esempio}[$\lim_{x\to 1}(2x^2 + 3) = 5$]
+Qui $f(x) = 2x^2 + 3$, $x_0 = 1$, $\ell = 2\cdot 1 + 3 = 5$. Verifichiamo con la definizione. Fissato $\varepsilon > 0$ consideriamo $|f(x) - \ell| < \varepsilon$:
+\[
+|2x^2 + 3 - 5| = |2x^2 - 2| = 2|x^2 - 1| = 2|x - 1|\cdot|x + 1| .
+\]
+Possiamo supporre $x \in I_1(1)$, cioè $1 - 1 < x < 1 + 1$, $0 < x < 2$; allora $|x + 1| < 2 + 1 = 3$, e
+\[
+2|x - 1|\,|x + 1| < 6\,|x - 1| < \varepsilon \quad\text{se}\quad |x - 1| < \delta = \frac{\varepsilon}{6}
+\]
+(più precisamente $\delta = \min\{1, \varepsilon/6\}$).
+\end{esempio}
+
+\subsection{Algebra delle funzioni continue}
+
+\begin{teorema}[Algebra delle funzioni continue]
+Se $f$ e $g$ sono continue in $x_0$, allora $f + g$, $f \cdot g$ e $f/g$ (se $g(x_0) \neq 0$) sono continue in $x_0$.
+\end{teorema}
+
+\begin{teorema}[Composizione di funzioni continue]
+Se $g \circ f$ esiste, e $f$ è continua in $x_0$ e $g$ è continua in $f(x_0)$, allora la funzione composta $g \circ f$ è continua in $x_0$.
+\end{teorema}
+
+\begin{osservazione}[Conseguenza]
+Una funzione espressa come numero finito di operazioni elementari è continua. Per calcolare il limite di una tale funzione è sufficiente calcolare la funzione in quel punto.
+\end{osservazione}
+
+\begin{esempio}[Determinare per quali $\alpha \in \mathbb{R}$ la funzione è continua]
+\[
+f(x) = \begin{cases} \alpha \cdot \sin\!\left(x + \dfrac{\pi}{2}\right) & x > 0 \\[2mm] 2x^2 + 3 & x \le 0 .\end{cases}
+\]
+Per $x < 0$ e per $x > 0$ la funzione è continua perché somma e prodotto di funzioni elementari continue. Verifichiamo la continuità in $x = 0$:
+\[
+\lim_{x\to 0^+} \alpha \sin\!\left(x + \frac{\pi}{2}\right) = \alpha \sin\frac{\pi}{2} = \alpha, \qquad
+\lim_{x\to 0^-} (2x^2 + 3) = 3, \qquad f(0) = 3 .
+\]
+Perché $\lim_{x\to 0^+} f(x) = \lim_{x\to 0^-} f(x) = f(0)$ bisogna che $\alpha = 3$. Dunque la funzione $f$ è continua in $\mathbb{R}$ per $\alpha = 3$.
+\end{esempio}
+
+\section[Limiti: monotone, algebra, potenze e polinomi (Lezione 11 -- 29 ottobre 2026)]{Limiti: monotone, algebra, potenze e polinomi}
+\noindent\emph{Lezione 11 -- 29 ottobre 2026}
+\subsection{Limiti di funzioni monotone}
+
+Ricordiamo: $f$ è \emph{monotona crescente} se $\forall x_1, x_2 \in D$, $x_1 < x_2 \Rightarrow f(x_1) \le f(x_2)$; \emph{monotona decrescente} se $x_1 < x_2 \Rightarrow f(x_1) \ge f(x_2)$.
+
+\begin{proposizione}[Limite destro]
+Sia $f$ una funzione definita e monotona in un intorno destro $I^+(c)$ del punto $c$ (dove $c$ è un numero reale oppure $-\infty$) escluso al più il punto $c$ stesso. Allora esiste, finito o infinito, il limite destro per $x \to c^+$ e precisamente si ha
+\[
+\lim_{x\to c^+} f(x) = \begin{cases} \inf\{f(x) : x \in I^+(c),\ x > c\} & \text{se } f \text{ è crescente} \\ \sup\{f(x) : x \in I^+(c),\ x > c\} & \text{se } f \text{ è decrescente.} \end{cases}
+\]
+\end{proposizione}
+
+\begin{proposizione}[Limite sinistro]
+Sia $f$ una funzione definita e monotona in un intorno sinistro $I^-(c)$ del punto $c$ (dove $c$ è un numero reale oppure $+\infty$) escluso al più il punto $c$ stesso. Allora esiste, finito o infinito, il limite sinistro per $x \to c^-$ e precisamente si ha
+\[
+\lim_{x\to c^-} f(x) = \begin{cases} \sup\{f(x) : x \in I^-(c),\ x < c\} & \text{se } f \text{ è crescente} \\ \inf\{f(x) : x \in I^-(c),\ x < c\} & \text{se } f \text{ è decrescente.} \end{cases}
+\]
+\end{proposizione}
+
+Per una funzione crescente, il limite destro in $c$ è l'estremo inferiore dei valori a destra di $c$ (perché la funzione è limitata dal basso da $f(c)$ e $f$ diminuisce avvicinandosi a $c$); il limite sinistro è l'estremo superiore dei valori a sinistra. Se l'estremo inferiore è $-\infty$ il limite è $-\infty$, se l'estremo superiore è $+\infty$ il limite è $+\infty$.
+
+\subsection{Continuità di funzioni monotone}
+
+\begin{osservazione}
+Una funzione monotona definita in un intorno di $x_0 \in \mathbb{R}$ può avere solo una discontinuità di prima specie.
+\end{osservazione}
+
+\begin{teorema}[Corollario]
+Sia $f$ una funzione definita e monotona in un intorno $I(x_0)$ di un punto $x_0 \in \mathbb{R}$. Allora esistono finiti i limiti destro e sinistro per $x \to x_0$ e precisamente si ha:
+\begin{enumerate}
+    \item[(i)] se $f$ è crescente allora $\displaystyle\lim_{x\to x_0^-} f(x) \le f(x_0) \le \lim_{x\to x_0^+} f(x)$;
+    \item[(ii)] se $f$ è decrescente allora $\displaystyle\lim_{x\to x_0^-} f(x) \ge f(x_0) \ge \lim_{x\to x_0^+} f(x)$.
+\end{enumerate}
+\end{teorema}
+
+\subsection{Proprietà dei limiti}
+
+\begin{teorema}[Unicità del limite]
+Supponiamo che $f$ ammetta limite $\ell$ (finito o infinito) per $x$ tendente a $c$. Allora $f$ non ha altri limiti per $x$ tendente a $c$.
+\end{teorema}
+
+\begin{teorema}[Permanenza del segno]
+Se per $x \to c$, $f(x) \to \ell > 0$, oppure $\ell = +\infty$, allora esiste un intorno $I(c)$ di $c$ tale che $f(x) > 0$ per $x \in I(c) \setminus \{c\}$. Un risultato analogo vale per il segno negativo.
+\end{teorema}
+
+\begin{teorema}[Inverso della permanenza del segno (1\textsuperscript{a} forma)]
+Supponiamo che $f$ ammetta limite $\ell$ (finito o infinito) per $x$ tendente a $c$. Se esiste un intorno $I(c)$ di $c$ tale che $f(x) \ge 0$ in $I(c) \setminus \{c\}$ allora $\ell \ge 0$ oppure $\ell = +\infty$. Un risultato analogo vale per il segno negativo.
+\end{teorema}
+
+\subsection{Algebra dei limiti}
+
+\begin{teorema}[Algebra dei limiti]
+Se per $x \to x_0$, $f(x) \to \ell_1$ e $g(x) \to \ell_2$, $\ell_1, \ell_2 \in \mathbb{R}$, allora per $x \to x_0$ si ha:
+\begin{itemize}
+    \item $f(x) \pm g(x) \to \ell_1 \pm \ell_2$;
+    \item $f(x)\,g(x) \to \ell_1 \ell_2$;
+    \item $f(x)/g(x) \to \ell_1/\ell_2$ (purché $g(x), \ell_2 \neq 0$);
+    \item $f(x)^{g(x)} \to \ell_1^{\ell_2}$ (purché $f(x), \ell_1 > 0$).
+\end{itemize}
+\end{teorema}
+
+\begin{proprieta}[Aritmetizzazione parziale di $\infty$]
+Per $a \in \mathbb{R}$:
+\begin{itemize}
+    \item $a \pm \infty = \pm\infty$; \quad $+\infty + \infty = +\infty$; \quad $-\infty - \infty = -\infty$;
+    \item $a \cdot \infty = \infty$ ($a \neq 0$); \quad $\infty\cdot\infty = \infty$; \quad $\dfrac{a}{\infty} = 0$; \quad $\dfrac{\infty}{a} = \infty$ ($a \neq 0$).
+\end{itemize}
+Il segno si stabilisce con la regola dei segni.
+\end{proprieta}
+
+\begin{definizione}[Forme indeterminate]
+Le forme indeterminate sono
+\[
++\infty - \infty, \qquad 0 \cdot \infty, \qquad \frac{0}{0}, \qquad \frac{\infty}{\infty}, \qquad 1^{\pm\infty}, \qquad 0^0, \qquad (+\infty)^0 .
+\]
+\end{definizione}
+
+\subsection{Limiti delle funzioni potenza}
+
+Sia $f(x) = x^\alpha$.
+
+Se $\alpha \in \mathbb{R}\setminus\mathbb{Q}$ allora $D(f) = (0, +\infty)$ e
+\[
+\lim_{x\to+\infty} x^\alpha = \begin{cases} +\infty & \alpha > 0 \\ 0 & \alpha < 0 \end{cases}
+\qquad
+\lim_{x\to 0^+} x^\alpha = \begin{cases} 0 & \alpha > 0 \\ +\infty & \alpha < 0. \end{cases}
+\]
+
+Se $f(x) = x^{m/n}$ con $n > 0$, $m \neq 0$, $m, n$ interi primi fra loro:
+\begin{itemize}
+    \item $n$ dispari e $m > 0$: $D(f) = \mathbb{R}$, $\displaystyle\lim_{x\to+\infty} x^{m/n} = +\infty$, $\displaystyle\lim_{x\to-\infty} x^{m/n} = \begin{cases} +\infty & m \text{ pari} \\ -\infty & m \text{ dispari} \end{cases}$ \quad (es.\ $\sqrt[3]{x^5}$);
+    \item $n$ pari e $m > 0$: $D(f) = [0, +\infty)$, $\displaystyle\lim_{x\to+\infty} x^{m/n} = +\infty$ (es.\ $\sqrt{x}$);
+    \item $n$ dispari e $m < 0$: $D(f) = \mathbb{R}\setminus\{0\}$, $\displaystyle\lim_{x\to\pm\infty} x^{m/n} = 0$, e per $x \to 0$: $\displaystyle\lim_{x\to 0^+} x^{m/n} = +\infty$, $\displaystyle\lim_{x\to 0^-} x^{m/n} = \begin{cases} +\infty & m \text{ pari} \\ -\infty & m \text{ dispari;} \end{cases}$
+    \item $n$ pari e $m < 0$: $D(f) = \,]0, +\infty)$, $\displaystyle\lim_{x\to+\infty} x^{m/n} = 0$, $\displaystyle\lim_{x\to 0^+} x^{m/n} = +\infty$ (es.\ $\frac{1}{\sqrt x}$).
+\end{itemize}
+
+\subsection{Limiti di polinomi per $x \to \pm\infty$}
+
+Per calcolare il limite di un polinomio per $x \to \pm\infty$ basta calcolare il limite del termine di grado massimo. Sia $P(x) = a_0 x^n + a_1 x^{n-1} + \dots + a_n$, $a_0 \neq 0$; si ha
+\[
+P(x) = a_0 x^n \left( 1 + \frac{a_1}{a_0 x} + \frac{a_2}{a_0 x^2} + \dots + \frac{a_n}{a_0 x^n} \right),
+\qquad
+\lim_{x\to\pm\infty} P(x) = \lim_{x\to\pm\infty} a_0 x^n ,
+\]
+infatti, tutti i termini dopo $1$, in parentesi graffa, tendono a zero per $x \to \pm\infty$ (e $1 + 0 + \dots + 0 = 1$).
+
+\subsection{Esempi}
+
+\begin{esempio}[Limite della tangente in $\frac{\pi}{2}$]
+$\tan x = \dfrac{\sin x}{\cos x}$, $\sin\frac{\pi}{2} = 1$, $\cos\frac{\pi}{2} = 0$. Quindi $\displaystyle\lim_{x\to\frac{\pi}{2}} \tan x$ è del tipo $\frac{1}{0} = \infty$: bisogna studiare il segno.
+\begin{itemize}
+    \item $\cos x > 0$ se $x \in I^-(\frac{\pi}{2})$, $\cos x < 0$ se $x \in I^+(\frac{\pi}{2})$.
+    \item Se $x \to \frac{\pi}{2}^-$: $\displaystyle\lim_{x\to\frac{\pi}{2}^-}\frac{\sin x}{\cos x} = +\infty$, perché $f(x) = \frac{\sin x}{\cos x} > 0$ per $x$ vicino a $\frac{\pi}{2}$ con $x < \frac{\pi}{2}$ (numeratore $>0$, denominatore $>0$).
+    \item Se $x \to \frac{\pi}{2}^+$: $\displaystyle\lim_{x\to\frac{\pi}{2}^+}\frac{\sin x}{\cos x} = -\infty$, perché per $x$ vicino a $\frac{\pi}{2}$ con $x > \frac{\pi}{2}$ si ha numeratore $>0$ e denominatore $<0$.
+\end{itemize}
+Dunque $\displaystyle\nexists \lim_{x\to\frac{\pi}{2}}\tan x$, perché $\displaystyle\lim_{x\to\frac{\pi}{2}^-}\tan x \neq \lim_{x\to\frac{\pi}{2}^+}\tan x$.
+\end{esempio}
+
+\begin{esempio}[Polinomi e potenze]
+\begin{itemize}
+    \item $\displaystyle\lim_{x\to+\infty} (x^2 + x + 1) = \lim_{x\to+\infty} x^2\left(1 + \frac{1}{x} + \frac{1}{x^2}\right) = +\infty\cdot(1 + 0 + 0) = +\infty$, perché $\frac{1}{x} = x^{-1}$ e $\frac{1}{x^2} = x^{-2}$ sono potenze con esponente negativo, quindi tendono a $0$ (siamo nel caso $\frac{a}{\infty} = 0$) e $\lim_{x\to+\infty} x^2 = +\infty\cdot+\infty = +\infty$.
+    \item $\displaystyle\lim_{x\to-\infty} (x^2 + x + 1) = \lim_{x\to-\infty} x^2\left(1 + \frac{1}{x} + \frac{1}{x^2}\right) = +\infty\cdot 1 = +\infty$.
+    \item $\displaystyle\lim_{x\to 0} (x^2 + x + 1) = 1$, perché $x^2 + x + 1$ è una funzione continua in $\mathbb{R}$, definita in $x_0 = 0$, quindi il limite si ottiene sostituendo ad $x$ il valore $0$.
+    \item $\displaystyle\lim_{x\to+\infty} (x + \sqrt{x}) = \lim_{x\to+\infty} x\left(1 + \frac{\sqrt{x}}{x}\right) = \lim_{x\to+\infty} x\left(1 + \frac{1}{\sqrt{x}}\right) = +\infty\cdot(1 + 0) = +\infty$, perché $\frac{\sqrt x}{x} = \frac{1}{\sqrt x} \to 0$ (siamo nella situazione $\frac{a}{\infty}$).
+    \item $\displaystyle\lim_{x\to-\infty} (x + \sqrt{x})$ \emph{non ha senso}, perché $\sqrt{x}$ è definita solo per $x \ge 0$.
+\end{itemize}
+\end{esempio}
+
+\section[Limiti di funzioni razionali (Lezione 12 -- 2 novembre 2026)]{Limiti di funzioni razionali}
+\noindent\emph{Lezione 12 -- 2 novembre 2026}
+\subsection{Limiti di funzioni razionali}
+
+Siano
+\[
+\begin{aligned} P_n(x) &= a_n x^n + a_{n-1}x^{n-1} + \dots + a_1 x + a_0, & a_n &\neq 0, \\ Q_m(x) &= b_m x^m + b_{m-1}x^{m-1} + \dots + b_1 x + b_0, & b_m &\neq 0 , \end{aligned}
+\]
+e $f(x) = \dfrac{P_n(x)}{Q_m(x)}$.
+
+\begin{proprieta}[Limite per $x \to \pm\infty$]
+Per calcolare il limite di $f(x)$ per $x \to \pm\infty$ basta calcolare il limite del rapporto dei \emph{monomi di grado massimo}:
+\[
+\lim_{x\to\pm\infty}\frac{P_n(x)}{Q_m(x)} = \lim_{x\to\pm\infty}\frac{a_n x^n}{b_m x^m} =
+\begin{cases} \pm\infty & \text{se } n > m \ (\text{segno: regola dei segni}) \\ a_n/b_m & \text{se } n = m \\ 0 & \text{se } n < m . \end{cases}
+\]
+\end{proprieta}
+
+\begin{proprieta}[Limite per $x \to 0$]
+Per calcolare il limite di $f(x)$ per $x \to 0$ basta calcolare il limite del rapporto dei \emph{monomi di grado minimo}, di gradi $r$ (al numeratore) e $s$ (al denominatore):
+\[
+\lim_{x\to 0}\frac{P(x)}{Q(x)} = \lim_{x\to 0}\frac{a_r x^r}{b_s x^s} =
+\begin{cases} 0 & \text{se } r > s \\ a_r/b_s & \text{se } r = s \\ \infty & \text{se } r < s . \end{cases}
+\]
+\end{proprieta}
+
+\subsection{Esempi per $x \to \pm\infty$}
+
+Tutti i limiti seguenti sono forme indeterminate $\frac{\infty}{\infty}$; si raccoglie la potenza di grado massimo al numeratore e al denominatore, e i termini rimanenti tendono a $0$.
+
+\begin{esempio}
+\[
+\lim_{x\to+\infty}\frac{3x^3 - 2x}{x - x^2} \quad (\text{F.I. } \tfrac{\infty}{\infty})
+\]
+Raccogliamo $3x^3$ al numeratore e $-x^2$ al denominatore:
+\[
+\begin{aligned}\lim_{x\to+\infty}\frac{3x^3\left(1 - \dfrac{2}{3}\cdot\dfrac{1}{x^2}\right)}{-x^2\left(-\dfrac{1}{x} + 1\right)}
+&= \lim_{x\to+\infty}(-3)\cdot x\cdot\frac{(1 - 0)}{(0 + 1)} \\ &= -\infty .\end{aligned}
+\]
+In pratica:
+\[
+\lim_{x\to+\infty}\frac{3x^3 - 2x}{x - x^2} = \lim_{x\to+\infty}\frac{3x^3}{-x^2} = \lim_{x\to+\infty}(-3)\,x = -\infty .
+\]
+\end{esempio}
+
+\begin{esempio}
+\[
+\lim_{x\to-\infty}\frac{-4x^5 + 2x^3}{8x^5 - x^4 + 5x} \quad (\text{F.I. } \tfrac{\infty}{\infty})
+\]
+Raccogliendo $-4x^5$ al numeratore e $8x^5$ al denominatore, le parentesi tendono a $1$:
+\[
+\lim_{x\to-\infty}\frac{-4x^5\left(1 - \dfrac{1}{2}\cdot\dfrac{1}{x^2}\right)}{8x^5\left(1 - \dfrac{1}{8}\cdot\dfrac{1}{x} + \dfrac{5}{8}\cdot\dfrac{1}{x^4}\right)} = -\frac{1}{2},
+\qquad\text{cioè}\qquad
+\lim_{x\to-\infty}\frac{-4x^5}{8x^5} = -\frac{4}{8} = -\frac{1}{2}.
+\]
+\end{esempio}
+
+\begin{esempio}
+\[
+\lim_{x\to-\infty}\frac{6x^2 - x}{-x^3} \quad (\text{F.I. } \tfrac{\infty}{\infty}) = 0
+\]
+Raccogliendo $6x^2$ al numeratore: $\dfrac{6x^2\left(1 - \frac{1}{6}\cdot\frac{1}{x}\right)}{-x^3} = \dfrac{6}{-x}\cdot\left(1 - \dfrac{1}{6x}\right)\to 0$. In pratica $\displaystyle\lim_{x\to-\infty}\frac{6x^2}{-x^3} = \lim_{x\to-\infty}\frac{-6}{x} = 0$.
+\end{esempio}
+
+\begin{esempio}
+\[
+\lim_{x\to+\infty}\frac{\sqrt{x} + x}{x} \quad (\text{F.I. } \tfrac{\infty}{\infty}) = 1
+\]
+Il termine di grado massimo è $x$ (e $\sqrt x = x^{1/2}$): raccogliendo $x$ si ha
+\[
+\lim_{x\to+\infty}\frac{x\left(\dfrac{\sqrt{x}}{x} + 1\right)}{x} = \lim_{x\to+\infty}\left(\frac{1}{\sqrt{x}} + 1\right) = 1,
+\]
+perché $\frac{\sqrt{x} + x}{x} = \frac{\sqrt x}{x} + \frac{x}{x} = \frac{1}{\sqrt x} + 1$. In pratica $\displaystyle\lim_{x\to+\infty}\frac{\sqrt{x} + x}{x} = \lim_{x\to+\infty}\frac{x}{x} = 1$.
+\end{esempio}
+
+\subsection{Esempi per $x \to 0$}
+
+Le forme indeterminate sono $\frac{0}{0}$: si raccoglie la potenza di grado \emph{minimo}.
+
+\begin{esempio}
+\[
+\lim_{x\to 0}\frac{3x^3 - 2x}{x - x^2} \quad (\text{F.I. } \tfrac{0}{0}) = -2
+\]
+Raccogliendo $-2x$ al numeratore e $x$ al denominatore:
+\[
+\lim_{x\to 0}\frac{-2x\left(-\dfrac{3}{2}x^2 + 1\right)}{x(1 - x)} = \lim_{x\to 0}\frac{-2x}{x} = -2 .
+\]
+\end{esempio}
+
+\begin{esempio}
+\[
+\lim_{x\to 0}\frac{-4x^5 + 2x^3}{8x^5 - x^4 + 5x} \quad (\text{F.I. } \tfrac{0}{0}) = 0
+\]
+I monomi di grado minimo sono $2x^3$ e $5x$:
+\[
+\lim_{x\to 0}\frac{2x^3}{5x} = \lim_{x\to 0}\frac{2}{5}x^2 = 0 .
+\]
+\end{esempio}
+
+\begin{esempio}
+\[
+\lim_{x\to 0}\frac{6x^2 - x}{-x^3} \quad (\text{F.I. } \tfrac{0}{0}) = +\infty
+\]
+Raccogliendo $-x$ al numeratore: $\dfrac{-x\,(-6x + 1)}{-x^3} \to \lim_{x\to 0}\dfrac{-x}{-x^3} = \lim_{x\to 0}\dfrac{1}{x^2} = +\infty$.
+\end{esempio}
+
+\begin{esempio}
+\[
+\lim_{x\to 0^+}\frac{\sqrt{x} + x}{x} \quad (\text{F.I. } \tfrac{0}{0}) = +\infty
+\]
+Si considera $x \to 0^+$ perché ci si può avvicinare a $0$ solo con valori non negativi, dato che c'è $\sqrt{x}$. Raccogliendo $\sqrt x$:
+\[
+\lim_{x\to 0^+}\frac{\sqrt{x}\left(1 + \dfrac{x}{\sqrt{x}}\right)}{x} = \lim_{x\to 0^+}\frac{\sqrt{x}\,(1 + \sqrt{x})}{x} = \lim_{x\to 0^+}\frac{\sqrt{x}}{x} = \lim_{x\to 0^+}\frac{1}{\sqrt{x}} = +\infty .
+\]
+\end{esempio}
+
+\subsection{Confronto tra potenze}
+
+Disegnando i grafici di $x$, $x^2$, $x^3$, $x^4$ si vede che:
+\begin{itemize}
+    \item per $x \to +\infty$ vanno a $+\infty$ più velocemente le potenze più grandi di $x$;
+    \item per $x \to 0$ vanno a $0$ più velocemente le potenze più piccole di $x$ (cioè con esponente maggiore): $x^4 < x^3 < x^2 < x$ per $0 < x < 1$.
+\end{itemize}
+Per $x > 1$ si ha invece $x < x^2 < x^3 < x^4$.
+
 \end{document}

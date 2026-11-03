@@ -1,0 +1,388 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\NewTColorBox{osservazione}{}{nota,
+  before upper={\textbf{Osservazione.}\ }}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Espressioni, lvalue e operatori}
+\author{Marco Cerbella}
+\date{Lezione 11 -- 19 ottobre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Espressioni}
+
+\begin{definizione}
+Un'\emph{espressione} è una sequenza di costanti (literal), identificatori e operatori che il programma valuta eseguendo le operazioni indicate. Lo scopo di un'espressione in un programma può essere ottenere il valore risultante, produrre \emph{effetti collaterali} della valutazione, oppure entrambi.
+\end{definizione}
+
+Una singola costante, un literal stringa o l'identificatore di un oggetto o di una funzione è già di per sé un'espressione.
+
+\subsection{Effetti collaterali}
+
+Un'espressione ha un \emph{effetto collaterale} (\emph{side effect}) se modifica uno stato al di fuori del proprio ambiente locale, cioè se ha un'interazione osservabile con il mondo esterno oltre a restituire un valore.
+
+\begin{codice}
+if (a == 5) {              // restituisce un valore
+    printf("Hello World!\n");
+}
+if (a = 5) {               // restituisce un valore E ha un effetto collaterale su a
+    printf("Hello World!\n");
+}
+\end{codice}
+
+\begin{osservazione}
+Il secondo \lstinline|if| è \emph{sbagliato} come modo di verificare una condizione: \lstinline|a = 5| assegna~$5$ ad \lstinline|a| e vale~$5$, quindi la condizione è sempre vera.
+\end{osservazione}
+
+\subsection{Tipo di un'espressione}
+
+Ogni espressione ha un tipo: è il tipo del valore che risulta dalla sua valutazione. Se l'espressione non produce alcun valore, ha tipo \lstinline|void|. Per esempio, se \lstinline|a| ha tipo \lstinline|int|, anche \lstinline|a + 1| ha tipo \lstinline|int|.
+
+Per capire come vengono valutate le espressioni in C servono quattro concetti fondamentali: \emph{precedenza} e \emph{associatività} degli operatori, \emph{sequence point} e \emph{lvalue/rvalue}.
+
+\section{Lvalue e rvalue}
+
+\begin{definizione}
+Un \emph{lvalue} è un'espressione che designa un oggetto. Per \emph{oggetto} si intende una locazione di memoria il cui contenuto può rappresentare valori.
+\end{definizione}
+
+L'esempio più semplice di lvalue è il nome di una variabile. La «l» iniziale significava originariamente \emph{left}: poiché un lvalue designa un oggetto, può comparire a sinistra di un operatore di assegnamento (ma anche a destra), come in
+\[
+\texttt{espressioneSinistra = espressioneDestra}
+\]
+
+Le espressioni che rappresentano un valore senza designare un oggetto si chiamano, per analogia, \emph{rvalue}. Un rvalue può comparire a destra di un operatore di assegnamento, ma non a sinistra.
+
+\begin{esempio}
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Espressione & Categoria & Uso \\
+\midrule
+\lstinline|7|   & rvalue & \lstinline|7 = a| è un errore; \lstinline|a = 7| è corretto\\
+\lstinline|a|   & lvalue & \lstinline|a = 7|\\
+\lstinline|a+1| & rvalue & \lstinline|a + 1 = 8| è un errore; \lstinline|a = a + 1| è corretto\\
+\lstinline|'c'| & rvalue & \lstinline|'c' = a| è un errore; \lstinline|a = 'c'| è corretto\\
+\lstinline|a+b| & rvalue & \lstinline|a + b = 11| è un errore; \lstinline|a = a + b| è corretto\\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{esempio}
+
+\subsection{Gli lvalue possono stare anche a destra di \texorpdfstring{\lstinline|=|}{=}}
+
+In \lstinline|a = 7; b = a;|
+\begin{enumerate}
+    \item quando una variabile è a sinistra di \lstinline|=|, ne \emph{modifichiamo} il valore con quello dell'espressione a destra;
+    \item quando una variabile è a destra di \lstinline|=|, ne prendiamo il valore memorizzato.
+\end{enumerate}
+
+\subsection{Variabili}
+
+Le variabili sono lvalue: sono contenitori di valori, qualunque cosa il cui valore possa cambiare in memoria. Per esempio, con \lstinline|int a = 7;| e \lstinline|int b = 256;| (little endian, $4$ byte ciascuna) la variabile \lstinline|a| occupa i byte a partire dall'indirizzo $2700$ con contenuto \texttt{07 00 00 00}, e \lstinline|b| quelli a partire da $2704$ con contenuto \texttt{00 01 00 00}.
+
+\subsection{Costanti e lvalue}
+
+Un oggetto può essere dichiarato \lstinline|const|. In tal caso, anche se è un lvalue, non si può usare a sinistra di un assegnamento.
+
+\begin{codice}
+int a = 1;
+const int b = 2;
+b = 20;      // Errore: b è dichiarata const int
+\end{codice}
+
+L'operando sinistro di un assegnamento deve essere un \emph{lvalue modificabile}.
+
+\begin{definizione}
+Un \emph{lvalue modificabile} è un lvalue che non è dichiarato con il qualificatore \lstinline|const|.
+\end{definizione}
+
+Si usano le costanti quando si vuole essere sicuri che il valore non cambi durante l'esecuzione del programma. Un valore va assegnato subito, nella definizione, perché dopo non è più modificabile:
+
+\begin{codice}
+const double pi;         // sbagliato: nessun valore iniziale
+const double pi = 3.14;  // corretto
+pi = 3.14;               // sbagliato: pi non è modificabile
+\end{codice}
+
+\section{Precedenza e associatività degli operatori}
+
+\subsection{Precedenza}
+
+Un'espressione può contenere più operatori. In questo caso la \emph{precedenza} degli operatori determina quale parte dell'espressione è l'operando di ciascun operatore. Come nelle regole usuali dell'aritmetica, gli operatori \lstinline|*|, \lstinline|/| e \lstinline|%| hanno precedenza maggiore di \lstinline|+| e \lstinline|-|. Per esempio
+\[
+\texttt{a - b * c}\quad\text{equivale a}\quad\texttt{a - (b * c)}.
+\]
+Se si vogliono raggruppare gli operandi in modo diverso si usano le parentesi: \lstinline|(a - b) * c|.
+
+\subsection{Associatività}
+
+Se due operatori in un'espressione hanno la stessa precedenza, la loro \emph{associatività} stabilisce se vengono raggruppati con gli operandi da sinistra a destra o da destra a sinistra. Gli operatori aritmetici associano da sinistra a destra, gli operatori di assegnamento da destra a sinistra:
+\begin{itemize}
+    \item \lstinline|a / b / c| equivale a \lstinline|(a / b) / c|;
+    \item \lstinline|a = b = c| equivale a \lstinline|a = (b = c)|.
+\end{itemize}
+
+\subsection{Tabella di precedenza e associatività}
+
+\begin{center}
+\small
+\begin{tabular}{r p{8.2cm} p{3.2cm}}
+\toprule
+Prec. & Operatori & Associatività \\
+\midrule
+1  & Postfissi: \lstinline|[]  ()  .  ->  ++  --|  \; (e \lstinline|(tipo){lista}|) & da sinistra a destra\\
+2  & Unari: \lstinline|++  --  !  ~  +  -  *  &  sizeof| & da destra a sinistra\\
+3  & Cast: \lstinline|(tipo)| & da destra a sinistra\\
+4  & Moltiplicativi: \lstinline|*  /  %| & da sinistra a destra\\
+5  & Additivi: \lstinline|+  -| & da sinistra a destra\\
+6  & Shift: \lstinline|<<  >>| & da sinistra a destra\\
+7  & Relazionali: \lstinline|<  <=  >  >=| & da sinistra a destra\\
+8  & Uguaglianza: \lstinline|==  !=| & da sinistra a destra\\
+9  & AND bit a bit: \lstinline|&| & da sinistra a destra\\
+10 & XOR bit a bit: \lstinline|^| & da sinistra a destra\\
+11 & OR bit a bit: \lstinline/|/ & da sinistra a destra\\
+12 & AND logico: \lstinline|&&| & da sinistra a destra\\
+13 & OR logico: \lstinline/||/ & da sinistra a destra\\
+14 & Condizionale: \lstinline|? :| & da destra a sinistra\\
+15 & Assegnamento: \lstinline!= += -= *= /= %= &= ^= |= <<= >>=! & da destra a sinistra\\
+16 & Virgola: \lstinline|,| & da sinistra a destra\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Alcuni simboli compaiono due volte nella tabella.
+\begin{itemize}
+    \item Gli operatori di incremento e decremento \lstinline|++| e \lstinline|--| hanno precedenza maggiore quando sono usati come operatori \emph{postfissi} (come in \lstinline|x++|) che come operatori \emph{prefissi} (come in \lstinline|++x|).
+    \item I simboli \lstinline|+|, \lstinline|-|, \lstinline|*| e \lstinline|&| rappresentano sia operatori \emph{unari}, cioè che lavorano su un solo operando, sia operatori \emph{binari}, che collegano due operandi.
+\end{itemize}
+
+\section{Operatori aritmetici}
+
+\begin{center}
+\begin{tabular}{llll}
+\toprule
+Operatore & Significato & Esempio & Risultato \\
+\midrule
+\lstinline|*| & moltiplicazione & \lstinline|x * y| & prodotto di $x$ e $y$\\
+\lstinline|/| & divisione & \lstinline|x / y| & quoziente di $x$ diviso $y$\\
+\lstinline|%| & modulo & \lstinline|x % y| & resto di $x$ diviso $y$\\
+\lstinline|+| & addizione & \lstinline|x + y| & somma di $x$ e $y$\\
+\lstinline|-| & sottrazione & \lstinline|x - y| & differenza di $x$ e $y$\\
+\lstinline|+| (unario) & segno positivo & \lstinline|+x| & il valore di $x$\\
+\lstinline|-| (unario) & segno negativo & \lstinline|-x| & l'opposto aritmetico di $x$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Gli operandi degli operatori aritmetici sottostanno alle regole seguenti:
+\begin{itemize}
+    \item solo l'operatore \lstinline|%| richiede operandi \emph{interi}; gli operandi di tutti gli altri operatori possono avere qualunque tipo aritmetico;
+    \item gli operandi sono soggetti alle usuali conversioni aritmetiche (lezione 10). Il risultato di una divisione tra due operandi interi è anch'esso un intero.
+\end{itemize}
+
+\begin{esempio}
+Con \lstinline|short n = -5;|
+\begin{center}
+\begin{tabular}{l p{5.6cm} l l}
+\toprule
+Espressione & Conversione implicita & Tipo & Valore\\
+\midrule
+\lstinline|-n|      & promozione intera & \lstinline|int| & $5$\\
+\lstinline|n * -2L| & $n$ promosso a \lstinline|long| (la costante \lstinline|-2L| è \lstinline|long|) & \lstinline|long| & $10$\\
+\lstinline|8 / n|   & promozione intera & \lstinline|int| & $-1$\\
+\lstinline|8 % n|   & promozione intera & \lstinline|int| & $3$\\
+\lstinline|8.0 / n| & $n$ convertito a \lstinline|double| (perché $8.0$ è \lstinline|double|) & \lstinline|double| & $-1{,}6$\\
+\lstinline|8.0 % n| & errore: \lstinline|%| richiede operandi interi & --- & ---\\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{esempio}
+
+\begin{osservazione}
+Se entrambi gli operandi di una moltiplicazione o di una divisione hanno lo stesso segno, il risultato è positivo; altrimenti è negativo. Il risultato dell'operazione di modulo, invece, ha sempre lo stesso segno dell'operando sinistro (come si vede sopra: $8 \% (-5) = 3$).
+\end{osservazione}
+
+\section{Operatori di assegnamento}
+
+In un'operazione di assegnamento l'operando sinistro deve essere un lvalue modificabile, cioè un'espressione che designa un oggetto il cui valore può essere cambiato. Nell'\emph{assegnamento semplice}, eseguito con l'operatore \lstinline|=|, il valore dell'operando destro viene memorizzato in questo oggetto.
+
+Esistono anche gli \emph{assegnamenti composti}, che combinano nello stesso passo un'operazione aritmetica o bit a bit con l'assegnamento:
+\begin{itemize}
+    \item \lstinline|*=  /=  %=  +=  -=| (operazione aritmetica e assegnamento);
+    \item \lstinline!<<=  >>=  &=  ^=  |=! (operazione bit a bit e assegnamento).
+\end{itemize}
+Nel valutare un assegnamento composto il programma combina i due operandi con l'operazione indicata e assegna il risultato all'operando sinistro: \lstinline|a += b| equivale a \lstinline|a = a + b|.
+
+\section{Incremento e decremento}
+
+Ciascuno dei simboli \lstinline|++| e \lstinline|--| rappresenta sia un operatore postfisso sia un operatore prefisso.
+
+\begin{center}
+\begin{tabular}{l p{5cm} p{5cm}}
+\toprule
+Operatore & Effetto collaterale & Valore dell'espressione\\
+\midrule
+\lstinline|x++| (postfisso) & aumenta $x$ di uno (come \lstinline|x = x + 1|) & il valore che $x$ aveva \emph{prima} dell'incremento\\
+\lstinline|++x| (prefisso) & aumenta $x$ di uno & il valore che $x$ ha \emph{dopo} l'incremento\\
+\lstinline|x--| (postfisso) & diminuisce $x$ di uno (come \lstinline|x = x - 1|) & il valore che $x$ aveva \emph{prima} del decremento\\
+\lstinline|--x| (prefisso) & diminuisce $x$ di uno & il valore che $x$ ha \emph{dopo} il decremento\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Operatori di confronto}
+
+Gli operatori di confronto, detti anche \emph{relazionali} e di \emph{uguaglianza}, confrontano due operandi e producono un valore di tipo \lstinline|int|: $1$ se la relazione specificata è vera, $0$ se è falsa.
+
+\begin{esempio}
+\begin{codice}
+int a = 5;
+int b = 6;
+int c = 0;
+c = a < b;     // c vale 1
+c = a == b;    // c vale 0
+c = b >= a;    // c vale 1
+\end{codice}
+\end{esempio}
+
+Gli operatori di confronto hanno precedenza minore degli operatori aritmetici, ma maggiore degli operatori logici. Inoltre gli operatori di uguaglianza \lstinline|==| e \lstinline|!=| hanno precedenza minore degli altri operatori di confronto:
+\begin{itemize}
+    \item \lstinline|a < b && b < c + 1| equivale a \lstinline|(a < b) && (b < (c + 1))|;
+    \item \lstinline|a < b != b < c| equivale a \lstinline|(a < b) != (b < c)|.
+\end{itemize}
+
+\section{Operatori logici}
+
+Si possono collegare più espressioni con gli operatori logici per formare condizioni composte: le operazioni booleane AND (\lstinline|&&|), OR (\lstinline/||/) e NOT (\lstinline|!|). Come le espressioni di confronto, anche le espressioni logiche hanno tipo \lstinline|int|: il risultato vale $1$ se l'espressione logica è vera e $0$ se è falsa.
+
+Qualunque operando con valore $0$ viene interpretato come falso; qualunque valore diverso da $0$ è trattato come vero. Le condizioni seguenti sono tutte equivalenti:
+\begin{codice}
+(a < -0.2) || (a > 0.2)
+a < -0.2 || a > 0.2
+!(a >= -0.2 && a <= 0.2)
+\end{codice}
+L'operatore unario \lstinline|!| ha precedenza maggiore degli altri.
+
+\subsection{Valutazione in corto circuito}
+
+Gli operatori \lstinline|&&| e \lstinline/||/ hanno una particolarità importante: i loro operandi vengono valutati da sinistra a destra e, se il valore dell'operando sinistro è sufficiente a determinare il risultato, l'operando destro \emph{non viene valutato affatto}.
+\begin{itemize}
+    \item \lstinline|&&| valuta l'operando destro solo se quello sinistro produce un valore diverso da zero;
+    \item \lstinline/||/ valuta l'operando destro solo se quello sinistro produce~$0$.
+\end{itemize}
+
+\begin{esempio}
+\begin{codice}
+int a = 1;
+int b = 0;
+int c;
+c = a || ++b;    // b non viene incrementato (resta 0), c vale 1
+\end{codice}
+\begin{codice}
+int a = 1;
+int b = 0;
+int c;
+c = b && ++a;    // a non viene incrementato (resta 1), c vale 0
+\end{codice}
+\end{esempio}
+
+\end{document}

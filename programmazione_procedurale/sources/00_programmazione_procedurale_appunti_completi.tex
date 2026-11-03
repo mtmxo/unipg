@@ -1890,4 +1890,1575 @@ Niente sul libro. Risorse indicate dal docente:
           \url{https://www.oreilly.com/library/view/c-in-a/0596006977/ch04.html}
 \end{itemize}
 
+\section[Espressioni, lvalue e operatori (Lezione 11 -- 19 ottobre 2026)]{Espressioni, lvalue e operatori}
+\noindent\emph{Lezione 11 -- 19 ottobre 2026}
+\subsection{Espressioni}
+
+\begin{definizione}
+Un'\emph{espressione} è una sequenza di costanti (literal), identificatori e operatori che il programma valuta eseguendo le operazioni indicate. Lo scopo di un'espressione in un programma può essere ottenere il valore risultante, produrre \emph{effetti collaterali} della valutazione, oppure entrambi.
+\end{definizione}
+
+Una singola costante, un literal stringa o l'identificatore di un oggetto o di una funzione è già di per sé un'espressione.
+
+\subsubsection{Effetti collaterali}
+
+Un'espressione ha un \emph{effetto collaterale} (\emph{side effect}) se modifica uno stato al di fuori del proprio ambiente locale, cioè se ha un'interazione osservabile con il mondo esterno oltre a restituire un valore.
+
+\begin{codice}
+if (a == 5) {              // restituisce un valore
+    printf("Hello World!\n");
+}
+if (a = 5) {               // restituisce un valore E ha un effetto collaterale su a
+    printf("Hello World!\n");
+}
+\end{codice}
+
+\begin{osservazione}
+Il secondo \lstinline|if| è \emph{sbagliato} come modo di verificare una condizione: \lstinline|a = 5| assegna~$5$ ad \lstinline|a| e vale~$5$, quindi la condizione è sempre vera.
+\end{osservazione}
+
+\subsubsection{Tipo di un'espressione}
+
+Ogni espressione ha un tipo: è il tipo del valore che risulta dalla sua valutazione. Se l'espressione non produce alcun valore, ha tipo \lstinline|void|. Per esempio, se \lstinline|a| ha tipo \lstinline|int|, anche \lstinline|a + 1| ha tipo \lstinline|int|.
+
+Per capire come vengono valutate le espressioni in C servono quattro concetti fondamentali: \emph{precedenza} e \emph{associatività} degli operatori, \emph{sequence point} e \emph{lvalue/rvalue}.
+
+\subsection{Lvalue e rvalue}
+
+\begin{definizione}
+Un \emph{lvalue} è un'espressione che designa un oggetto. Per \emph{oggetto} si intende una locazione di memoria il cui contenuto può rappresentare valori.
+\end{definizione}
+
+L'esempio più semplice di lvalue è il nome di una variabile. La «l» iniziale significava originariamente \emph{left}: poiché un lvalue designa un oggetto, può comparire a sinistra di un operatore di assegnamento (ma anche a destra), come in
+\[
+\texttt{espressioneSinistra = espressioneDestra}
+\]
+
+Le espressioni che rappresentano un valore senza designare un oggetto si chiamano, per analogia, \emph{rvalue}. Un rvalue può comparire a destra di un operatore di assegnamento, ma non a sinistra.
+
+\begin{esempio}
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Espressione & Categoria & Uso \\
+\midrule
+\lstinline|7|   & rvalue & \lstinline|7 = a| è un errore; \lstinline|a = 7| è corretto\\
+\lstinline|a|   & lvalue & \lstinline|a = 7|\\
+\lstinline|a+1| & rvalue & \lstinline|a + 1 = 8| è un errore; \lstinline|a = a + 1| è corretto\\
+\lstinline|'c'| & rvalue & \lstinline|'c' = a| è un errore; \lstinline|a = 'c'| è corretto\\
+\lstinline|a+b| & rvalue & \lstinline|a + b = 11| è un errore; \lstinline|a = a + b| è corretto\\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{esempio}
+
+\subsubsection{Gli lvalue possono stare anche a destra di \texorpdfstring{\lstinline|=|}{=}}
+
+In \lstinline|a = 7; b = a;|
+\begin{enumerate}
+    \item quando una variabile è a sinistra di \lstinline|=|, ne \emph{modifichiamo} il valore con quello dell'espressione a destra;
+    \item quando una variabile è a destra di \lstinline|=|, ne prendiamo il valore memorizzato.
+\end{enumerate}
+
+\subsubsection{Variabili}
+
+Le variabili sono lvalue: sono contenitori di valori, qualunque cosa il cui valore possa cambiare in memoria. Per esempio, con \lstinline|int a = 7;| e \lstinline|int b = 256;| (little endian, $4$ byte ciascuna) la variabile \lstinline|a| occupa i byte a partire dall'indirizzo $2700$ con contenuto \texttt{07 00 00 00}, e \lstinline|b| quelli a partire da $2704$ con contenuto \texttt{00 01 00 00}.
+
+\subsubsection{Costanti e lvalue}
+
+Un oggetto può essere dichiarato \lstinline|const|. In tal caso, anche se è un lvalue, non si può usare a sinistra di un assegnamento.
+
+\begin{codice}
+int a = 1;
+const int b = 2;
+b = 20;      // Errore: b è dichiarata const int
+\end{codice}
+
+L'operando sinistro di un assegnamento deve essere un \emph{lvalue modificabile}.
+
+\begin{definizione}
+Un \emph{lvalue modificabile} è un lvalue che non è dichiarato con il qualificatore \lstinline|const|.
+\end{definizione}
+
+Si usano le costanti quando si vuole essere sicuri che il valore non cambi durante l'esecuzione del programma. Un valore va assegnato subito, nella definizione, perché dopo non è più modificabile:
+
+\begin{codice}
+const double pi;         // sbagliato: nessun valore iniziale
+const double pi = 3.14;  // corretto
+pi = 3.14;               // sbagliato: pi non è modificabile
+\end{codice}
+
+\subsection{Precedenza e associatività degli operatori}
+
+\subsubsection{Precedenza}
+
+Un'espressione può contenere più operatori. In questo caso la \emph{precedenza} degli operatori determina quale parte dell'espressione è l'operando di ciascun operatore. Come nelle regole usuali dell'aritmetica, gli operatori \lstinline|*|, \lstinline|/| e \lstinline|%| hanno precedenza maggiore di \lstinline|+| e \lstinline|-|. Per esempio
+\[
+\texttt{a - b * c}\quad\text{equivale a}\quad\texttt{a - (b * c)}.
+\]
+Se si vogliono raggruppare gli operandi in modo diverso si usano le parentesi: \lstinline|(a - b) * c|.
+
+\subsubsection{Associatività}
+
+Se due operatori in un'espressione hanno la stessa precedenza, la loro \emph{associatività} stabilisce se vengono raggruppati con gli operandi da sinistra a destra o da destra a sinistra. Gli operatori aritmetici associano da sinistra a destra, gli operatori di assegnamento da destra a sinistra:
+\begin{itemize}
+    \item \lstinline|a / b / c| equivale a \lstinline|(a / b) / c|;
+    \item \lstinline|a = b = c| equivale a \lstinline|a = (b = c)|.
+\end{itemize}
+
+\subsubsection{Tabella di precedenza e associatività}
+
+\begin{center}
+\small
+\begin{tabular}{r p{8.2cm} p{3.2cm}}
+\toprule
+Prec. & Operatori & Associatività \\
+\midrule
+1  & Postfissi: \lstinline|[]  ()  .  ->  ++  --|  \; (e \lstinline|(tipo){lista}|) & da sinistra a destra\\
+2  & Unari: \lstinline|++  --  !  ~  +  -  *  &  sizeof| & da destra a sinistra\\
+3  & Cast: \lstinline|(tipo)| & da destra a sinistra\\
+4  & Moltiplicativi: \lstinline|*  /  %| & da sinistra a destra\\
+5  & Additivi: \lstinline|+  -| & da sinistra a destra\\
+6  & Shift: \lstinline|<<  >>| & da sinistra a destra\\
+7  & Relazionali: \lstinline|<  <=  >  >=| & da sinistra a destra\\
+8  & Uguaglianza: \lstinline|==  !=| & da sinistra a destra\\
+9  & AND bit a bit: \lstinline|&| & da sinistra a destra\\
+10 & XOR bit a bit: \lstinline|^| & da sinistra a destra\\
+11 & OR bit a bit: \lstinline/|/ & da sinistra a destra\\
+12 & AND logico: \lstinline|&&| & da sinistra a destra\\
+13 & OR logico: \lstinline/||/ & da sinistra a destra\\
+14 & Condizionale: \lstinline|? :| & da destra a sinistra\\
+15 & Assegnamento: \lstinline!= += -= *= /= %= &= ^= |= <<= >>=! & da destra a sinistra\\
+16 & Virgola: \lstinline|,| & da sinistra a destra\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Alcuni simboli compaiono due volte nella tabella.
+\begin{itemize}
+    \item Gli operatori di incremento e decremento \lstinline|++| e \lstinline|--| hanno precedenza maggiore quando sono usati come operatori \emph{postfissi} (come in \lstinline|x++|) che come operatori \emph{prefissi} (come in \lstinline|++x|).
+    \item I simboli \lstinline|+|, \lstinline|-|, \lstinline|*| e \lstinline|&| rappresentano sia operatori \emph{unari}, cioè che lavorano su un solo operando, sia operatori \emph{binari}, che collegano due operandi.
+\end{itemize}
+
+\subsection{Operatori aritmetici}
+
+\begin{center}
+\begin{tabular}{llll}
+\toprule
+Operatore & Significato & Esempio & Risultato \\
+\midrule
+\lstinline|*| & moltiplicazione & \lstinline|x * y| & prodotto di $x$ e $y$\\
+\lstinline|/| & divisione & \lstinline|x / y| & quoziente di $x$ diviso $y$\\
+\lstinline|%| & modulo & \lstinline|x % y| & resto di $x$ diviso $y$\\
+\lstinline|+| & addizione & \lstinline|x + y| & somma di $x$ e $y$\\
+\lstinline|-| & sottrazione & \lstinline|x - y| & differenza di $x$ e $y$\\
+\lstinline|+| (unario) & segno positivo & \lstinline|+x| & il valore di $x$\\
+\lstinline|-| (unario) & segno negativo & \lstinline|-x| & l'opposto aritmetico di $x$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Gli operandi degli operatori aritmetici sottostanno alle regole seguenti:
+\begin{itemize}
+    \item solo l'operatore \lstinline|%| richiede operandi \emph{interi}; gli operandi di tutti gli altri operatori possono avere qualunque tipo aritmetico;
+    \item gli operandi sono soggetti alle usuali conversioni aritmetiche (lezione 10). Il risultato di una divisione tra due operandi interi è anch'esso un intero.
+\end{itemize}
+
+\begin{esempio}
+Con \lstinline|short n = -5;|
+\begin{center}
+\begin{tabular}{l p{5.6cm} l l}
+\toprule
+Espressione & Conversione implicita & Tipo & Valore\\
+\midrule
+\lstinline|-n|      & promozione intera & \lstinline|int| & $5$\\
+\lstinline|n * -2L| & $n$ promosso a \lstinline|long| (la costante \lstinline|-2L| è \lstinline|long|) & \lstinline|long| & $10$\\
+\lstinline|8 / n|   & promozione intera & \lstinline|int| & $-1$\\
+\lstinline|8 % n|   & promozione intera & \lstinline|int| & $3$\\
+\lstinline|8.0 / n| & $n$ convertito a \lstinline|double| (perché $8.0$ è \lstinline|double|) & \lstinline|double| & $-1{,}6$\\
+\lstinline|8.0 % n| & errore: \lstinline|%| richiede operandi interi & --- & ---\\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{esempio}
+
+\begin{osservazione}
+Se entrambi gli operandi di una moltiplicazione o di una divisione hanno lo stesso segno, il risultato è positivo; altrimenti è negativo. Il risultato dell'operazione di modulo, invece, ha sempre lo stesso segno dell'operando sinistro (come si vede sopra: $8 \% (-5) = 3$).
+\end{osservazione}
+
+\subsection{Operatori di assegnamento}
+
+In un'operazione di assegnamento l'operando sinistro deve essere un lvalue modificabile, cioè un'espressione che designa un oggetto il cui valore può essere cambiato. Nell'\emph{assegnamento semplice}, eseguito con l'operatore \lstinline|=|, il valore dell'operando destro viene memorizzato in questo oggetto.
+
+Esistono anche gli \emph{assegnamenti composti}, che combinano nello stesso passo un'operazione aritmetica o bit a bit con l'assegnamento:
+\begin{itemize}
+    \item \lstinline|*=  /=  %=  +=  -=| (operazione aritmetica e assegnamento);
+    \item \lstinline!<<=  >>=  &=  ^=  |=! (operazione bit a bit e assegnamento).
+\end{itemize}
+Nel valutare un assegnamento composto il programma combina i due operandi con l'operazione indicata e assegna il risultato all'operando sinistro: \lstinline|a += b| equivale a \lstinline|a = a + b|.
+
+\subsection{Incremento e decremento}
+
+Ciascuno dei simboli \lstinline|++| e \lstinline|--| rappresenta sia un operatore postfisso sia un operatore prefisso.
+
+\begin{center}
+\begin{tabular}{l p{5cm} p{5cm}}
+\toprule
+Operatore & Effetto collaterale & Valore dell'espressione\\
+\midrule
+\lstinline|x++| (postfisso) & aumenta $x$ di uno (come \lstinline|x = x + 1|) & il valore che $x$ aveva \emph{prima} dell'incremento\\
+\lstinline|++x| (prefisso) & aumenta $x$ di uno & il valore che $x$ ha \emph{dopo} l'incremento\\
+\lstinline|x--| (postfisso) & diminuisce $x$ di uno (come \lstinline|x = x - 1|) & il valore che $x$ aveva \emph{prima} del decremento\\
+\lstinline|--x| (prefisso) & diminuisce $x$ di uno & il valore che $x$ ha \emph{dopo} il decremento\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Operatori di confronto}
+
+Gli operatori di confronto, detti anche \emph{relazionali} e di \emph{uguaglianza}, confrontano due operandi e producono un valore di tipo \lstinline|int|: $1$ se la relazione specificata è vera, $0$ se è falsa.
+
+\begin{esempio}
+\begin{codice}
+int a = 5;
+int b = 6;
+int c = 0;
+c = a < b;     // c vale 1
+c = a == b;    // c vale 0
+c = b >= a;    // c vale 1
+\end{codice}
+\end{esempio}
+
+Gli operatori di confronto hanno precedenza minore degli operatori aritmetici, ma maggiore degli operatori logici. Inoltre gli operatori di uguaglianza \lstinline|==| e \lstinline|!=| hanno precedenza minore degli altri operatori di confronto:
+\begin{itemize}
+    \item \lstinline|a < b && b < c + 1| equivale a \lstinline|(a < b) && (b < (c + 1))|;
+    \item \lstinline|a < b != b < c| equivale a \lstinline|(a < b) != (b < c)|.
+\end{itemize}
+
+\subsection{Operatori logici}
+
+Si possono collegare più espressioni con gli operatori logici per formare condizioni composte: le operazioni booleane AND (\lstinline|&&|), OR (\lstinline/||/) e NOT (\lstinline|!|). Come le espressioni di confronto, anche le espressioni logiche hanno tipo \lstinline|int|: il risultato vale $1$ se l'espressione logica è vera e $0$ se è falsa.
+
+Qualunque operando con valore $0$ viene interpretato come falso; qualunque valore diverso da $0$ è trattato come vero. Le condizioni seguenti sono tutte equivalenti:
+\begin{codice}
+(a < -0.2) || (a > 0.2)
+a < -0.2 || a > 0.2
+!(a >= -0.2 && a <= 0.2)
+\end{codice}
+L'operatore unario \lstinline|!| ha precedenza maggiore degli altri.
+
+\subsubsection{Valutazione in corto circuito}
+
+Gli operatori \lstinline|&&| e \lstinline/||/ hanno una particolarità importante: i loro operandi vengono valutati da sinistra a destra e, se il valore dell'operando sinistro è sufficiente a determinare il risultato, l'operando destro \emph{non viene valutato affatto}.
+\begin{itemize}
+    \item \lstinline|&&| valuta l'operando destro solo se quello sinistro produce un valore diverso da zero;
+    \item \lstinline/||/ valuta l'operando destro solo se quello sinistro produce~$0$.
+\end{itemize}
+
+\begin{esempio}
+\begin{codice}
+int a = 1;
+int b = 0;
+int c;
+c = a || ++b;    // b non viene incrementato (resta 0), c vale 1
+\end{codice}
+\begin{codice}
+int a = 1;
+int b = 0;
+int c;
+c = b && ++a;    // a non viene incrementato (resta 1), c vale 0
+\end{codice}
+\end{esempio}
+
+\section[Operatori bit a bit, altri operatori e sequence point (Lezione 12 -- 19 ottobre 2026)]{Operatori bit a bit, altri operatori e sequence point}
+\noindent\emph{Lezione 12 -- 19 ottobre 2026}
+\subsection{Operatori bit a bit}
+
+Gli operatori bit a bit permettono di manipolare i singoli bit di un byte o di un'unità di dati più grande.
+
+\begin{center}
+\begin{tabular}{l p{3.2cm} l p{5.6cm}}
+\toprule
+Operatore & Significato & Esempio & Risultato (per ogni posizione di bit)\\
+\midrule
+\lstinline|&| & AND bit a bit & \lstinline|x & y| & $1$ se $1$ sia in $x$ sia in $y$; $0$ se $0$ in $x$ o in $y$, o in entrambi\\
+\lstinline/|/ & OR bit a bit & \lstinline/x | y/ & $1$ se $1$ in $x$ o in $y$, o in entrambi; $0$ se $0$ in entrambi\\
+\lstinline|^| & XOR bit a bit (OR esclusivo) & \lstinline|x ^ y| & $1$ se $1$ in $x$ o in $y$ ma non in entrambi; $0$ se i due bit sono uguali\\
+\lstinline|~| & NOT bit a bit (complemento a uno) & \lstinline|~x| & $1$ se $0$ in $x$; $0$ se $1$ in $x$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{esempio}
+Con \lstinline|int a = 6;| e \lstinline|int b = 11;| (mostrati gli ultimi $5$ bit, gli altri valgono~$0$ tranne che in $\sim a$, dove valgono~$1$):
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+Espressione & Schema di bit\\
+\midrule
+\lstinline|a = 6|  & \texttt{0\,0\,1\,1\,0}\\
+\lstinline|b = 11| & \texttt{0\,1\,0\,1\,1}\\
+\lstinline|a & b|  & \texttt{0\,0\,0\,1\,0}\\
+\lstinline/a | b/  & \texttt{0\,1\,1\,1\,1}\\
+\lstinline|a ^ b|  & \texttt{0\,1\,1\,0\,1}\\
+\lstinline|~a|     & \texttt{1\,1\,0\,0\,1}\\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{esempio}
+
+Un uso tipico degli assegnamenti composti bit a bit è la \emph{maschera}:
+\begin{codice}
+a &= 0xFF;    // equivale a a = a & 0xFF; azzera tutti i bit tranne gli otto meno significativi
+\end{codice}
+
+\subsubsection{Rappresentazione in memoria e nel processore}
+
+In memoria i valori sono rappresentati in \emph{little endian}; nel processore gli stessi valori vengono tradotti in \emph{big endian}. Tutte le operazioni nel processore sono quindi eseguite in big endian e, quando il risultato viene riscritto in memoria, viene salvato in little endian.
+
+\subsection{Operatori di shift}
+
+Gli operatori di shift traslano lo schema di bit dell'operando sinistro del numero di posizioni indicato dall'operando destro.
+
+Gli operandi degli operatori di shift devono essere interi. Prima dello shift vengono eseguite su entrambi le promozioni intere. Il valore dell'operando destro non deve essere negativo e deve essere minore della larghezza (in bit) dell'operando sinistro dopo la promozione intera.
+
+\begin{esempio}
+\begin{codice}
+unsigned long n = 0xB,   // schema di bit: 0 ... 0 0 0 1 0 1 1
+              result = 0;
+result = n << 2;         // 0 ... 0 1 0 1 1 0 0
+result = n >> 2;         // 0 ... 0 0 0 0 0 1 0
+\end{codice}
+\end{esempio}
+
+\begin{osservazione}
+Uno shift a sinistra di $y$ posizioni equivale a moltiplicare l'operando sinistro per $2^{y}$; uno shift a destra di $y$ posizioni equivale a dividere per $2^{y}$ (divisione intera): $x / 2^{y}$.
+\end{osservazione}
+
+\subsection{Altri operatori}
+
+In C ci sono altri sei operatori che non rientrano nelle categorie viste.
+
+\begin{center}
+\begin{tabular}{l p{3.6cm} l p{5.2cm}}
+\toprule
+Operatore & Significato & Esempio & Risultato\\
+\midrule
+\lstinline|()| & chiamata di funzione & \lstinline|log(x)| & passa il controllo alla funzione specificata, con gli argomenti specificati\\
+\lstinline|sizeof| & dimensione in byte di un oggetto o di un tipo & \lstinline|sizeof x| & numero di byte occupati da $x$ in memoria\\
+\lstinline|(tipo)| & conversione esplicita di tipo (cast) & \lstinline|(short) x| & il valore di $x$ convertito al tipo specificato\\
+\lstinline|?:| & valutazione condizionale & \lstinline|x ? y : z| & il valore di $y$ se $x$ è vero (diverso da $0$), altrimenti il valore di $z$\\
+\lstinline|,| & valutazione sequenziale & \lstinline|x, y| & valuta prima $x$, poi $y$; il risultato è il valore di $y$\\
+\bottomrule
+\end{tabular}
+\end{center}
+(gli altri due operatori, di selezione dei membri e di indicizzazione, sono già nella tabella di precedenza.)
+
+\subsubsection{Operatore condizionale}
+
+L'operatore condizionale è detto anche operatore \emph{ternario}, perché è l'unico che ha tre operandi:
+\[
+\texttt{condizione ? espressione1 : espressione2}
+\]
+L'operazione valuta prima la condizione. Poi, a seconda del risultato, valuta una delle due espressioni alternative. Dopo la valutazione della condizione c'è un \emph{sequence point}. Se il risultato è diverso da $0$ (la condizione è vera) viene valutato \emph{solo} il secondo operando, \texttt{espressione1}, e l'intera operazione assume il suo valore. Se invece la condizione è $0$ (falsa) viene valutato solo il terzo operando, \texttt{espressione2}, e l'operazione assume il suo valore.
+
+\begin{esempio}
+\begin{codice}
+int a = 6;
+int b = 12;
+int c;
+c = b > a ? 100 : 150;     // c diventa 100
+c = a == b ? 100 : 150;    // c diventa 150
+\end{codice}
+\end{esempio}
+
+Il primo operando, la condizione, deve avere tipo aritmetico. Se entrambe le espressioni alternative hanno tipo aritmetico, il tipo del risultato è quello che si ottiene applicando agli operandi le usuali conversioni aritmetiche:
+\begin{codice}
+int a = 6;
+int b = 12;
+int c;
+c = (b > a) ? 100 : 150LL;   // l'intera espressione ha tipo long long
+\end{codice}
+
+\subsubsection{Operatore virgola}
+
+L'operatore virgola è un operatore binario:
+\[
+\texttt{espressione1 , espressione2}
+\]
+Garantisce un'elaborazione sequenziale: prima viene valutato l'operando sinistro, poi quello destro. Il risultato dell'intera espressione ha il tipo e il valore dell'operando destro. L'operando sinistro viene valutato solo per i suoi effetti collaterali; il suo valore viene scartato.
+
+\begin{esempio}
+\begin{codice}
+int a = 6;
+int b = 12;
+int c;
+c = (a++, a + 7);   // a diventa 7, c diventa 14
+\end{codice}
+Il valore dell'intera espressione tra parentesi è $14$.
+\end{esempio}
+
+\subsection{Sequence point ed effetti collaterali}
+
+Una funzione o un'espressione ha un \emph{effetto collaterale} se, oltre a restituire un valore, modifica uno stato o ha un'interazione osservabile con le funzioni chiamanti o con il mondo esterno.
+
+\begin{definizione}
+Un \emph{sequence point} è un punto dell'esecuzione di un programma in cui è garantito che
+\begin{itemize}
+    \item tutti gli effetti collaterali delle valutazioni precedenti sono già stati eseguiti, e
+    \item nessun effetto collaterale delle valutazioni successive è ancora stato eseguito.
+\end{itemize}
+In altre parole, è un punto in cui tutti gli effetti collaterali sono stati valutati prima di passare al passo successivo.
+\end{definizione}
+
+\subsubsection{Attenzione agli assegnamenti}
+
+La modifica dell'operando sinistro è un effetto collaterale di un'espressione di assegnamento. Il valore dell'intera espressione di assegnamento è uguale al valore assegnato all'operando sinistro, e l'espressione ha il tipo dell'operando sinistro. A differenza dell'operando sinistro, però, l'espressione di assegnamento \emph{non è un lvalue}.
+
+\begin{esempio}
+\begin{codice}
+int a = 6;
+int b = 12;
+int c;
+c = (b = a);
+\end{codice}
+L'espressione \lstinline|(b = a)| ha valore $6$ e, come effetto collaterale, cambia il valore di \lstinline|b| in memoria; poi l'assegnamento a \lstinline|c| ha a sua volta come effetto collaterale la modifica di \lstinline|c|.
+\end{esempio}
+
+\begin{esempio}
+\begin{codice}
+int a = 6;
+int b = 12;
+int c;
+(c = b) = a;     // errore di compilazione
+\end{codice}
+Il compilatore segnala un errore perché \lstinline|(c = b)| è un rvalue e non un lvalue: non si può assegnargli il valore di \lstinline|a|.
+\end{esempio}
+
+\begin{esempio}[Quanti effetti collaterali?]
+\begin{codice}
+int a = 3;
+int b = 4;
+a = b++;
+\end{codice}
+L'espressione \lstinline|a = b++| ha due effetti collaterali: uno su \lstinline|b| e uno su \lstinline|a|.
+\end{esempio}
+
+\subsubsection{Regola da ricordare}
+
+Un programmatore deve ricordarsi di \emph{non modificare la stessa variabile più di una volta tra due sequence point consecutivi}.
+
+\begin{codice}
+i = 1;       // OK
+i = i++;     // SBAGLIATO: due modifiche di i; il comportamento è indefinito
+\end{codice}
+Poiché l'assegnamento e l'incremento nell'ultima istruzione possono avvenire in un ordine qualunque, il valore risultante di \lstinline|i| è indefinito.
+\begin{codice}
+int i = i++;   // OK, qualunque cosa significhi: è la creazione di i
+               // seguita dalla sua inizializzazione; il primo "=" non è
+               // un operatore di assegnamento
+\end{codice}
+
+\subsubsection{Dove si trovano i sequence point}
+
+I sequence point più importanti si trovano nelle posizioni seguenti:
+\begin{itemize}
+    \item alla fine di un comando (\lstinline|;|);
+    \item dopo la valutazione di tutti gli argomenti di una chiamata di funzione e prima che il controllo passi alle istruzioni della funzione;
+    \item alla fine di un'espressione che non fa parte di un'espressione più grande: per esempio ognuna delle tre espressioni di controllo di un \lstinline|for|, la condizione di un \lstinline|if| o di un \lstinline|while|, l'espressione di un \lstinline|return| e gli inizializzatori (dopo la valutazione di $5$ in \lstinline|int a = 5;|);
+    \item dopo la valutazione del primo operando di ciascuno dei seguenti operatori: \lstinline|&&| (AND logico), \lstinline/||/ (OR logico), \lstinline|?:| (condizionale) e \lstinline|,| (virgola).
+\end{itemize}
+
+\begin{esempio}
+\begin{itemize}
+    \item L'espressione \lstinline|++i < 100 ? f(i++) : (i = 0)| è ammessa, perché c'è un sequence point tra la prima modifica di \lstinline|i| e quella delle altre due che viene eseguita.
+    \item Anche \lstinline|a++ && a++| è corretta (sequence point dopo il primo operando di \lstinline|&&|).
+    \item \lstinline|a++ + b++| è corretta, perché ha un effetto collaterale su \lstinline|a| e uno su \lstinline|b|, cioè su due variabili diverse.
+\end{itemize}
+\end{esempio}
+
+\begin{esercizio}
+Che cosa stampa il programma seguente?
+\begin{codice}
+int main()
+{
+    int i = 0;
+    int k = i++, j = i++;
+    printf("%d %d %d\n", k, j, i);
+    int l = 0;
+    int m = ++l, n = ++l;
+    printf("%d %d %d\n", m, n, l);
+    int q;
+    q = ++q;
+    printf("%d\n", q);
+}
+\end{codice}
+\begin{risultato}
+0 1 2
+1 2 2
+\end{risultato}
+Nelle prime due dichiarazioni c'è un sequence point alla fine di ciascun inizializzatore, quindi i valori sono ben definiti. L'ultima istruzione, invece, modifica \lstinline|q| due volte senza sequence point intermedio: il compilatore avverte con
+\texttt{warning: multiple unsequenced modifications to 'q' [-Wunsequenced]} e il comportamento è indefinito.
+\end{esercizio}
+
+\subsection{Riferimenti}
+
+Sul libro: sezioni 2.5, 2.6, 3.11, 3.12, 4.9, 4.10, 7.7, 10.9, appendice~A, pag.~77 (espressione condizionale), pag.~87 (cast), pag.~135 (lvalue e rvalue), pag.~243 (virgola). Per effetti collaterali e sequence point:
+\begin{itemize}
+    \item {\footnotesize\url{https://learn.microsoft.com/it-it/cpp/c-language/side-effects?view=msvc-170}}
+    \item {\footnotesize\url{https://learn.microsoft.com/it-it/cpp/c-language/c-sequence-points?view=msvc-170}}
+\end{itemize}
+
+\section[Istruzioni, blocchi e cicli (Lezione 13 -- 26 ottobre 2026)]{Istruzioni, blocchi e cicli}
+\noindent\emph{Lezione 13 -- 26 ottobre 2026}
+\subsection{Istruzioni}
+
+Un'\emph{istruzione} (\emph{statement}) specifica una o più azioni da eseguire, come assegnare un valore a una variabile, passare il controllo a una funzione o saltare a un'altra istruzione. L'insieme di tutte le istruzioni di un programma determina ciò che il programma fa.
+
+I salti e i cicli sono istruzioni che controllano il flusso del programma. Eccetto quando queste istruzioni di controllo producono dei salti, le istruzioni vengono eseguite in sequenza, cioè nell'ordine in cui compaiono nel programma. Un'istruzione semplice è un'espressione seguita da un punto e virgola:
+\[
+\texttt{[espressione] ;}
+\]
+
+\begin{esempio}
+\lstinline|a + 3| è un'\emph{espressione}; \lstinline|a + 3;| è un \emph{comando} (istruzione). Si veda la differenza:
+\begin{codice}
+int a = 3;
+a = a + 2;        // istruzione: espressione seguita da ;
+if (a + 3;) { }   // SBAGLIATO: dentro le parentesi dell'if serve un'espressione, non un'istruzione
+\end{codice}
+\end{esempio}
+
+\subsubsection{Programmazione imperativa e procedurale}
+
+In informatica la \emph{programmazione imperativa} è un paradigma di programmazione che usa istruzioni che cambiano lo stato del programma. La \emph{programmazione procedurale} è un paradigma derivato dalla programmazione strutturata, basato sul concetto di chiamata di procedura. Le procedure sono dette anche routine, sottoprogrammi o funzioni. Il C è un linguaggio imperativo e procedurale.
+
+\subsubsection{Altri paradigmi}
+
+La \emph{programmazione dichiarativa} è un paradigma che esprime la logica di una computazione senza descriverne il flusso di controllo: descrivendo \emph{che cosa} il programma deve ottenere, piuttosto che \emph{come} ottenerlo, si cerca di minimizzare o eliminare gli effetti collaterali. Un esempio in Prolog:
+\begin{codice}
+mother_child(trude, sally).
+father_child(tom, sally).
+father_child(tom, erica).
+father_child(mike, tom).
+sibling(X, Y) :- parent_child(Z, X), parent_child(Z, Y).
+parent_child(X, Y) :- father_child(X, Y).
+parent_child(X, Y) :- mother_child(X, Y).
+
+?- sibling(sally, erica).
+Yes
+\end{codice}
+
+\subsection{Istruzione composta (blocco)}
+
+Un'\emph{istruzione composta}, detta in breve \emph{blocco}, raggruppa una serie di istruzioni e dichiarazioni tra parentesi graffe in modo da formare un'unica istruzione:
+\[
+\texttt{\{ [lista di dichiarazioni e istruzioni] \}}
+\]
+A differenza delle istruzioni semplici, i blocchi \emph{non} sono terminati da un punto e virgola.
+
+Un blocco si usa dove la sintassi richiede una sola istruzione, ma lo scopo del programma ne richiede più di una.
+\begin{codice}
+{
+    int a = 5, b = 4, c = 0;
+    c = a + b;
+}
+\end{codice}
+
+\begin{esempio}
+Senza le graffe l'\lstinline|if| controlla soltanto la prima istruzione che lo segue:
+\begin{codice}
+int a = -4;
+if (a < 0)
+    printf("%d is less than 0", a);
+    a = -a;
+    printf("a now is %d", a);
+\end{codice}
+\begin{risultato}
+-4 is less than 0 a now is 4
+\end{risultato}
+Con \lstinline|int a = 4;| nello stesso codice \lstinline|a = -a;| e la seconda \lstinline|printf| vengono comunque eseguite, perché non sono sotto il controllo dell'\lstinline|if|; l'output è \texttt{a now is -4}. Per controllare tutte e tre le istruzioni occorre un blocco:
+\begin{codice}
+int a = 4;
+if (a < 0) {
+    printf("%d is less than 0", a);
+    a = -a;
+    printf("a now is %d", a);
+}
+\end{codice}
+\end{esempio}
+
+\subsubsection{Blocchi e scope}
+
+\begin{codice}
+{   double result = 0.0, x = 0.0;
+    long status = 0;
+    int limit;
+    ++x;                    // istruzioni
+    if (status == 0)
+    {                       // nuovo blocco
+        int i = 0;
+        { int k = 3; }      // un altro blocco
+    }
+}
+\end{codice}
+I nomi dichiarati all'interno di un blocco hanno \emph{block scope}: sono visibili solo dalla loro dichiarazione fino alla fine del blocco. All'interno di questo scope, una dichiarazione può anche nascondere un oggetto con lo stesso nome dichiarato fuori dal blocco.
+
+\subsection{Istruzioni di definizione}
+
+Servono a definire variabili. La definizione di una variabile equivale alla sua creazione in memoria. Nello stesso scope le variabili devono avere nomi diversi.
+
+\begin{codice}
+int main() {
+    int a = 4;      // corretto
+}
+\end{codice}
+\begin{codice}
+int main() {
+    int a = 4;
+    float a = 5;    // errore: a è già definita in questo scope
+}
+\end{codice}
+Non si possono usare come espressioni:
+\begin{codice}
+int main() {
+    int a = int b = 3;    // errore
+}
+\end{codice}
+
+\subsection{Cicli}
+
+Si usa un \emph{ciclo} per eseguire un gruppo di istruzioni, detto \emph{corpo del ciclo}, più di una volta. In C un ciclo si introduce con una delle tre istruzioni di iterazione:
+\begin{enumerate}
+    \item \lstinline|while|;
+    \item \lstinline|do ... while|;
+    \item \lstinline|for|.
+\end{enumerate}
+Il numero di iterazioni del corpo è controllato da una condizione, l'\emph{espressione di controllo}: un'espressione di tipo scalare, cioè un'espressione aritmetica o un puntatore. La condizione del ciclo è vera se il valore dell'espressione di controllo è diverso da $0$, altrimenti è considerata falsa.
+
+\subsubsection{Istruzione while}
+
+Un'istruzione \lstinline|while| esegue un'istruzione ripetutamente finché l'espressione di controllo è vera:
+\[
+\texttt{while ( espressione ) istruzione}
+\]
+Il \lstinline|while| è un ciclo \emph{a controllo in testa} (\emph{top-driven}): prima si valuta la condizione del ciclo (l'espressione di controllo). Se è vera, si esegue il corpo e si valuta di nuovo l'espressione di controllo. Se la condizione è falsa, l'esecuzione prosegue con l'istruzione che segue il corpo del ciclo.
+
+Sintatticamente il corpo del ciclo è \emph{una} istruzione; se ne servono più d'una si raggruppano in un blocco.
+
+\begin{esempio}
+\begin{codice}
+#include <stdio.h>
+int main() {
+    int a = 10;
+
+    while (a < 20) {
+        printf("value of a: %d\n", a);
+        a++;
+    }
+    return 0;
+}
+\end{codice}
+\begin{risultato}
+value of a: 10
+value of a: 11
+value of a: 12
+value of a: 13
+value of a: 14
+value of a: 15
+value of a: 16
+value of a: 17
+value of a: 18
+value of a: 19
+\end{risultato}
+\end{esempio}
+
+\subsubsection{Istruzione for}
+
+Come il \lstinline|while|, l'istruzione \lstinline|for| è un ciclo a controllo in testa, ma con più logica del ciclo contenuta nell'istruzione stessa:
+\[
+\texttt{for ( [espressione1]; [espressione2]; [espressione3] ) istruzione}
+\]
+\begin{itemize}
+    \item \texttt{espressione1}: \emph{inizializzazione}. Viene valutata una sola volta, prima della prima valutazione dell'espressione di controllo, per eseguire le inizializzazioni necessarie.
+    \item \texttt{espressione2}: \emph{espressione di controllo}. Viene verificata prima di ogni iterazione; l'esecuzione del ciclo termina quando vale falso.
+    \item \texttt{espressione3}: \emph{aggiustamento}, per esempio l'incremento di un contatore, eseguito dopo ogni iterazione del ciclo e prima che l'espressione di controllo venga verificata di nuovo.
+\end{itemize}
+
+\begin{esempio}
+\begin{codice}
+int a = 0;
+int i;
+for (i = 0; i < 4; ++i) {
+    a = a + 2;
+    printf("%d", a);
+}
+\end{codice}
+\begin{risultato}
+2468
+\end{risultato}
+La variabile \lstinline|i| vale successivamente $0, 1, 2, 3$ (e $4$, quando il ciclo termina). Lo stesso comportamento si ottiene con \lstinline|for (i = 1; i <= 4; ++i)|.
+\end{esempio}
+
+Ognuna delle tre espressioni nell'intestazione del \lstinline|for| può essere omessa; la forma più breve possibile è quindi \lstinline|for (;;)|. Un'espressione di controllo mancante è considerata sempre vera e definisce quindi un ciclo infinito. \lstinline|for (; espressione; )| equivale a \lstinline|while (espressione)|. Ogni \lstinline|for| si può riscrivere come \lstinline|while| e viceversa:
+\begin{codice}
+int a = 0, i = 0;
+while (i < 4)
+{
+    a = a + 2;
+    ++i;
+}
+\end{codice}
+
+\medskip\noindent\textbf{Dichiarazione al posto di espressione1}\par\nopagebreak
+
+Dallo standard C99 si può usare una dichiarazione al posto di \texttt{espressione1}. In tal caso lo scope della variabile dichiarata è limitato al ciclo \lstinline|for|:
+\begin{codice}
+for (int i = 0; i < 4; ++i) {
+    a = a + 2;
+}
+\end{codice}
+La variabile \lstinline|i| dichiarata in questo ciclo non esiste più dopo la fine del ciclo.
+
+\subsubsection{Istruzione do \dots{} while}
+
+L'istruzione \lstinline|do ... while| è un ciclo \emph{a controllo in coda} (\emph{bottom-driven}):
+\[
+\texttt{do istruzione while ( espressione );}
+\]
+Il corpo del ciclo viene eseguito una volta prima che l'espressione di controllo sia valutata per la prima volta. A differenza di \lstinline|while| e \lstinline|for|, il \lstinline|do ... while| garantisce che venga eseguita \emph{almeno una} iterazione del corpo. Se l'espressione di controllo è vera segue un'altra iterazione; se è falsa il ciclo termina.
+
+\begin{esempio}
+\begin{codice}
+#include <stdio.h>
+int main()
+{
+    double number, sum = 0;
+
+    do   // il corpo viene eseguito almeno una volta
+    {
+        printf("Enter a number: ");
+        scanf("%lf", &number);
+        sum += number;
+    }
+    while (number != 0.0);
+
+    printf("Sum = %.2lf", sum);
+    return 0;
+}
+\end{codice}
+\begin{risultato}
+Enter a number: 1.5
+Enter a number: 2.4
+Enter a number: -3.4
+Enter a number: 4.2
+Enter a number: 0
+Sum = 4.70
+\end{risultato}
+\end{esempio}
+
+\subsection{Riferimenti}
+
+Sul libro: scope o campo di azione, sezione 5.13; sezioni 3.4--3.10, 4.1--4.8 (cicli e istruzioni); sezione 15.9 (da poi scordare immediatamente).
+
+\section[Selezione, salti e typedef (Lezione 14 -- 26 ottobre 2026)]{Selezione, salti e typedef}
+\noindent\emph{Lezione 14 -- 26 ottobre 2026}
+\subsection{Istruzioni di selezione}
+
+Un'istruzione di selezione può dirigere il flusso di esecuzione del programma lungo percorsi diversi a seconda di una condizione data. In C ci sono due istruzioni di selezione:
+\begin{enumerate}
+    \item \lstinline|if|;
+    \item \lstinline|switch|.
+\end{enumerate}
+
+\subsubsection{Istruzione if}
+
+Un'istruzione \lstinline|if| ha la forma
+\[
+\texttt{if ( espressione ) istruzione1 [ else istruzione2 ]}
+\]
+La clausola \lstinline|else| è facoltativa. L'espressione viene valutata per prima, per determinare quale delle due istruzioni viene eseguita; deve avere tipo scalare. Se il suo valore è vero (cioè diverso da $0$) viene eseguita \texttt{istruzione1}; altrimenti viene eseguita \texttt{istruzione2}, se presente.
+
+\begin{codice}
+if (testExpression)
+{
+    // corpo dell'if
+}
+// istruzione subito dopo l'if
+\end{codice}
+\begin{codice}
+if (testExpression)
+{
+    // corpo dell'if
+}
+else
+{
+    // corpo dell'else
+}
+// istruzione subito dopo l'if...else
+\end{codice}
+
+\medskip\noindent\textbf{If annidati}\par\nopagebreak
+
+Se più istruzioni \lstinline|if| sono annidate, una clausola \lstinline|else| appartiene sempre all'ultimo \lstinline|if| (allo stesso livello di annidamento dei blocchi) che non ha ancora un \lstinline|else|:
+\begin{codice}
+if (n > 0)
+    if (n % 2 == 0)
+        puts("n is positive and even");
+    else    // alternativa all'ultimo if
+        puts("n is positive and odd");
+\end{codice}
+Una clausola \lstinline|else| può essere assegnata a un \lstinline|if| diverso racchiudendo in un blocco l'ultimo \lstinline|if| che non deve avere un \lstinline|else|:
+\begin{codice}
+if (n > 0)
+{
+    if (n % 2 == 0)
+        puts("n is positive and even");
+}
+else        // alternativa al primo if
+    puts("n is negative or zero");
+\end{codice}
+
+\medskip\noindent\textbf{Catena else if}\par\nopagebreak
+
+Per scegliere una tra più di due istruzioni alternative si possono mettere a cascata degli \lstinline|if| in una catena \lstinline|else if|. Ogni nuovo \lstinline|if| è semplicemente annidato nella clausola \lstinline|else| di quello precedente:
+\begin{codice}
+double spec = 10.0, measured = 10.7, diff;
+diff = measured - spec;
+if (diff >= 0.0 && diff < 0.5)
+    printf("Rounding down: %.2f\n", diff);
+else if (diff >= 0.5 && diff < 1)
+    printf("Rounding up: %.2f\n", diff);
+else
+    printf("Difference greater than 1!\n");
+\end{codice}
+Appena una di queste espressioni è vera, viene eseguita l'istruzione corrispondente e le altre vengono scartate. Se nessuna delle condizioni è vera, viene eseguita la clausola \lstinline|else| dell'ultimo \lstinline|if|, se presente.
+
+\begin{osservazione}
+Nelle slide la seconda \lstinline|printf| stampava ancora «Rounding down»: qui è stata corretta in «Rounding up», coerentemente con l'intervallo $[0{,}5,\,1)$.
+\end{osservazione}
+
+\subsubsection{Istruzione switch}
+
+Un'istruzione \lstinline|switch| fa saltare il flusso di esecuzione a una tra più istruzioni, a seconda del valore di un'espressione intera:
+\[
+\texttt{switch ( espressione ) istruzione}
+\]
+\texttt{espressione} ha tipo intero e \texttt{istruzione} è il \emph{corpo dello switch}, che contiene etichette \lstinline|case| e al più un'etichetta \lstinline|default|. L'espressione viene valutata una sola volta e confrontata con le espressioni costanti nelle etichette \lstinline|case|. Se il valore coincide con una delle costanti, il flusso del programma salta all'istruzione che segue quell'etichetta. Se nessuna costante coincide, il programma continua all'etichetta \lstinline|default|, se c'è.
+
+\begin{codice}
+switch (menu())   // salta in base al risultato di menu()
+{
+    case 'A': action1();     // esegue l'azione 1
+              break;         // non esegue nessun'altra "azione"
+    case 'B': action2();     // esegue l'azione 2
+              break;         // non esegue l'azione di default
+    default:  putchar('\a'); // nessun comando riconosciuto
+}
+\end{codice}
+
+\medskip\noindent\textbf{Intervalli}\par\nopagebreak
+
+Per trattare un intervallo di valori con la stessa azione, si possono scrivere più etichette consecutive:
+\begin{codice}
+switch (value)
+{
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+    case 8:
+        printf("Hello, 1 to 8\n");
+        break;
+    default:
+        printf("Hello, default\n");
+        break;
+}
+\end{codice}
+Esiste anche un'estensione di GCC, non standard, che permette di scrivere \lstinline|case 1 ... 8:|. Un'alternativa è mettere nel \lstinline|default| un \lstinline|if|:
+\begin{codice}
+switch (value) {
+    case 1:
+        /* do 1 */
+        break;
+    case 2:
+        /* do 2 */
+        break;
+    default:
+        if (value >= 3 && value <= 8)
+            printf("Hello, 3 to 8\n");
+}
+\end{codice}
+Se però si deve lavorare con molti intervalli, conviene usare gli \lstinline|if|.
+
+\medskip\noindent\textbf{Senza break: fall-through}\par\nopagebreak
+
+Senza \lstinline|break| l'esecuzione prosegue nelle etichette successive.
+\begin{esempio}
+\begin{codice}
+#include <stdio.h>
+int main()
+{
+    int Grade = 'A';
+    switch (Grade)
+    {
+        case 'A': printf("Excellent\n");
+        case 'B': printf("Good\n");
+        case 'C': printf("OK\n");
+        case 'D': printf("Mmmmm....\n");
+        case 'F': printf("You must do better than this\n");
+        default : printf("What is your grade anyway?\n");
+    }
+}
+\end{codice}
+\begin{risultato}
+Excellent
+Good
+OK
+Mmmmm....
+You must do better than this
+What is your grade anyway?
+\end{risultato}
+\end{esempio}
+
+\subsection{Salti incondizionati}
+
+Le istruzioni di salto interrompono l'esecuzione sequenziale delle istruzioni, in modo che l'esecuzione continui in un altro punto del programma. Un salto distrugge le variabili automatiche se la destinazione del salto è fuori dal loro scope. In C ci sono quattro istruzioni che causano salti incondizionati: \lstinline|break|, \lstinline|continue|, \lstinline|goto| e \lstinline|return|.
+
+\subsubsection{break}
+
+L'istruzione \lstinline|break;| può comparire solo nel corpo di un ciclo o di uno \lstinline|switch| e causa un salto alla prima istruzione dopo il ciclo o lo \lstinline|switch| che la contiene immediatamente. Si può quindi usare \lstinline|break| per terminare l'esecuzione di un ciclo in qualunque punto del corpo.
+
+\begin{esempio}
+\begin{codice}
+#include <stdio.h>
+int main()
+{
+    int i;
+    double number, sum = 0.0;
+
+    for (i = 1; i <= 10; ++i)
+    {
+        printf("Enter a n%d: ", i);
+        scanf("%lf", &number);
+
+        // se l'utente inserisce un numero negativo, il ciclo termina
+        if (number < 0.0)
+        {
+            break;
+        }
+        sum += number;
+    }
+    printf("Sum = %.2lf", sum);
+    return 0;
+}
+\end{codice}
+Con input $2{,}4$, $4{,}5$, $3{,}4$, $-3$ l'output è \texttt{Sum = 10.30}.
+\end{esempio}
+
+\subsubsection{continue}
+
+L'istruzione \lstinline|continue;| si può usare solo nel corpo di un ciclo e fa saltare il resto dell'iterazione corrente.
+\begin{itemize}
+    \item In un ciclo \lstinline|while| o \lstinline|do ... while| il programma salta alla successiva valutazione dell'espressione di controllo.
+    \item In un ciclo \lstinline|for| il programma salta alla successiva valutazione della terza espressione dell'istruzione \lstinline|for|, che contiene le operazioni eseguite dopo ogni iterazione.
+\end{itemize}
+
+\begin{esempio}
+Stesso programma di prima, ma con \lstinline|continue| al posto di \lstinline|break|:
+\begin{codice}
+for (i = 1; i <= 10; ++i)
+{
+    printf("Enter a n%d: ", i);
+    scanf("%lf", &number);
+
+    // se l'utente inserisce un numero negativo, si passa all'iterazione successiva
+    if (number < 0.0)
+    {
+        continue;
+    }
+    sum += number;
+}
+\end{codice}
+Con input $1{,}1$, $2{,}2$, $5{,}5$, $4{,}4$, $-3{,}4$, $-45{,}5$, $34{,}5$, $-4{,}2$, $-1000$, $12$ i negativi vengono saltati e l'output è \texttt{Sum = 59.70}.
+\end{esempio}
+
+\subsubsection{goto}
+
+L'istruzione \lstinline|goto| causa un salto incondizionato a un'altra istruzione nella stessa funzione. La destinazione del salto è specificata dal nome di un'\emph{etichetta}:
+\[
+\texttt{goto nome\_etichetta;}
+\]
+Un'etichetta è un nome seguito da due punti: \texttt{nome\_etichetta: istruzione}. Le etichette hanno un proprio spazio dei nomi, quindi possono avere gli stessi nomi di variabili o tipi senza causare conflitti. Le etichette possono essere messe prima di qualunque istruzione, e un'istruzione può avere più etichette. Servono solo come destinazioni dei \lstinline|goto| e non hanno alcun effetto se l'istruzione etichettata viene raggiunta nel normale corso dell'esecuzione sequenziale.
+
+\begin{codice}
+void calculate(int a)
+{
+    if (a < 1 || a > 5)
+        goto here;
+    printf("a between 1 and 5!\n");
+    return;
+here: printf("a < 1 or a > 5!\n");
+    return;
+}
+\end{codice}
+
+\begin{osservazione}
+Poiché il codice che fa largo uso di \lstinline|goto| è difficile da leggere, conviene usarli solo quando offrono un vantaggio evidente, come l'uscita rapida da cicli profondamente annidati. Qualunque programma C che usa \lstinline|goto| si può scrivere anche senza.
+\end{osservazione}
+
+Lo \emph{spaghetti code} è un'espressione spregiativa per il codice sorgente con una struttura di controllo complessa e ingarbugliata, soprattutto quando usa molti \lstinline|goto|, eccezioni, thread o altri costrutti di salto «non strutturati» (tipico di assembly, Fortran, BASIC).
+
+\subsubsection{return}
+
+Si veda la lezione sulle funzioni: \lstinline|return| è anch'esso un'istruzione di salto incondizionato, come \lstinline|goto|.
+
+\subsection{typedef}
+
+Il modo più semplice di usare tipi con nomi complessi è dichiarare dei \emph{sinonimi} semplici per essi. In una dichiarazione che inizia con la parola chiave \lstinline|typedef|, ogni dichiaratore definisce un identificatore come sinonimo del tipo specificato. L'identificatore è poi detto \emph{typedef name} per quel tipo. A parte la parola chiave \lstinline|typedef|, la sintassi è esattamente la stessa di una dichiarazione di un oggetto o di una funzione del tipo specificato.
+
+\begin{esempio}
+\begin{codice}
+typedef unsigned int UINT;
+typedef enum state {DEAD, ALIVE} State;
+
+UINT ui = 10;
+State s = DEAD;
+\end{codice}
+Nello scope di queste dichiarazioni \lstinline|UINT| è sinonimo di \lstinline|unsigned int| e \lstinline|State| è sinonimo di \lstinline|enum state|. La variabile \lstinline|ui| ha tipo \lstinline|unsigned int| e \lstinline|s| ha tipo \lstinline|enum state|.
+\end{esempio}
+
+\subsection{Riferimenti}
+
+Sul libro: sezione 10.6 (\lstinline|typedef|).
+
+\section[Array, stringhe e matrici (Lezione 15 -- 2 novembre 2026)]{Array, stringhe e matrici}
+\noindent\emph{Lezione 15 -- 2 novembre 2026}
+\subsection{Array}
+
+Un \emph{array} contiene oggetti di un dato tipo, memorizzati consecutivamente in un blocco continuo di memoria. I singoli oggetti sono detti \emph{elementi} dell'array. Il tipo degli elementi può essere qualunque tipo di oggetto.
+
+Il tipo di un array è determinato dal tipo e dal numero degli elementi. Se gli elementi hanno tipo $T$, l'array è detto «array di $T$». Se gli elementi hanno tipo \lstinline|int|, per esempio, il tipo dell'array è «array di \lstinline|int|». Il tipo è però \emph{incompleto}, a meno che non si specifichi anche il numero di elementi: un array di \lstinline|int| con $16$ elementi ha un tipo di oggetto completo, «array di $16$ elementi \lstinline|int|».
+
+\subsubsection{Operatore di indicizzazione}
+
+L'operatore di indicizzazione \lstinline|[]| permette di accedere ai singoli elementi di un array. Ha due operandi. Nel caso più semplice un operando è il nome di un array e l'altro è un intero. L'espressione \lstinline|myarray[i]| designa allora l'elemento numero $i$ dell'array, dove il primo elemento ha numero zero. L'operando sinistro di \lstinline|[]| non deve necessariamente essere il nome di un array; l'operando destro deve avere tipo intero.
+
+\subsubsection{Definizione di array}
+
+È un tipo \emph{aggregato}: una sequenza di oggetti con lo stesso tipo. La definizione di un array determina il suo nome, il tipo dei suoi elementi e il numero degli elementi. Una definizione di array senza inizializzazione esplicita ha la sintassi
+\[
+\texttt{tipo nome[ numero\_di\_elementi ];}
+\]
+Il numero di elementi, tra parentesi quadre, deve essere un'espressione intera con valore maggiore di zero. Per esempio:
+\begin{codice}
+char buffer[4*512];
+\end{codice}
+Questa riga definisce un array di nome \lstinline|buffer| formato da $2048$ elementi di tipo \lstinline|char|; \lstinline|sizeof(buffer)| vale $2048 \cdot \texttt{sizeof(char)}$.
+
+\subsubsection{Array a lunghezza variabile}
+
+Dallo standard C99 è possibile definire un array usando per il numero di elementi un'espressione non costante (\emph{variable-length array}, VLA). Dal C11 sono una caratteristica \emph{opzionale} dei compilatori: alcuni compilatori potrebbero non implementarli.
+\begin{codice}
+void func(int n)
+{
+    int vla1[2*n];
+    int vla2[n];
+    /* ... */
+}
+\end{codice}
+
+\subsubsection{Accesso agli elementi}
+
+L'espressione \lstinline|myArray[i]| designa l'elemento dell'array con indice $i$. Gli elementi sono indicizzati a partire da $0$: se \lstinline|len| è il numero di elementi di un array, l'ultimo elemento ha indice $\texttt{len}-1$.
+\begin{codice}
+const int a = 4;
+long mArray[a];
+for (int i = 0; i < a; ++i)
+    mArray[i] = 2 * i;
+\end{codice}
+\begin{center}
+\begin{tabular}{|c|c|c|c|}
+\hline
+\lstinline|mArray[0]| & \lstinline|mArray[1]| & \lstinline|mArray[2]| & \lstinline|mArray[3]|\\
+\hline
+$0$ & $2$ & $4$ & $6$\\
+\hline
+\end{tabular}
+\end{center}
+
+\subsubsection{Inizializzazione}
+
+Per inizializzare esplicitamente un array quando lo si definisce, si usa una \emph{lista di inizializzazione}: una lista di inizializzatori separati da virgole.
+\begin{codice}
+int a[4] = { 1, 2, 4, 8 };   // a[0] = 1, a[1] = 2, a[2] = 4, a[3] = 8
+\end{codice}
+
+\begin{esempio}[Accesso fuori dai limiti]
+\begin{codice}
+int a[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+
+for (int i = 0; i < 20; i++) {
+    printf("Element[%d] = %d\n", i+1, a[i]);
+}
+\end{codice}
+I primi $10$ elementi stampati sono $1,\dots,10$; dall'undicesimo in poi si leggono valori casuali (per esempio $1339107492$, $2097207605$, $32767$, \dots): il ciclo accede a locazioni \emph{oltre la fine dell'array}. In C non c'è nessun controllo sui limiti: il comportamento è indefinito.
+\end{esempio}
+
+\medskip\noindent\textbf{Regole per l'inizializzazione}\par\nopagebreak
+
+Quando si inizializza un array si devono rispettare le regole seguenti.
+\begin{itemize}
+    \item Non si può includere un'inizializzazione nella definizione di un array a lunghezza variabile.
+    \item Si può omettere la lunghezza dell'array nella definizione se si fornisce una lista di inizializzazione: la lunghezza è allora determinata dall'indice dell'ultimo elemento per il quale la lista contiene un inizializzatore.
+    \item Se la definizione contiene sia una lunghezza sia una lista di inizializzazione, la lunghezza è quella specificata dall'espressione tra le parentesi quadre. Gli elementi per cui nella lista non c'è un inizializzatore vengono inizializzati a zero. Se la lista contiene più inizializzatori di quanti elementi ha l'array, quelli in eccesso vengono semplicemente ignorati.
+    \item L'ultima virgola nella lista degli inizializzatori viene ignorata.
+\end{itemize}
+
+Di conseguenza tutte le definizioni seguenti sono equivalenti:
+\begin{codice}
+int a[4] = { 1, 2 };
+int a[]  = { 1, 2, 0, 0 };
+int a[]  = { 1, 2, 0, 0, };
+int a[4] = { 1, 2, 0, 0, 5 };    // l'inizializzatore 5 è ignorato
+\end{codice}
+Nell'ultima definizione l'inizializzatore $5$ è ignorato; la maggior parte dei compilatori genera un warning quando c'è questo disallineamento. Se gli inizializzatori non hanno lo stesso tipo degli elementi, avviene una conversione implicita di tipo.
+
+\medskip\noindent\textbf{Inizializzare elementi specifici}\par\nopagebreak
+
+I \emph{designatori di elemento} permettono di associare gli inizializzatori a elementi specifici. Per specificare l'elemento da inizializzare si mette il suo indice tra parentesi quadre: \texttt{[espressione costante]}.
+\begin{codice}
+int a[6] = { 1, 2, [3] = 1, 2 };   // equivale a { 1, 2, 0, 1, 2, 0 }
+\end{codice}
+Questa definizione inizializza gli elementi \lstinline|a[0]| e \lstinline|a[3]| con il valore $1$ e gli elementi \lstinline|a[1]| e \lstinline|a[4]| con il valore $2$. Tutti gli altri elementi ricevono il valore iniziale $0$.
+
+Il designatore deve essere un'\emph{espressione costante intera}:
+\begin{codice}
+int three = 2;
+int a[4] = { 1, [three] = 1 };
+// error: expression is not an integer constant expression
+\end{codice}
+\begin{codice}
+const int three = 2;
+int a[4] = { 1, [three] = 1 };
+// ok (con alcuni compilatori): a = { 1, 0, 1, 0 }
+\end{codice}
+
+\subsubsection{Array come parametri di funzione}
+
+\begin{esempio}
+\begin{codice}
+#include <stdio.h>
+void fun(int a[3]) {
+    printf("%lu\n", sizeof(a));
+    for (int i = 0; i < 3; ++i)
+        a[i] = i;
+}
+int main() {
+    int a[3];
+    printf("%lu\n", sizeof(a));
+    fun(a);
+}
+\end{codice}
+\begin{risultato}
+12
+8
+\end{risultato}
+Nella \lstinline|main|, \lstinline|sizeof(a)| vale $12$ ($3 \cdot 4$ byte). Nella funzione, invece, il parametro \lstinline|int a[3]| è in realtà un puntatore: \lstinline|sizeof(a)| restituisce la dimensione di \lstinline|int *| ($8$ byte), e il compilatore avverte con \texttt{[-Wsizeof-array-argument]}: «sizeof on array function parameter will return size of 'int *' instead of 'int [3]'».
+\end{esempio}
+
+\subsection{Stringhe}
+
+Una \emph{stringa} è una sequenza continua di caratteri terminata da \lstinline|'\0'|, il carattere nullo. La lunghezza di una stringa è il numero dei caratteri escluso il carattere nullo di terminazione. Le stringhe sono memorizzate in array i cui elementi hanno tipo \lstinline|char|.
+
+Si possono inizializzare array di \lstinline|char| con literal stringa. Per esempio le due definizioni seguenti sono equivalenti (lunghezza della stringa $8$, lunghezza dell'array $30$):
+\begin{codice}
+char str1[30] = "Let's go";
+char str1[30] = { 'L', 'e', 't', '\'', 's', ' ', 'g', 'o', '\0' };
+\end{codice}
+Un array che contiene una stringa deve essere sempre lungo almeno un elemento in più della lunghezza della stringa, per far posto al carattere nullo di terminazione.
+
+\begin{esempio}[Array troppo corto]
+\begin{codice}
+#include <stdio.h>
+int main() {
+    char string[5] = "Jim Morrison";
+    printf("%s\n", string);
+}
+\end{codice}
+Il compilatore avverte \texttt{initializer-string for char array is too long}; l'output è composto da caratteri casuali dopo \texttt{Jim M}, perché l'array non contiene il carattere nullo di terminazione.
+\end{esempio}
+
+\begin{esempio}[Carattere nullo nel mezzo]
+\begin{codice}
+#include <stdio.h>
+int main() {
+    char string[14] = {'J','i','m',' ','M','\0','o','r','r','i','s','o','n','\0'};
+    printf("%s\n", string);
+}
+\end{codice}
+\begin{risultato}
+Jim M
+\end{risultato}
+La stampa si ferma al primo \lstinline|'\0'|.
+\end{esempio}
+
+Se si definisce un array di caratteri senza lunghezza esplicita e lo si inizializza con un literal stringa, l'array creato è lungo un elemento \emph{in più} della lunghezza della stringa:
+\begin{codice}
+char str2[] = " to London!";   // lunghezza della stringa: 11
+                               // lunghezza dell'array: 12
+\end{codice}
+
+\subsection{Array multidimensionali}
+
+Un array multidimensionale in C è semplicemente un array i cui elementi sono a loro volta array. Gli elementi di un array a $n$ dimensioni sono array a $(n-1)$ dimensioni. Per esempio, ogni elemento di un array a due dimensioni è un array a una dimensione.
+
+La dichiarazione di un array multidimensionale ha una coppia di parentesi quadre per ogni dimensione:
+\begin{codice}
+char screen[10][40][80];   // un array a tre dimensioni
+\end{codice}
+Ha $10$ elementi, da \lstinline|screen[0]| a \lstinline|screen[9]|; ognuno è un array a due dimensioni, formato a sua volta da $40$ array a una dimensione di $80$ caratteri. In totale $10\cdot 40 \cdot 80 = 32\,000$ elementi. Lo standard raccomanda alle implementazioni di accettare almeno $256$ dimensioni (ISO~14882, B.2), ma possono supportarne meno o più.
+
+\subsubsection{Matrici}
+
+Gli array bidimensionali sono detti anche \emph{matrici}. Sono molto usati e meritano uno sguardo più attento. La matrice \lstinline|mat| della definizione seguente ha tre righe e cinque colonne (conviene ragionare in termini di righe e colonne):
+\begin{codice}
+float mat[3][5];
+\end{codice}
+\lstinline|mat[0]|, \lstinline|mat[1]| e \lstinline|mat[2]| sono le righe della matrice; ognuna è un array di cinque elementi \lstinline|float|. In totale $15$ elementi \lstinline|float|.
+\begin{codice}
+for (int row = 0; row < 3; ++row)
+    for (int col = 0; col < 5; ++col)
+        mat[row][col] = row + (float) col / 10;
+\end{codice}
+
+\subsubsection{Inizializzazione}
+
+Si possono inizializzare array multidimensionali con una lista di inizializzazione secondo le regole già viste:
+\begin{codice}
+int a3d[2][2][3] = { { { 1, 0, 0 }, { 4, 0, 0 } }, { { 7, 8, 0 }, { 0, 0, 0 } } };
+int a3d[][2][3]  = { { { 1 }, { 4 } }, { { 7, 8 } } };
+\end{codice}
+Nella seconda non occorre specificare che la prima dimensione ha ampiezza $2$, perché la lista più esterna contiene due inizializzatori.
+
+Si possono anche omettere alcune parentesi graffe. Se una coppia di graffe contiene più inizializzatori del numero di elementi della dimensione corrispondente, quelli in eccesso sono associati all'elemento successivo nella sequenza di memorizzazione:
+\begin{codice}
+int a3d[2][2][3] = { { 1, 0, 0, 4 }, { 7, 8 } };
+int a3d[2][2][3] = { 1, 0, 0, 4, 0, 0, 7, 8 };
+\end{codice}
+Si possono usare anche i designatori di elemento:
+\begin{codice}
+int a3d[2][2][3] = { 1, [0][1][0] = 4, [1][0][0] = 7, 8 };
+\end{codice}
+
+\subsection{Riferimenti}
+
+Sul libro: sezioni 6.1--6.5, 6.11; stringhe: capitoli 8 e 9.
+
+\section[Funzioni e funzione main (Lezione 16 -- 3 novembre 2026)]{Funzioni e funzione main}
+\noindent\emph{Lezione 16 -- 3 novembre 2026}
+\subsection{Funzioni}
+
+\subsubsection{Introduzione e main}
+
+Tutte le istruzioni di un programma C sono contenute in funzioni. Il C è un linguaggio procedurale: ogni funzione svolge un certo compito. Un nome speciale di funzione è \lstinline|main()|: la funzione con questo nome è la prima a essere eseguita quando il programma parte. Il primo comando eseguito nel programma è il primo comando della \lstinline|main| (dall'alto verso il basso). Tutte le altre funzioni sono sottoprogrammi della \lstinline|main()| e possono avere i nomi che si vuole.
+
+Ogni funzione è definita esattamente una volta. Un programma può dichiarare e chiamare una funzione tante volte quante ne servono.
+
+\subsubsection{Definizione di funzione}
+
+La definizione di una funzione consiste in un'\emph{intestazione} (o dichiaratore) e in un \emph{blocco} della funzione. L'intestazione specifica il nome della funzione, il tipo del valore restituito e i tipi e i nomi dei parametri, se ce ne sono. Le istruzioni nel blocco specificano che cosa fa la funzione.
+\begin{codice}
+tipo nome_funzione (tipo nome_parametro1, tipo nome_parametro2, ...) {
+    // istruzioni;
+}
+\end{codice}
+
+\begin{osservazione}
+Scrivere sempre il tipo del valore restituito: se non è specificato è \lstinline|int|.
+\end{osservazione}
+
+\subsubsection{Dichiarazione di funzione}
+
+Dichiarando una funzione prima di usarla si informa il compilatore del suo tipo: la dichiarazione descrive cioè l'\emph{interfaccia} della funzione. Una dichiarazione definisce
+\begin{itemize}
+    \item il tipo della funzione;
+    \item il numero e i tipi dei suoi parametri;
+    \item il tipo del valore restituito.
+\end{itemize}
+Gli identificatori dei parametri in una dichiarazione di funzione sono facoltativi. Se si scrivono i nomi, il loro scope termina con il prototipo stesso. Le due forme sono entrambe valide:
+\begin{codice}
+tipo nome_funzione (tipo nome_parametro1, tipo nome_parametro2, ...);
+tipo nome_funzione (tipo, tipo, ...);
+\end{codice}
+
+\subsubsection{Scope degli identificatori}
+
+\begin{itemize}
+    \item \emph{Block scope}: gli identificatori dichiarati in un blocco hanno block scope. Si può usare un tale identificatore solo dalla sua dichiarazione fino alla fine del blocco più piccolo che contiene la dichiarazione. Il blocco più piccolo che la contiene è spesso, ma non necessariamente, il corpo di una definizione di funzione. In C11 le dichiarazioni non devono essere necessariamente poste prima di tutte le istruzioni nel blocco di una funzione. Anche i nomi dei parametri nell'intestazione di una definizione di funzione hanno block scope, e sono validi nel blocco corrispondente della funzione.
+    \item \emph{Function prototype scope}: i nomi dei parametri in un prototipo di funzione hanno function prototype scope. Poiché questi nomi non hanno significato al di fuori del prototipo stesso, hanno valore solo di commento e si possono anche omettere.
+\end{itemize}
+
+\begin{esempio}
+\begin{codice}
+int p;
+int fun1(int q);
+int fun2(int r)
+{
+    int s = r + 3;
+    while (r != s)
+        r--;
+}
+\end{codice}
+\lstinline|p|, \lstinline|fun1| e \lstinline|fun2| sono visibili in tutto il file (da dove sono dichiarati); \lstinline|q| ha scope il solo prototipo; \lstinline|r| e \lstinline|s| hanno scope il blocco di \lstinline|fun2|.
+\end{esempio}
+
+\subsubsection{Parametri di una funzione}
+
+I parametri di una funzione sono normali variabili locali. Il programma li crea e li inizializza con i valori dei corrispondenti argomenti quando avviene una chiamata di funzione. Il loro scope è il blocco della funzione (block scope).
+\begin{codice}
+long double factorial(unsigned int n)
+{
+    long double f = 1;
+    while (n > 1)
+        f *= n--;
+    return f;
+}
+\end{codice}
+
+\subsubsection{Dichiarazione e definizione}
+
+Una definizione di funzione è anche una dichiarazione di funzione. Le due versioni seguenti sono equivalenti: nella prima \lstinline|fun2| è dichiarata prima della \lstinline|main| e definita dopo; nella seconda è definita prima della \lstinline|main|, e la definizione fa anche da dichiarazione.
+\begin{codice}
+int fun2(int);
+int main() {
+    int a = 5;
+    a = fun2(a);
+}
+int fun2(int r) {
+    int s = r + 5;
+    while (r != s)
+        r--;
+    return r;
+}
+\end{codice}
+\begin{codice}
+int fun2(int r) {
+    int s = r + 5;
+    while (r != s)
+        r--;
+    return r;
+}
+int main() {
+    int a = 5;
+    a = fun2(a);
+}
+\end{codice}
+
+In sintesi:
+\begin{itemize}
+    \item prima di chiamare (usare) una funzione bisogna dichiararla;
+    \item si possono dichiarare tutte le funzioni all'inizio del file e definirle in un ordine qualunque più sotto nello stesso file; oppure si possono evitare le dichiarazioni in testa, ma allora vanno definite \emph{prima} di essere chiamate;
+    \item una funzione deve anche essere definita, altrimenti non si sa che cosa fare quando viene chiamata;
+    \item nello stesso file non si possono avere due definizioni di funzioni con la stessa intestazione e lo stesso identificatore (nome).
+\end{itemize}
+
+\begin{esempio}[Dichiarazioni e ordine delle definizioni]
+Questa versione è corretta: \lstinline|fun1| e \lstinline|fun2| sono dichiarate in testa.
+\begin{codice}
+int fun1(int);
+int fun2(int);
+int main() {
+    int a = 5;
+    a = fun1(a);
+}
+int fun1(int q) {
+    return (fun2(q) + 1);
+}
+int fun2(int r) {
+    int s = r + 5;
+    while (r != s)
+        r--;
+    return r;
+}
+\end{codice}
+Questa invece è \emph{sbagliata}: \lstinline|fun1| chiama \lstinline|fun2|, che non è stata dichiarata prima di quel punto (e non è definita prima).
+\begin{codice}
+int fun1(int);
+int main() {
+    int a = 5;
+    a = fun1(a);
+}
+int fun1(int q) {
+    return (fun2(q) + 1);   // errore: fun2 non dichiarata
+}
+int fun2(int r) {
+    int s = r + 5;
+    while (r != s)
+        r--;
+    return r;
+}
+\end{codice}
+Si può correggere dichiarando \lstinline|fun2| in testa, oppure definendola prima di \lstinline|fun1|.
+\end{esempio}
+
+\subsubsection{return}
+
+L'istruzione \lstinline|return| termina l'esecuzione della funzione corrente e salta indietro al punto in cui la funzione era stata chiamata:
+\[
+\texttt{return [espressione];}
+\]
+L'espressione viene valutata e il risultato viene restituito al chiamante come valore della chiamata di funzione. Questo valore restituito viene convertito al tipo restituito dalla funzione, se necessario. Una funzione può contenere un numero qualunque di istruzioni \lstinline|return|; il primo \lstinline|return| eseguito fa uscire dalla funzione. \lstinline|return| è un'istruzione di salto incondizionato (come \lstinline|goto|).
+
+\begin{esempio}
+\begin{codice}
+// Restituisce il minore di due argomenti interi.
+int min(int a, int b)
+{
+    if (a < b)
+        return a;
+    else
+        return b;
+}
+int main()
+{
+    int a = 5;
+    int b = 6;
+    int c = min(a, b);
+    printf("%d", c);
+}
+\end{codice}
+\begin{risultato}
+5
+\end{risultato}
+\end{esempio}
+
+Un \lstinline|return| senza espressione può essere usato solo in una funzione di tipo \lstinline|void|; anzi, queste funzioni non hanno nemmeno bisogno di un'istruzione \lstinline|return|. Se in una funzione non si incontra nessun \lstinline|return|, il flusso del programma torna al chiamante quando si raggiunge la fine del blocco della funzione.
+
+\subsection{La funzione main}
+
+Si può definire la funzione \lstinline|main()| in una delle due forme seguenti:
+\begin{codice}
+int main(void) { /* ... */ }                  // nessun parametro, restituisce int
+int main(int argc, char *argv[]) { /* ... */ } // due parametri di tipo int e char **, restituisce int
+\end{codice}
+
+\subsubsection{Parametri della main}
+
+I parametri \lstinline|argc| e \lstinline|argv| (ai quali si possono dare altri nomi) rappresentano gli \emph{argomenti sulla riga di comando} del programma. Funzionano così:
+\begin{itemize}
+    \item \lstinline|argc| (da \emph{argument count}) è $0$ oppure il numero dei token stringa nella riga di comando che ha avviato il programma. Il nome del programma stesso è incluso in questo conteggio;
+    \item \lstinline|argv| (da \emph{argument vector}) è un array di puntatori a \lstinline|char| che puntano ai singoli token stringa ricevuti sulla riga di comando. Il numero di elementi di questo array è uno in più del valore di \lstinline|argc|: l'ultimo elemento, \lstinline|argv[argc]|, è sempre un puntatore nullo;
+    \item la prima stringa, \lstinline|argv[0]|, contiene il nome con cui è stato invocato il programma. Se l'ambiente di esecuzione non fornisce il nome del programma, la stringa è vuota;
+    \item se \lstinline|argc| è maggiore di $1$, le stringhe da \lstinline|argv[1]| a \lstinline|argv[argc - 1]| contengono gli argomenti sulla riga di comando del programma.
+\end{itemize}
+
+\begin{esempio}[Un esempio classico]
+\begin{codice}
+#include <stdio.h>
+int main(int argc, char *argv[])
+{
+    if (argc == 0)
+        puts("No command line available.");
+    else {
+        printf("The program now running: %s\n", argv[0]);  // nome del programma
+        if (argc == 1)
+            puts("No arguments received on the command line.");
+        else {
+            puts("The command line arguments:");
+            for (int i = 1; i < argc; ++i)    // un argomento per riga
+                puts(argv[i]);
+        }
+    }
+}
+\end{codice}
+Se su un sistema Unix si lancia il programma con la riga di comando
+\begin{comando}
+$ ./args one two "and three"
+\end{comando}
+l'output è
+\begin{risultato}
+The program now running: ./args
+The command line arguments:
+one
+two
+and three
+\end{risultato}
+\end{esempio}
+
+\subsubsection{Valore restituito dalla main}
+
+Il valore restituito dalla \lstinline|main| viene passato al processo padre che l'ha eseguita (per esempio la shell). Il valore restituito dalla \lstinline|main| dovrebbe indicare come è terminato il programma: l'uscita normale è generalmente rappresentata dal valore $0$; una terminazione anomala è di solito segnalata da un valore diverso da zero.
+
+\subsection{Come vengono eseguite le funzioni}
+
+\subsubsection{Uscire da una funzione}
+
+Se il programma raggiunge un'istruzione \lstinline|return| o la parentesi graffa di chiusura \lstinline|}| del blocco della funzione, l'esecuzione della funzione termina e il programma torna alla funzione chiamante. Se il programma «esce dal fondo» della funzione raggiungendo la graffa di chiusura, il valore restituito al chiamante è \emph{indefinito}. Per questo motivo bisogna usare un \lstinline|return| per terminare qualunque funzione che non abbia tipo \lstinline|void|. Il valore dell'espressione di \lstinline|return| viene restituito alla funzione chiamante.
+
+\subsubsection{Chiamare una funzione}
+
+L'istruzione che esegue una funzione, la \emph{chiamata di funzione}, consiste nel nome della funzione e nell'operatore \lstinline|()|. Per esempio, l'istruzione seguente chiama la funzione \lstinline|maximum()| per calcolare il massimo di due numeri:
+\begin{codice}
+maximum(a, b);
+\end{codice}
+Il programma prima alloca lo spazio di memoria per i parametri, poi copia i valori degli argomenti nelle locazioni corrispondenti. Quindi salta all'inizio della funzione, e l'esecuzione della funzione comincia con la prima definizione di variabile o istruzione del blocco.
+
+\begin{esempio}
+\begin{codice}
+#include <stdio.h>
+int sum(int p, int q) {
+    int r = 0;
+    r = p + q;
+    return r;
+}
+int main(void) {
+    int i = 3, j = 5, s = 0;
+    s = sum(i, j);
+    printf("%d\n", s);
+    return 0;
+}
+\end{codice}
+\begin{risultato}
+8
+\end{risultato}
+Al momento della chiamata, \lstinline|p| e \lstinline|q| ricevono copie dei valori di \lstinline|i| ($3$) e \lstinline|j| ($5$): \lstinline|i| e \lstinline|j| sono passati \emph{per valore}. \lstinline|r| vale prima $0$ e poi $8$, che viene restituito e assegnato a \lstinline|s|.
+\end{esempio}
+
+\subsubsection{Parametri formali e attuali}
+
+Quando una funzione viene chiamata, i valori (le espressioni) passati nella chiamata si chiamano \emph{argomenti} o \emph{parametri attuali} (i due termini hanno lo stesso significato). Al momento della chiamata, ogni parametro attuale viene assegnato al corrispondente \emph{parametro formale} nella definizione della funzione. Nell'esempio precedente \lstinline|p| e \lstinline|q| sono i parametri formali; i valori di \lstinline|i| e \lstinline|j| sono i parametri attuali.
+
+\subsubsection{Allocazione delle variabili}
+
+L'\emph{allocazione di memoria} significa che una parte della memoria viene riservata, per esempio per una variabile. Una \emph{variabile automatica} è una variabile locale che viene allocata e deallocata automaticamente quando il flusso del programma entra nel suo scope e ne esce. Per \emph{deallocazione} si intende che quella parte di memoria non è più riservata per quella variabile. Le variabili \lstinline|p| e \lstinline|q| vengono allocate quando la funzione è chiamata e deallocate quando se ne esce.
+
+\subsection{Overloading di funzioni}
+
+L'\emph{overloading} è una caratteristica di un linguaggio di programmazione che permette di avere più funzioni con lo stesso nome ma con firme diverse (tipo dei parametri e tipo restituito). È presente nella maggior parte dei linguaggi orientati agli oggetti, come C++ e Java. \textbf{Il C non supporta questa caratteristica.} Per fare l'overloading di una funzione in C++ la si può definire più volte, ciascuna identificata in modo univoco dal tipo degli argomenti che accetta; il tipo restituito non viene considerato.
+
+\begin{esempio}
+\begin{codice}
+#include <stdio.h>
+int min(int x, int y) {
+    return (x < y ? x : y);
+}
+float min(float x, float y) {
+    return (x < y ? x : y);
+}
+int main() {
+    int a = min(4, 1);
+    float b = min(4.56F, 1.23F);
+}
+\end{codice}
+Compilando con \texttt{gcc} si ottiene l'errore \texttt{conflicting types for 'min'}; compilando lo stesso file come C++ (\texttt{g++}) funziona.
+\end{esempio}
+
+\subsection{Riferimenti}
+
+Sul libro: sezioni 5.1--5.6, 15.3, 7.4.
+
 \end{document}

@@ -1,0 +1,193 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\newrunin{osservazione}{Osservazione}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Limiti infiniti, limite destro e sinistro}
+\author{Marco Cerbella}
+\date{Lezione 10 -- 26 ottobre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Limiti infiniti per $x \to x_0$}
+
+\begin{definizione}[Limite $\pm\infty$ in un punto]
+Sia $f : D \to \mathbb{R}$ e $x_0$ di accumulazione. Si dice che $f$ \emph{ha limite $+\infty$} (o tende a $+\infty$) per $x$ tendente a $x_0$ e si scrive $\displaystyle\lim_{x\to x_0} f(x) = +\infty$ se
+\[
+\forall M > 0,\ \exists \delta > 0 \text{ tale che } \forall x \in D \setminus \{x_0\} : |x - x_0| < \delta \text{ si ha } f(x) > M .
+\]
+Si dice che $f$ \emph{ha limite $-\infty$} per $x \to x_0$ e si scrive $\displaystyle\lim_{x\to x_0} f(x) = -\infty$ se
+\[
+\forall M > 0,\ \exists \delta > 0 \text{ tale che } \forall x \in D \setminus \{x_0\} : |x - x_0| < \delta \text{ si ha } f(x) < -M .
+\]
+\end{definizione}
+
+Graficamente: vicino alla retta verticale $x = x_0$ (\emph{asintoto verticale}) il grafico di $f$ supera ogni retta orizzontale $y = M$ (o scende sotto ogni retta $y = -M$).
+
+\begin{esempio}[$\lim_{x\to 3}\frac{1}{(x-3)^2} = +\infty$]
+Qui $x_0 = 3$. Fissato $M > 0$:
+\[
+\frac{1}{(x-3)^2} > M \iff (x-3)^2 < \frac{1}{M} \iff \sqrt{(x-3)^2} < \sqrt{\frac{1}{M}} \iff |x - 3| < \frac{1}{\sqrt{M}} .
+\]
+Basta considerare $\delta = \dfrac{1}{\sqrt{M}}$: per ogni $M > 0$, preso $\delta = \dfrac{1}{\sqrt M}$, per ogni $x \in D$ con $|x - 3| < \dfrac{1}{\sqrt M}$ si ha $\dfrac{1}{(x-3)^2} > M$.
+\end{esempio}
+
+\section{Limite destro e sinistro}
+
+\begin{esempio}[$f(x) = \frac{1}{x}$ non ha limite per $x \to 0$]
+Per $x > 0$, vicini a $0$, $\frac{1}{x}$ si avvicina a $+\infty$; per $x < 0$, vicini a $0$, $\frac{1}{x}$ si avvicina a $-\infty$. Quindi $\displaystyle\lim_{x\to 0}\frac{1}{x}$ \emph{non esiste}.
+\end{esempio}
+
+Serve allora distinguere da che parte $x$ si avvicina a $x_0$.
+
+\begin{definizione}[Limite destro e sinistro]
+Sia $f : D \to \mathbb{R}$ definita in un intorno di $x_0 \in \mathbb{R}$ tranne eventualmente nel punto $x_0$.
+
+Si dice che $f$ ha \emph{limite destro} $\ell \in \mathbb{R}$ per $x$ tendente a $x_0$ e si scrive $\displaystyle\lim_{x\to x_0^+} f(x) = \ell$ se
+\begin{gather*}
+\forall \varepsilon > 0,\ \exists \delta > 0 \text{ tale che } \forall x \in D \setminus \{x_0\} : \\ 0 < x - x_0 < \delta \ (x_0 < x < x_0 + \delta) \text{ si ha } |f(x) - \ell| < \varepsilon .
+\end{gather*}
+Si dice che $f$ ha \emph{limite sinistro} $\ell \in \mathbb{R}$ per $x$ tendente a $x_0$ e si scrive $\displaystyle\lim_{x\to x_0^-} f(x) = \ell$ se
+\begin{gather*}
+\forall \varepsilon > 0,\ \exists \delta > 0 \text{ tale che } \forall x \in D \setminus \{x_0\} : \\ -\delta < x - x_0 < 0 \ (x_0 - \delta < x < x_0) \text{ si ha } |f(x) - \ell| < \varepsilon .
+\end{gather*}
+\end{definizione}
+
+Le definizioni con limite $\pm\infty$ si danno in modo analogo, con la condizione $f(x) > M$ o $f(x) < -M$ al posto di $|f(x) - \ell| < \varepsilon$.
+
+\begin{esempio}[$\lim_{x\to 0^+}\frac{1}{x} = +\infty$ e $\lim_{x\to 0^-}\frac{1}{x} = -\infty$]
+\emph{Limite destro.} Fissato $M > 0$ consideriamo $\frac{1}{x} > M$, cioè (per $x > 0$) $x < \frac{1}{M}$. Quindi $0 < x - 0 < \delta$ con $\delta = \frac{1}{M}$.
+
+\emph{Limite sinistro.} Fissato $M > 0$ consideriamo $\frac{1}{x} < -M$. Ponendo $x = -y$ con $y > 0$ si ha $-\frac{1}{y} < -M$, cioè $\frac{1}{y} > M$, cioè $y < \frac{1}{M}$, e tornando a $x$ ($y = -x$): $-x < \frac{1}{M}$, cioè $x > -\frac{1}{M}$. Quindi $\delta = \frac{1}{M}$ e la condizione è $-\delta < x < 0$.
+\end{esempio}
+
+\section{Intorno destro e sinistro; continuità laterale}
+
+\begin{definizione}[Intorni destro e sinistro]
+L'\emph{intorno destro} di $x_0$ di ampiezza $r > 0$ è
+\[
+I_r^+(x_0) = [x_0, x_0 + r[ \;= \{x \in \mathbb{R} : 0 \le x - x_0 < r\},
+\]
+l'\emph{intorno sinistro} di $x_0$ di ampiezza $r > 0$ è
+\[
+I_r^-(x_0) = \,]x_0 - r, x_0] = \{x \in \mathbb{R} : -r < x - x_0 \le 0\}.
+\]
+\end{definizione}
+
+\begin{definizione}[Continuità da destra e da sinistra]
+Sia $f : D \to \mathbb{R}$ definita in un intorno destro di $x_0 \in \mathbb{R}$. Si dice che $f$ è \emph{continua da destra} in $x_0$ se
+\[
+\lim_{x\to x_0^+} f(x) = f(x_0).
+\]
+Sia $f$ definita in un intorno sinistro di $x_0$. Si dice che $f$ è \emph{continua da sinistra} in $x_0$ se
+\[
+\lim_{x\to x_0^-} f(x) = f(x_0).
+\]
+\end{definizione}
+
+\begin{proposizione}
+Sia $f$ una funzione definita in un intorno di $x_0 \in \mathbb{R}$ tranne eventualmente in $x_0$. La funzione $f$ ha limite $L$ (finito o infinito) per $x$ tendente a $x_0$ se e solo se esistono i limiti destro e sinistro di $f$ per $x \to x_0$ e tali limiti sono entrambi uguali a $L$.
+
+Una funzione $f$ definita in un intorno di $x_0$ è continua in $x_0$ se e solo se è continua da destra e da sinistra in $x_0$.
+\end{proposizione}
+
+Se $f$ è continua in tutti i punti di $D$ si dice che $f$ è \emph{continua}. Cioè, dato $x_0 \in D$, $f$ è continua in $x_0$ se per $x$ vicino a $x_0$ si ha che $f(x)$ è arbitrariamente vicino a $f(x_0)$, oppure $x_0$ è un punto isolato.
+
+\end{document}

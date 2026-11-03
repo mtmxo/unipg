@@ -1,0 +1,382 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\NewTColorBox{osservazione}{}{nota,
+  before upper={\textbf{Osservazione.}\ }}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Selezione, salti e typedef}
+\author{Marco Cerbella}
+\date{Lezione 14 -- 26 ottobre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Istruzioni di selezione}
+
+Un'istruzione di selezione può dirigere il flusso di esecuzione del programma lungo percorsi diversi a seconda di una condizione data. In C ci sono due istruzioni di selezione:
+\begin{enumerate}
+    \item \lstinline|if|;
+    \item \lstinline|switch|.
+\end{enumerate}
+
+\subsection{Istruzione if}
+
+Un'istruzione \lstinline|if| ha la forma
+\[
+\texttt{if ( espressione ) istruzione1 [ else istruzione2 ]}
+\]
+La clausola \lstinline|else| è facoltativa. L'espressione viene valutata per prima, per determinare quale delle due istruzioni viene eseguita; deve avere tipo scalare. Se il suo valore è vero (cioè diverso da $0$) viene eseguita \texttt{istruzione1}; altrimenti viene eseguita \texttt{istruzione2}, se presente.
+
+\begin{codice}
+if (testExpression)
+{
+    // corpo dell'if
+}
+// istruzione subito dopo l'if
+\end{codice}
+\begin{codice}
+if (testExpression)
+{
+    // corpo dell'if
+}
+else
+{
+    // corpo dell'else
+}
+// istruzione subito dopo l'if...else
+\end{codice}
+
+\subsubsection*{If annidati}
+
+Se più istruzioni \lstinline|if| sono annidate, una clausola \lstinline|else| appartiene sempre all'ultimo \lstinline|if| (allo stesso livello di annidamento dei blocchi) che non ha ancora un \lstinline|else|:
+\begin{codice}
+if (n > 0)
+    if (n % 2 == 0)
+        puts("n is positive and even");
+    else    // alternativa all'ultimo if
+        puts("n is positive and odd");
+\end{codice}
+Una clausola \lstinline|else| può essere assegnata a un \lstinline|if| diverso racchiudendo in un blocco l'ultimo \lstinline|if| che non deve avere un \lstinline|else|:
+\begin{codice}
+if (n > 0)
+{
+    if (n % 2 == 0)
+        puts("n is positive and even");
+}
+else        // alternativa al primo if
+    puts("n is negative or zero");
+\end{codice}
+
+\subsubsection*{Catena else if}
+
+Per scegliere una tra più di due istruzioni alternative si possono mettere a cascata degli \lstinline|if| in una catena \lstinline|else if|. Ogni nuovo \lstinline|if| è semplicemente annidato nella clausola \lstinline|else| di quello precedente:
+\begin{codice}
+double spec = 10.0, measured = 10.7, diff;
+diff = measured - spec;
+if (diff >= 0.0 && diff < 0.5)
+    printf("Rounding down: %.2f\n", diff);
+else if (diff >= 0.5 && diff < 1)
+    printf("Rounding up: %.2f\n", diff);
+else
+    printf("Difference greater than 1!\n");
+\end{codice}
+Appena una di queste espressioni è vera, viene eseguita l'istruzione corrispondente e le altre vengono scartate. Se nessuna delle condizioni è vera, viene eseguita la clausola \lstinline|else| dell'ultimo \lstinline|if|, se presente.
+
+\begin{osservazione}
+Nelle slide la seconda \lstinline|printf| stampava ancora «Rounding down»: qui è stata corretta in «Rounding up», coerentemente con l'intervallo $[0{,}5,\,1)$.
+\end{osservazione}
+
+\subsection{Istruzione switch}
+
+Un'istruzione \lstinline|switch| fa saltare il flusso di esecuzione a una tra più istruzioni, a seconda del valore di un'espressione intera:
+\[
+\texttt{switch ( espressione ) istruzione}
+\]
+\texttt{espressione} ha tipo intero e \texttt{istruzione} è il \emph{corpo dello switch}, che contiene etichette \lstinline|case| e al più un'etichetta \lstinline|default|. L'espressione viene valutata una sola volta e confrontata con le espressioni costanti nelle etichette \lstinline|case|. Se il valore coincide con una delle costanti, il flusso del programma salta all'istruzione che segue quell'etichetta. Se nessuna costante coincide, il programma continua all'etichetta \lstinline|default|, se c'è.
+
+\begin{codice}
+switch (menu())   // salta in base al risultato di menu()
+{
+    case 'A': action1();     // esegue l'azione 1
+              break;         // non esegue nessun'altra "azione"
+    case 'B': action2();     // esegue l'azione 2
+              break;         // non esegue l'azione di default
+    default:  putchar('\a'); // nessun comando riconosciuto
+}
+\end{codice}
+
+\subsubsection*{Intervalli}
+
+Per trattare un intervallo di valori con la stessa azione, si possono scrivere più etichette consecutive:
+\begin{codice}
+switch (value)
+{
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+    case 8:
+        printf("Hello, 1 to 8\n");
+        break;
+    default:
+        printf("Hello, default\n");
+        break;
+}
+\end{codice}
+Esiste anche un'estensione di GCC, non standard, che permette di scrivere \lstinline|case 1 ... 8:|. Un'alternativa è mettere nel \lstinline|default| un \lstinline|if|:
+\begin{codice}
+switch (value) {
+    case 1:
+        /* do 1 */
+        break;
+    case 2:
+        /* do 2 */
+        break;
+    default:
+        if (value >= 3 && value <= 8)
+            printf("Hello, 3 to 8\n");
+}
+\end{codice}
+Se però si deve lavorare con molti intervalli, conviene usare gli \lstinline|if|.
+
+\subsubsection*{Senza break: fall-through}
+
+Senza \lstinline|break| l'esecuzione prosegue nelle etichette successive.
+\begin{esempio}
+\begin{codice}
+#include <stdio.h>
+int main()
+{
+    int Grade = 'A';
+    switch (Grade)
+    {
+        case 'A': printf("Excellent\n");
+        case 'B': printf("Good\n");
+        case 'C': printf("OK\n");
+        case 'D': printf("Mmmmm....\n");
+        case 'F': printf("You must do better than this\n");
+        default : printf("What is your grade anyway?\n");
+    }
+}
+\end{codice}
+\begin{risultato}
+Excellent
+Good
+OK
+Mmmmm....
+You must do better than this
+What is your grade anyway?
+\end{risultato}
+\end{esempio}
+
+\section{Salti incondizionati}
+
+Le istruzioni di salto interrompono l'esecuzione sequenziale delle istruzioni, in modo che l'esecuzione continui in un altro punto del programma. Un salto distrugge le variabili automatiche se la destinazione del salto è fuori dal loro scope. In C ci sono quattro istruzioni che causano salti incondizionati: \lstinline|break|, \lstinline|continue|, \lstinline|goto| e \lstinline|return|.
+
+\subsection{break}
+
+L'istruzione \lstinline|break;| può comparire solo nel corpo di un ciclo o di uno \lstinline|switch| e causa un salto alla prima istruzione dopo il ciclo o lo \lstinline|switch| che la contiene immediatamente. Si può quindi usare \lstinline|break| per terminare l'esecuzione di un ciclo in qualunque punto del corpo.
+
+\begin{esempio}
+\begin{codice}
+#include <stdio.h>
+int main()
+{
+    int i;
+    double number, sum = 0.0;
+
+    for (i = 1; i <= 10; ++i)
+    {
+        printf("Enter a n%d: ", i);
+        scanf("%lf", &number);
+
+        // se l'utente inserisce un numero negativo, il ciclo termina
+        if (number < 0.0)
+        {
+            break;
+        }
+        sum += number;
+    }
+    printf("Sum = %.2lf", sum);
+    return 0;
+}
+\end{codice}
+Con input $2{,}4$, $4{,}5$, $3{,}4$, $-3$ l'output è \texttt{Sum = 10.30}.
+\end{esempio}
+
+\subsection{continue}
+
+L'istruzione \lstinline|continue;| si può usare solo nel corpo di un ciclo e fa saltare il resto dell'iterazione corrente.
+\begin{itemize}
+    \item In un ciclo \lstinline|while| o \lstinline|do ... while| il programma salta alla successiva valutazione dell'espressione di controllo.
+    \item In un ciclo \lstinline|for| il programma salta alla successiva valutazione della terza espressione dell'istruzione \lstinline|for|, che contiene le operazioni eseguite dopo ogni iterazione.
+\end{itemize}
+
+\begin{esempio}
+Stesso programma di prima, ma con \lstinline|continue| al posto di \lstinline|break|:
+\begin{codice}
+for (i = 1; i <= 10; ++i)
+{
+    printf("Enter a n%d: ", i);
+    scanf("%lf", &number);
+
+    // se l'utente inserisce un numero negativo, si passa all'iterazione successiva
+    if (number < 0.0)
+    {
+        continue;
+    }
+    sum += number;
+}
+\end{codice}
+Con input $1{,}1$, $2{,}2$, $5{,}5$, $4{,}4$, $-3{,}4$, $-45{,}5$, $34{,}5$, $-4{,}2$, $-1000$, $12$ i negativi vengono saltati e l'output è \texttt{Sum = 59.70}.
+\end{esempio}
+
+\subsection{goto}
+
+L'istruzione \lstinline|goto| causa un salto incondizionato a un'altra istruzione nella stessa funzione. La destinazione del salto è specificata dal nome di un'\emph{etichetta}:
+\[
+\texttt{goto nome\_etichetta;}
+\]
+Un'etichetta è un nome seguito da due punti: \texttt{nome\_etichetta: istruzione}. Le etichette hanno un proprio spazio dei nomi, quindi possono avere gli stessi nomi di variabili o tipi senza causare conflitti. Le etichette possono essere messe prima di qualunque istruzione, e un'istruzione può avere più etichette. Servono solo come destinazioni dei \lstinline|goto| e non hanno alcun effetto se l'istruzione etichettata viene raggiunta nel normale corso dell'esecuzione sequenziale.
+
+\begin{codice}
+void calculate(int a)
+{
+    if (a < 1 || a > 5)
+        goto here;
+    printf("a between 1 and 5!\n");
+    return;
+here: printf("a < 1 or a > 5!\n");
+    return;
+}
+\end{codice}
+
+\begin{osservazione}
+Poiché il codice che fa largo uso di \lstinline|goto| è difficile da leggere, conviene usarli solo quando offrono un vantaggio evidente, come l'uscita rapida da cicli profondamente annidati. Qualunque programma C che usa \lstinline|goto| si può scrivere anche senza.
+\end{osservazione}
+
+Lo \emph{spaghetti code} è un'espressione spregiativa per il codice sorgente con una struttura di controllo complessa e ingarbugliata, soprattutto quando usa molti \lstinline|goto|, eccezioni, thread o altri costrutti di salto «non strutturati» (tipico di assembly, Fortran, BASIC).
+
+\subsection{return}
+
+Si veda la lezione sulle funzioni: \lstinline|return| è anch'esso un'istruzione di salto incondizionato, come \lstinline|goto|.
+
+\section{typedef}
+
+Il modo più semplice di usare tipi con nomi complessi è dichiarare dei \emph{sinonimi} semplici per essi. In una dichiarazione che inizia con la parola chiave \lstinline|typedef|, ogni dichiaratore definisce un identificatore come sinonimo del tipo specificato. L'identificatore è poi detto \emph{typedef name} per quel tipo. A parte la parola chiave \lstinline|typedef|, la sintassi è esattamente la stessa di una dichiarazione di un oggetto o di una funzione del tipo specificato.
+
+\begin{esempio}
+\begin{codice}
+typedef unsigned int UINT;
+typedef enum state {DEAD, ALIVE} State;
+
+UINT ui = 10;
+State s = DEAD;
+\end{codice}
+Nello scope di queste dichiarazioni \lstinline|UINT| è sinonimo di \lstinline|unsigned int| e \lstinline|State| è sinonimo di \lstinline|enum state|. La variabile \lstinline|ui| ha tipo \lstinline|unsigned int| e \lstinline|s| ha tipo \lstinline|enum state|.
+\end{esempio}
+
+\section{Riferimenti}
+
+Sul libro: sezione 10.6 (\lstinline|typedef|).
+
+\end{document}

@@ -1,0 +1,185 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\newrunin{osservazione}{Osservazione}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Gruppi}
+\author{Marco Cerbella}
+\date{Lezione 9 -- 19 ottobre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Gruppi}
+
+\begin{definizione}
+$(G, *)$ è un \emph{gruppo} se
+\begin{enumerate}
+  \item $*$ è associativa: $\forall a, b, c \in G$ \quad $(a * b) * c = a * (b * c)$;
+  \item esiste l'elemento neutro: $\exists e \in G$ tale che $\forall a \in G$ \quad $e * a = a * e = a$;
+  \item ogni elemento è invertibile: $\forall a \in G$ \quad $\exists a' \in G$ tale che $a * a' = a' * a = e$.
+\end{enumerate}
+Un gruppo $(G, *)$ è \emph{abeliano} se $*$ è commutativa: $\forall a, b \in G$ \quad $a * b = b * a$.
+\end{definizione}
+
+\begin{esempio}
+\begin{itemize}
+  \item $(\mathbb{Q}\setminus\{0\}, \cdot)$ è un gruppo commutativo: l'operazione è associativa, l'elemento neutro è $1$ e l'inverso di $\frac{a}{b}$ è $\frac{b}{a}$ (se $q \in \mathbb{Q}$ l'inverso è $q^{-1}$).
+  \item $(\mathbb{Z}, +)$ è un gruppo abeliano: associativa, $0$ elemento neutro, e se $k \in \mathbb{Z}$ allora $-k$ è l'inverso.
+\end{itemize}
+\end{esempio}
+
+\subsection{Notazione}
+
+\begin{center}
+\begin{tabular}{@{}p{3.5cm} p{4.5cm} p{4.5cm}@{}}
+\toprule
+$(G, *)$ gruppo & Notazione additiva $(G, +)$ & Notazione moltiplicativa $(G, \cdot)$ \\
+\midrule
+$e$ elemento neutro & $0$ elemento neutro & $1$ elemento neutro \\[2pt]
+$a'$ inverso di $a$ & $(-a)$ \emph{opposto} di $a$ & $a^{-1}$ \emph{inverso} di $a$ \\[2pt]
+$\underbrace{a * a * \dots * a}_{n\text{ volte}}$ & $\underbrace{a + \dots + a}_{n\text{ volte}} = na$ & $\underbrace{a \cdot a \cdot \ldots \cdot a}_{n\text{ volte}} = a^n$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{definizione}[Gruppo ciclico]
+Un gruppo $(G, *)$ è un \emph{gruppo ciclico} se esiste un elemento $g \in G$ tale che $\forall a \in G$
+\[
+  a = \underbrace{g * g * \dots * g}_{\text{qualche volta}}
+  \quad\text{oppure}\quad a = e\ (= g^0)
+  \quad\text{oppure}\quad a = g^{-1} * g^{-1} * \dots * g^{-1} .
+\]
+\end{definizione}
+
+\begin{esempio}[$\mathbb{Z}_{12}$: l'aritmetica dell'orologio]
+$\mathbb{Z}_{12} = \{[1], [2], \dots, [12]\}$ con la somma ad esempio $[3] + [4] = [7]$, $[8] + [5] = [1]$. Si può costruire la tavola della somma, con $[12]$ elemento neutro e ogni elemento invertibile (ad esempio $[5] + [?] = [12]$ dà $[?] = [7]$). Poiché $[2] = [1] + [1]$, $[3] = [1] + [1] + [1]$, \dots, il gruppo è ciclico, generato da $[1]$.
+\end{esempio}
+
+\begin{esempio}[$(\mathbb{Z}, +)$ è ciclico]
+$(\mathbb{Z}, +)$ è un gruppo ciclico: $+1$ genera tutti i numeri. Infatti, se $h \in \mathbb{Z}$:
+\begin{itemize}
+  \item $h > 0$: $h = \underbrace{1 + 1 + \dots + 1}_{h\text{ volte}}$;
+  \item $h = 0$: elemento neutro;
+  \item $h < 0$: $h = \underbrace{(-1) + (-1) + \dots + (-1)}_{(-h)\text{ volte}}$.
+\end{itemize}
+\end{esempio}
+
+\subsection{Simmetrie di un rettangolo}
+
+\begin{esempio}
+Consideriamo un rettangolo $ABCD$ (con $A$, $B$ in basso e $D$, $C$ in alto) e le sue simmetrie:
+\begin{itemize}
+  \item $a_1$: simmetria rispetto all'asse verticale, $(ABCD) \mapsto (BADC)$;
+  \item $a_2$: simmetria rispetto all'asse orizzontale, $(ABCD) \mapsto (DCBA)$;
+  \item $\tau$: rotazione di $180^\circ$, $(ABCD) \mapsto (CDAB)$;
+  \item $\mathrm{Id}$: identità, $(ABCD) \mapsto (ABCD)$.
+\end{itemize}
+La composizione di simmetrie è ancora una simmetria del rettangolo. Ad esempio
+\[
+  \mathrm{Id} * \tau\,(ABCD) = \mathrm{Id}(CDAB) = (CDAB), \qquad
+  \tau * \tau\,(ABCD) = \tau(CDAB) = (ABCD),
+\]
+\[
+  \tau * a_1\,(ABCD) = \tau(BADC) = (DCBA) = a_2\,(ABCD).
+\]
+Dunque $\tau * a_1 = a_2$ (il resto della tavola della composizione viene completato nella lezione successiva).
+\end{esempio}
+
+\end{document}

@@ -1,0 +1,331 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\NewTColorBox{osservazione}{}{nota,
+  before upper={\textbf{Osservazione.}\ }}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Array, stringhe e matrici}
+\author{Marco Cerbella}
+\date{Lezione 15 -- 2 novembre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Array}
+
+Un \emph{array} contiene oggetti di un dato tipo, memorizzati consecutivamente in un blocco continuo di memoria. I singoli oggetti sono detti \emph{elementi} dell'array. Il tipo degli elementi può essere qualunque tipo di oggetto.
+
+Il tipo di un array è determinato dal tipo e dal numero degli elementi. Se gli elementi hanno tipo $T$, l'array è detto «array di $T$». Se gli elementi hanno tipo \lstinline|int|, per esempio, il tipo dell'array è «array di \lstinline|int|». Il tipo è però \emph{incompleto}, a meno che non si specifichi anche il numero di elementi: un array di \lstinline|int| con $16$ elementi ha un tipo di oggetto completo, «array di $16$ elementi \lstinline|int|».
+
+\subsection{Operatore di indicizzazione}
+
+L'operatore di indicizzazione \lstinline|[]| permette di accedere ai singoli elementi di un array. Ha due operandi. Nel caso più semplice un operando è il nome di un array e l'altro è un intero. L'espressione \lstinline|myarray[i]| designa allora l'elemento numero $i$ dell'array, dove il primo elemento ha numero zero. L'operando sinistro di \lstinline|[]| non deve necessariamente essere il nome di un array; l'operando destro deve avere tipo intero.
+
+\subsection{Definizione di array}
+
+È un tipo \emph{aggregato}: una sequenza di oggetti con lo stesso tipo. La definizione di un array determina il suo nome, il tipo dei suoi elementi e il numero degli elementi. Una definizione di array senza inizializzazione esplicita ha la sintassi
+\[
+\texttt{tipo nome[ numero\_di\_elementi ];}
+\]
+Il numero di elementi, tra parentesi quadre, deve essere un'espressione intera con valore maggiore di zero. Per esempio:
+\begin{codice}
+char buffer[4*512];
+\end{codice}
+Questa riga definisce un array di nome \lstinline|buffer| formato da $2048$ elementi di tipo \lstinline|char|; \lstinline|sizeof(buffer)| vale $2048 \cdot \texttt{sizeof(char)}$.
+
+\subsection{Array a lunghezza variabile}
+
+Dallo standard C99 è possibile definire un array usando per il numero di elementi un'espressione non costante (\emph{variable-length array}, VLA). Dal C11 sono una caratteristica \emph{opzionale} dei compilatori: alcuni compilatori potrebbero non implementarli.
+\begin{codice}
+void func(int n)
+{
+    int vla1[2*n];
+    int vla2[n];
+    /* ... */
+}
+\end{codice}
+
+\subsection{Accesso agli elementi}
+
+L'espressione \lstinline|myArray[i]| designa l'elemento dell'array con indice $i$. Gli elementi sono indicizzati a partire da $0$: se \lstinline|len| è il numero di elementi di un array, l'ultimo elemento ha indice $\texttt{len}-1$.
+\begin{codice}
+const int a = 4;
+long mArray[a];
+for (int i = 0; i < a; ++i)
+    mArray[i] = 2 * i;
+\end{codice}
+\begin{center}
+\begin{tabular}{|c|c|c|c|}
+\hline
+\lstinline|mArray[0]| & \lstinline|mArray[1]| & \lstinline|mArray[2]| & \lstinline|mArray[3]|\\
+\hline
+$0$ & $2$ & $4$ & $6$\\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{Inizializzazione}
+
+Per inizializzare esplicitamente un array quando lo si definisce, si usa una \emph{lista di inizializzazione}: una lista di inizializzatori separati da virgole.
+\begin{codice}
+int a[4] = { 1, 2, 4, 8 };   // a[0] = 1, a[1] = 2, a[2] = 4, a[3] = 8
+\end{codice}
+
+\begin{esempio}[Accesso fuori dai limiti]
+\begin{codice}
+int a[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+
+for (int i = 0; i < 20; i++) {
+    printf("Element[%d] = %d\n", i+1, a[i]);
+}
+\end{codice}
+I primi $10$ elementi stampati sono $1,\dots,10$; dall'undicesimo in poi si leggono valori casuali (per esempio $1339107492$, $2097207605$, $32767$, \dots): il ciclo accede a locazioni \emph{oltre la fine dell'array}. In C non c'è nessun controllo sui limiti: il comportamento è indefinito.
+\end{esempio}
+
+\subsubsection*{Regole per l'inizializzazione}
+
+Quando si inizializza un array si devono rispettare le regole seguenti.
+\begin{itemize}
+    \item Non si può includere un'inizializzazione nella definizione di un array a lunghezza variabile.
+    \item Si può omettere la lunghezza dell'array nella definizione se si fornisce una lista di inizializzazione: la lunghezza è allora determinata dall'indice dell'ultimo elemento per il quale la lista contiene un inizializzatore.
+    \item Se la definizione contiene sia una lunghezza sia una lista di inizializzazione, la lunghezza è quella specificata dall'espressione tra le parentesi quadre. Gli elementi per cui nella lista non c'è un inizializzatore vengono inizializzati a zero. Se la lista contiene più inizializzatori di quanti elementi ha l'array, quelli in eccesso vengono semplicemente ignorati.
+    \item L'ultima virgola nella lista degli inizializzatori viene ignorata.
+\end{itemize}
+
+Di conseguenza tutte le definizioni seguenti sono equivalenti:
+\begin{codice}
+int a[4] = { 1, 2 };
+int a[]  = { 1, 2, 0, 0 };
+int a[]  = { 1, 2, 0, 0, };
+int a[4] = { 1, 2, 0, 0, 5 };    // l'inizializzatore 5 è ignorato
+\end{codice}
+Nell'ultima definizione l'inizializzatore $5$ è ignorato; la maggior parte dei compilatori genera un warning quando c'è questo disallineamento. Se gli inizializzatori non hanno lo stesso tipo degli elementi, avviene una conversione implicita di tipo.
+
+\subsubsection*{Inizializzare elementi specifici}
+
+I \emph{designatori di elemento} permettono di associare gli inizializzatori a elementi specifici. Per specificare l'elemento da inizializzare si mette il suo indice tra parentesi quadre: \texttt{[espressione costante]}.
+\begin{codice}
+int a[6] = { 1, 2, [3] = 1, 2 };   // equivale a { 1, 2, 0, 1, 2, 0 }
+\end{codice}
+Questa definizione inizializza gli elementi \lstinline|a[0]| e \lstinline|a[3]| con il valore $1$ e gli elementi \lstinline|a[1]| e \lstinline|a[4]| con il valore $2$. Tutti gli altri elementi ricevono il valore iniziale $0$.
+
+Il designatore deve essere un'\emph{espressione costante intera}:
+\begin{codice}
+int three = 2;
+int a[4] = { 1, [three] = 1 };
+// error: expression is not an integer constant expression
+\end{codice}
+\begin{codice}
+const int three = 2;
+int a[4] = { 1, [three] = 1 };
+// ok (con alcuni compilatori): a = { 1, 0, 1, 0 }
+\end{codice}
+
+\subsection{Array come parametri di funzione}
+
+\begin{esempio}
+\begin{codice}
+#include <stdio.h>
+void fun(int a[3]) {
+    printf("%lu\n", sizeof(a));
+    for (int i = 0; i < 3; ++i)
+        a[i] = i;
+}
+int main() {
+    int a[3];
+    printf("%lu\n", sizeof(a));
+    fun(a);
+}
+\end{codice}
+\begin{risultato}
+12
+8
+\end{risultato}
+Nella \lstinline|main|, \lstinline|sizeof(a)| vale $12$ ($3 \cdot 4$ byte). Nella funzione, invece, il parametro \lstinline|int a[3]| è in realtà un puntatore: \lstinline|sizeof(a)| restituisce la dimensione di \lstinline|int *| ($8$ byte), e il compilatore avverte con \texttt{[-Wsizeof-array-argument]}: «sizeof on array function parameter will return size of 'int *' instead of 'int [3]'».
+\end{esempio}
+
+\section{Stringhe}
+
+Una \emph{stringa} è una sequenza continua di caratteri terminata da \lstinline|'\0'|, il carattere nullo. La lunghezza di una stringa è il numero dei caratteri escluso il carattere nullo di terminazione. Le stringhe sono memorizzate in array i cui elementi hanno tipo \lstinline|char|.
+
+Si possono inizializzare array di \lstinline|char| con literal stringa. Per esempio le due definizioni seguenti sono equivalenti (lunghezza della stringa $8$, lunghezza dell'array $30$):
+\begin{codice}
+char str1[30] = "Let's go";
+char str1[30] = { 'L', 'e', 't', '\'', 's', ' ', 'g', 'o', '\0' };
+\end{codice}
+Un array che contiene una stringa deve essere sempre lungo almeno un elemento in più della lunghezza della stringa, per far posto al carattere nullo di terminazione.
+
+\begin{esempio}[Array troppo corto]
+\begin{codice}
+#include <stdio.h>
+int main() {
+    char string[5] = "Jim Morrison";
+    printf("%s\n", string);
+}
+\end{codice}
+Il compilatore avverte \texttt{initializer-string for char array is too long}; l'output è composto da caratteri casuali dopo \texttt{Jim M}, perché l'array non contiene il carattere nullo di terminazione.
+\end{esempio}
+
+\begin{esempio}[Carattere nullo nel mezzo]
+\begin{codice}
+#include <stdio.h>
+int main() {
+    char string[14] = {'J','i','m',' ','M','\0','o','r','r','i','s','o','n','\0'};
+    printf("%s\n", string);
+}
+\end{codice}
+\begin{risultato}
+Jim M
+\end{risultato}
+La stampa si ferma al primo \lstinline|'\0'|.
+\end{esempio}
+
+Se si definisce un array di caratteri senza lunghezza esplicita e lo si inizializza con un literal stringa, l'array creato è lungo un elemento \emph{in più} della lunghezza della stringa:
+\begin{codice}
+char str2[] = " to London!";   // lunghezza della stringa: 11
+                               // lunghezza dell'array: 12
+\end{codice}
+
+\section{Array multidimensionali}
+
+Un array multidimensionale in C è semplicemente un array i cui elementi sono a loro volta array. Gli elementi di un array a $n$ dimensioni sono array a $(n-1)$ dimensioni. Per esempio, ogni elemento di un array a due dimensioni è un array a una dimensione.
+
+La dichiarazione di un array multidimensionale ha una coppia di parentesi quadre per ogni dimensione:
+\begin{codice}
+char screen[10][40][80];   // un array a tre dimensioni
+\end{codice}
+Ha $10$ elementi, da \lstinline|screen[0]| a \lstinline|screen[9]|; ognuno è un array a due dimensioni, formato a sua volta da $40$ array a una dimensione di $80$ caratteri. In totale $10\cdot 40 \cdot 80 = 32\,000$ elementi. Lo standard raccomanda alle implementazioni di accettare almeno $256$ dimensioni (ISO~14882, B.2), ma possono supportarne meno o più.
+
+\subsection{Matrici}
+
+Gli array bidimensionali sono detti anche \emph{matrici}. Sono molto usati e meritano uno sguardo più attento. La matrice \lstinline|mat| della definizione seguente ha tre righe e cinque colonne (conviene ragionare in termini di righe e colonne):
+\begin{codice}
+float mat[3][5];
+\end{codice}
+\lstinline|mat[0]|, \lstinline|mat[1]| e \lstinline|mat[2]| sono le righe della matrice; ognuna è un array di cinque elementi \lstinline|float|. In totale $15$ elementi \lstinline|float|.
+\begin{codice}
+for (int row = 0; row < 3; ++row)
+    for (int col = 0; col < 5; ++col)
+        mat[row][col] = row + (float) col / 10;
+\end{codice}
+
+\subsection{Inizializzazione}
+
+Si possono inizializzare array multidimensionali con una lista di inizializzazione secondo le regole già viste:
+\begin{codice}
+int a3d[2][2][3] = { { { 1, 0, 0 }, { 4, 0, 0 } }, { { 7, 8, 0 }, { 0, 0, 0 } } };
+int a3d[][2][3]  = { { { 1 }, { 4 } }, { { 7, 8 } } };
+\end{codice}
+Nella seconda non occorre specificare che la prima dimensione ha ampiezza $2$, perché la lista più esterna contiene due inizializzatori.
+
+Si possono anche omettere alcune parentesi graffe. Se una coppia di graffe contiene più inizializzatori del numero di elementi della dimensione corrispondente, quelli in eccesso sono associati all'elemento successivo nella sequenza di memorizzazione:
+\begin{codice}
+int a3d[2][2][3] = { { 1, 0, 0, 4 }, { 7, 8 } };
+int a3d[2][2][3] = { 1, 0, 0, 4, 0, 0, 7, 8 };
+\end{codice}
+Si possono usare anche i designatori di elemento:
+\begin{codice}
+int a3d[2][2][3] = { 1, [0][1][0] = 4, [1][0][0] = 7, 8 };
+\end{codice}
+
+\section{Riferimenti}
+
+Sul libro: sezioni 6.1--6.5, 6.11; stringhe: capitoli 8 e 9.
+
+\end{document}

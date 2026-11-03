@@ -1,0 +1,184 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\newrunin{osservazione}{Osservazione}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Continuità delle funzioni elementari}
+\author{Marco Cerbella}
+\date{Lezione 11 -- 29 ottobre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Continuità delle funzioni elementari}
+
+Le funzioni elementari:
+\begin{itemize}
+    \item funzioni potenza,
+    \item funzioni esponenziali,
+    \item funzioni logaritmiche,
+    \item funzioni trigonometriche e loro inverse,
+\end{itemize}
+sono continue nel loro dominio.
+
+\section{Verifiche di continuità con la definizione}
+
+\begin{esempio}[$f(x) = ax + b$ è continua in ogni $x_0 \in \mathbb{R}$, con $a, b \in \mathbb{R}$]
+Fissato $\varepsilon > 0$ consideriamo la disuguaglianza $|f(x) - f(x_0)| < \varepsilon$:
+\[
+|f(x) - f(x_0)| = |ax + b - (ax_0 + b)| = |ax - ax_0| = |a|\cdot|x - x_0| .
+\]
+Vogliamo trovare $\delta > 0$ per cui se $|x - x_0| < \delta$ allora $|a|\cdot|x - x_0| < \varepsilon$.
+\begin{itemize}
+    \item Se $a = 0$: $|a|\cdot|x-x_0| = 0 < \varepsilon$ per ogni $x$.
+    \item Se $a \neq 0$: $|a|\cdot|x - x_0| < \varepsilon \iff |x - x_0| < \dfrac{\varepsilon}{|a|}$; si sceglie $\delta = \dfrac{\varepsilon}{|a|}$ e la definizione è verificata.
+\end{itemize}
+\end{esempio}
+
+\begin{esempio}[$f(x) = x^2$ è continua in $x_0 = 2$]
+Fissato $\varepsilon > 0$:
+\[
+|f(x) - f(x_0)| = |x^2 - 4| = |x - 2|\cdot|x + 2| ,
+\]
+usando $a^2 - b^2 = (a - b)(a + b)$ per ogni $a, b \in \mathbb{R}$. Possiamo considerare $x \in I_1(2)$, cioè $2 - 1 < x < 2 + 1$; allora $1 < x < 3$ e quindi $|x + 2| < 5$. Dunque
+\[
+|x - 2|\,|x + 2| < |x - 2| \cdot 5 < \varepsilon \iff |x - 2| < \frac{\varepsilon}{5} .
+\]
+Consideriamo $\delta = \min\{1, \frac{\varepsilon}{5}\}$ e abbiamo che la definizione di continuità è soddisfatta, quindi $f(x) = x^2$ è continua in $x_0 = 2$. In realtà $f(x) = x^2$ è continua per ogni $x \in \mathbb{R}$.
+\end{esempio}
+
+\begin{esempio}[$\lim_{x\to 1}(2x^2 + 3) = 5$]
+Qui $f(x) = 2x^2 + 3$, $x_0 = 1$, $\ell = 2\cdot 1 + 3 = 5$. Verifichiamo con la definizione. Fissato $\varepsilon > 0$ consideriamo $|f(x) - \ell| < \varepsilon$:
+\[
+|2x^2 + 3 - 5| = |2x^2 - 2| = 2|x^2 - 1| = 2|x - 1|\cdot|x + 1| .
+\]
+Possiamo supporre $x \in I_1(1)$, cioè $1 - 1 < x < 1 + 1$, $0 < x < 2$; allora $|x + 1| < 2 + 1 = 3$, e
+\[
+2|x - 1|\,|x + 1| < 6\,|x - 1| < \varepsilon \quad\text{se}\quad |x - 1| < \delta = \frac{\varepsilon}{6}
+\]
+(più precisamente $\delta = \min\{1, \varepsilon/6\}$).
+\end{esempio}
+
+\section{Algebra delle funzioni continue}
+
+\begin{teorema}[Algebra delle funzioni continue]
+Se $f$ e $g$ sono continue in $x_0$, allora $f + g$, $f \cdot g$ e $f/g$ (se $g(x_0) \neq 0$) sono continue in $x_0$.
+\end{teorema}
+
+\begin{teorema}[Composizione di funzioni continue]
+Se $g \circ f$ esiste, e $f$ è continua in $x_0$ e $g$ è continua in $f(x_0)$, allora la funzione composta $g \circ f$ è continua in $x_0$.
+\end{teorema}
+
+\begin{osservazione}[Conseguenza]
+Una funzione espressa come numero finito di operazioni elementari è continua. Per calcolare il limite di una tale funzione è sufficiente calcolare la funzione in quel punto.
+\end{osservazione}
+
+\begin{esempio}[Determinare per quali $\alpha \in \mathbb{R}$ la funzione è continua]
+\[
+f(x) = \begin{cases} \alpha \cdot \sin\!\left(x + \dfrac{\pi}{2}\right) & x > 0 \\[2mm] 2x^2 + 3 & x \le 0 .\end{cases}
+\]
+Per $x < 0$ e per $x > 0$ la funzione è continua perché somma e prodotto di funzioni elementari continue. Verifichiamo la continuità in $x = 0$:
+\[
+\lim_{x\to 0^+} \alpha \sin\!\left(x + \frac{\pi}{2}\right) = \alpha \sin\frac{\pi}{2} = \alpha, \qquad
+\lim_{x\to 0^-} (2x^2 + 3) = 3, \qquad f(0) = 3 .
+\]
+Perché $\lim_{x\to 0^+} f(x) = \lim_{x\to 0^-} f(x) = f(0)$ bisogna che $\alpha = 3$. Dunque la funzione $f$ è continua in $\mathbb{R}$ per $\alpha = 3$.
+\end{esempio}
+
+\end{document}

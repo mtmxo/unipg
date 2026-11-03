@@ -1,0 +1,210 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\newrunin{osservazione}{Osservazione}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Interi, divisibilità e divisione con resto}
+\author{Marco Cerbella}
+\date{Lezione 11 -- 26 ottobre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Gli interi come struttura algebrica}
+
+$\mathbb{Z} = \{0, \pm 1, \pm 2, \pm 3, \dots\}$ con la somma e il prodotto di interi.
+\begin{itemize}
+  \item $(\mathbb{Z}, +)$ è un gruppo abeliano: $0$ elemento neutro, l'opposto di $k \in \mathbb{Z}$ è $-k \in \mathbb{Z}$.
+  \item $(\mathbb{Z}, \cdot)$ è un semigruppo commutativo, con $+1$ elemento neutro per $\cdot$ ($1$ è l'unità); $+1$ e $-1$ sono invertibili per $\cdot$.
+  \item Valgono le distributive.
+\end{itemize}
+Quindi $(\mathbb{Z}, +, \cdot)$ è un anello commutativo con unità. Vale la legge di annullamento del prodotto: è un dominio di integrità. In particolare, se $k \neq 0$ e $k\cdot x = k\cdot y \Rightarrow x = y$ ($k, x, y \in \mathbb{Z}$): vale la legge di cancellazione del prodotto. Indicheremo $(\mathbb{Z}, +, \cdot)$ semplicemente con $\mathbb{Z}$.
+
+\section{Divisibilità}
+
+\begin{definizione}
+Siano $a, b \in \mathbb{Z}$. Si dice che $a$ \emph{divide} $b$, e si scrive $a \mid b$, se $\exists k \in \mathbb{Z}$ tale che $b = k\cdot a$. Se $a$ non divide $b$ ($\nexists k$ tale che $b = ka$) si scrive $a \nmid b$.
+\end{definizione}
+
+\begin{esempio}
+$5 \nmid 7$; \quad $3 \mid 33$ perché $3\cdot 11 = 33$; \quad $-4 \mid 20$ perché $\exists k = -5$ tale che $(-4)\cdot(-5) = 20$; \quad $7 \mid -21$ perché $\exists -3 \in \mathbb{Z}$ tale che $7\cdot(-3) = -21$.
+\end{esempio}
+
+\begin{osservazione}
+\begin{itemize}
+  \item $\forall a \in \mathbb{Z}$: $a \mid 0$, perché $0\cdot a = 0$.
+  \item $\forall a \in \mathbb{Z}$: $1 \mid a$, perché $a\cdot 1 = a$.
+  \item $0 \mid b \Rightarrow \exists k$ tale che $0\cdot k = b \Rightarrow b = 0$: cioè $0$ divide solo zero.
+  \item $\forall a$: $a \mid a$, perché $a\cdot 1 = a$.
+  \item La relazione $\mid$ su $\mathbb{N}$ è una relazione d'ordine parziale. Su $\mathbb{Z}$ non è una relazione d'ordine perché non è antisimmetrica: se $a \mid b \wedge b \mid a$ allora $a = b$ oppure $a = -b$ (ad esempio $5 \mid -5 \wedge -5 \mid 5$ ma $-5 \neq 5$).
+  \item $a \mid b \wedge a \mid c \Rightarrow a \mid (b + c)$; inoltre $a \mid (b + c) \wedge a \mid b \Rightarrow a \mid c$.
+\end{itemize}
+\end{osservazione}
+
+\begin{proposizione}[Lemma]
+Se $a \mid b$ e $a \mid c$ allora $a \mid (\alpha b + \beta c)$ per ogni $\alpha, \beta \in \mathbb{Z}$.
+\end{proposizione}
+
+\begin{proof}
+$a \mid b$ significa $\exists k_1 \in \mathbb{Z}$ tale che $b = k_1\cdot a$; $a \mid c$ significa $\exists k_2 \in \mathbb{Z}$ tale che $c = k_2\cdot a$. Allora
+\[
+  \alpha b + \beta c = \alpha k_1 a + \beta k_2 a = (\alpha k_1 + \beta k_2)\cdot a = h\cdot a ,
+\]
+con $h = \alpha k_1 + \beta k_2 \in \mathbb{Z}$. Cioè $a \mid (\alpha b + \beta c)$.
+\end{proof}
+
+\section{Divisione con resto}
+
+\begin{proposizione}
+Siano $a, b \in \mathbb{Z}$, $b \neq 0$. Allora esistono e sono unici $q, r \in \mathbb{Z}$ tali che
+\[
+  a = q\cdot b + r, \qquad 0 \le r < |b| ,
+\]
+dove $q$ è il \emph{quoziente} e $r$ il \emph{resto}.
+\end{proposizione}
+
+\begin{proof}[Dimostrazione dell'esistenza]
+Sia $T = \{k \in \mathbb{Z} \mid k = a - mb,\ m \in \mathbb{Z},\ k \ge 0\} \subseteq \mathbb{N}$.
+
+$T \neq \emptyset$? Se $a \ge 0$, allora $a \in T$ (con $m = 0$). Se $a < 0$, esiste $\bar m \in \mathbb{Z}$ tale che $\bar m b \le a$ (ad esempio $\bar m = -|a|\,b$, perché $\bar m b = -|a|\,b^2 \le -|a| = a$), cioè $0 \le a - \bar m b$, cioè $a - \bar m b \in T$. Quindi $T \neq \emptyset$.
+
+$\mathbb{N}$ è bene ordinato, quindi $T$ ha minimo. Sia $r = \min T$. Poiché $r \in T$, $r = a - qb$ per qualche $q \in \mathbb{Z}$, cioè $a = qb + r$, e $r \ge 0$. Resta da far vedere che $r < |b|$.
+
+Per assurdo sia $r \ge |b|$, cioè $r = |b| + r_0$ con $r_0 \ge 0$. Allora
+\[
+  0 \le r_0 = r - |b| = a - qb - |b| = \begin{cases} a - b(q + 1) & b > 0 \\ a - b(q - 1) & b < 0 \end{cases}
+\]
+cioè $r_0 \in T$ e $r_0 = r - |b| < r$, contro la minimalità di $r$: assurdo. Dunque $r < |b|$.
+\end{proof}
+
+\begin{proof}[Dimostrazione dell'unicità]
+Supponiamo che ci siano due coppie $q, r$ e $q', r'$ tali che $a = qb + r = q'b + r'$ con $0 \le r, r' < |b|$. Supponiamo $r \le r'$. Allora
+\[
+  0 \le r' - r = (a - q'b) - (a - qb) = b(q - q') .
+\]
+Passando ai valori assoluti:
+\[
+  0 \le |q - q'|\,|b| = |r' - r| = r' - r \le r' < |b| ,
+\]
+cioè $|q - q'|\,|b| < |b|$, cioè $|q - q'| < 1$, cioè $|q - q'| = 0$, cioè $q' = q$. Da $qb + r = q'b + r'$ segue allora $r' = r$.
+\end{proof}
+
+\begin{esempio}
+\begin{itemize}
+  \item $a = 15$, $b = 6$: $15 = 6\cdot 2 + 3$ ($q = 2$, $r = 3$).
+  \item $a = 15$, $b = -6$: $15 = (-6)\cdot(-2) + 3$.
+  \item $a = -15$, $b = 6$: $-15 = 6\cdot(-2) - 3 = 6\cdot(-2) - 3 + 6 - 6 = 6\cdot(-3) + 3$, cioè quoziente $-3$ e resto $3$.
+  \item $a = -15$, $b = -6$: $-15 = (-6)\cdot 2 - 3 = (-6)\cdot 3 + 3$.
+  \item $a = -24$, $b = 7$: $-24 = 7\cdot(-4) + 4$.
+  \item $a = 24$, $b = -7$: $24 = (-7)\cdot(-3) + 3$.
+\end{itemize}
+\end{esempio}
+
+\section{Classi di resto modulo 7}
+
+$a \equiv b \bmod 7$ se $7 \mid a - b$, cioè se $\exists k \in \mathbb{Z}$ tale che $a - b = 7k$, cioè $a = 7k + b$. Le classi sono
+\begin{align*}
+  [0]_7 &= \{0, \pm 7, \pm 14, \dots\},\\
+  [1]_7 &= \{1,\ 7 + 1,\ 14 + 1, \dots, 7k + 1, \dots, -7 + 1,\ -14 + 1, \dots\},\\
+  [2]_7 &= \{2,\ 7 + 2, \dots, 7k + 2, \dots, -7 + 2,\ -14 + 2, \dots\},\\
+  [-1]_7 &= \{-1 = (-1)\cdot 7 + 6,\ 6,\ 6 + 7k, \dots\} = [6]_7 .
+\end{align*}
+Le classi di congruenza modulo $n$ di $\mathbb{Z}_n = \mathbb{Z}/{\equiv_n}$ sono esattamente $n$, cioè i resti possibili della divisione per $n$: $[0], [1], \dots, [n-1]$.
+
+\end{document}

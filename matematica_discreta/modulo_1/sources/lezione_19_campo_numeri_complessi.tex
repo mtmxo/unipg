@@ -1,0 +1,190 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\newrunin{osservazione}{Osservazione}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Il campo dei numeri complessi}
+\author{Marco Cerbella}
+\date{Lezione 10 -- 20 ottobre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Il campo dei numeri complessi}
+
+Consideriamo $\mathbb{R}^2 = \mathbb{R}\times\mathbb{R} = \{(x, y) \mid x, y \in \mathbb{R}\}$ con le operazioni
+\begin{align*}
+  (x_1, y_1) + (x_2, y_2) &= (x_1 + x_2,\ y_1 + y_2),\\
+  (x_1, y_1)\cdot(x_2, y_2) &= (x_1 x_2 - y_1 y_2,\ x_1 y_2 + x_2 y_1).
+\end{align*}
+$(\mathbb{R}^2, +, \cdot) = \mathbb{C}$ è l'\emph{insieme dei numeri complessi}; $z = (x, y)$.
+
+\subsection{Proprietà}
+
+\begin{enumerate}
+  \item \emph{$(\mathbb{C}, +)$ è un gruppo abeliano.}
+  \begin{itemize}
+    \item $z_1 + z_2 = z_2 + z_1$ (commutativa);
+    \item $z_1 + (z_2 + z_3) = (z_1 + z_2) + z_3$ (associativa);
+    \item esiste $0 = (0, 0)$ elemento neutro: $(x, y) + (0, 0) = (0, 0) + (x, y) = (x, y)$;
+    \item per ogni $z = (x, y)$ esiste l'inverso (opposto) $-z = (-x, -y)$: $(x, y) + (-x, -y) = (x - x, y - y) = (0, 0) = 0$.
+  \end{itemize}
+  \item \emph{Distributive:} $z_1\cdot(z_2 + z_3) = z_1 z_2 + z_1 z_3$ e $(z_1 + z_2)\cdot z_3 = z_1 z_3 + z_2 z_3$.
+  \item \emph{Associativa del prodotto:} $z_1\cdot(z_2\cdot z_3) = (z_1\cdot z_2)\cdot z_3$. Quindi $(\mathbb{C}, +, \cdot)$ è un anello.
+  \item \emph{Commutativa del prodotto:} $z_1 \cdot z_2 = z_2 \cdot z_1$. Quindi è un anello commutativo.
+  \item \emph{Elemento neutro del prodotto:} $1 = (1, 0)$ è l'unità per $\cdot$:
+  \[
+    (1, 0)\cdot(x, y) = (1\cdot x - 0\cdot y,\ 1\cdot y + 0\cdot x) = (x, y).
+  \]
+  Quindi $(\mathbb{C}, +, \cdot)$ è un anello commutativo con unità.
+  \item \emph{Inverso moltiplicativo:} per ogni $z = (x, y) \neq (0, 0)$ esiste l'inverso
+  \[
+    z^{-1} = \left( \frac{x}{x^2 + y^2},\ -\frac{y}{x^2 + y^2} \right).
+  \]
+  Infatti
+  \[
+    (x, y)\cdot\left( \frac{x}{x^2+y^2},\ \frac{-y}{x^2+y^2} \right)
+    = \left( \frac{x^2}{x^2+y^2} - \frac{y(-y)}{x^2+y^2},\ \frac{x(-y)}{x^2+y^2} + \frac{y\,x}{x^2+y^2} \right) = (1, 0) = 1 .
+  \]
+\end{enumerate}
+Dunque $(\mathbb{C}, +, \cdot)$ è un \emph{campo}.
+
+\subsection{Scrittura $a + ib$}
+
+Per semplicità scriviamo $(1, 0) = 1$ e $(0, 1) = i$ (nuovo simbolo, \emph{unità immaginaria}). Allora
+\[
+  (x, y) = (x, 0) + (0, y) = x\,(1, 0) + y\,(0, 1) = x + yi .
+\]
+I numeri $(x, 0)$ sono i numeri reali: $(x_1, 0) + (x_2, 0) = (x_1 + x_2, 0)$ e $(x_1, 0)\cdot(x_2, 0) = (x_1 x_2, 0)$; quindi $\mathbb{R} \subseteq \mathbb{C}$.
+
+\begin{osservazione}
+$i^2 = i\cdot i = (0, 1)\cdot(0, 1) = (-1, 0) = -(1, 0) = -1$. Anche $(-i)^2 = (-i)(-i) = (0, -1)(0, -1) = (-1, 0) = -1$.
+\end{osservazione}
+
+L'equazione $x^2 + 1 = 0$ con $x \in \mathbb{R}$ non ha soluzioni. L'equazione $z^2 + 1 = 0$ con $z \in \mathbb{C}$, cioè $z^2 = -1$, ha soluzioni $z_1 = i$, $z_2 = -i$.
+
+\begin{esempio}[Equazione di secondo grado su $\mathbb{C}$]
+\[
+  z^2 - 2z + 10 = 0, \qquad
+  z_{1,2} = \frac{2 \pm \sqrt{4 - 40}}{2} = \frac{2 \pm \sqrt{-36}}{2} = \frac{2 \pm \sqrt{36\cdot(-1)}}{2} = \frac{2 \pm 6\sqrt{-1}}{2} ,
+\]
+cioè $z_1 = \dfrac{2 + 6i}{2} = 1 + 3i$ e $z_2 = \dfrac{2 - 6i}{2} = 1 - 3i$.
+\end{esempio}
+
+Possiamo scrivere i numeri complessi in questo modo: $z = a + ib$, $w = c + id$ con $a, b, c, d \in \mathbb{R}$; $a = a(1, 0)$ è la \emph{parte reale}, $b = b(0, 1)$ la \emph{parte immaginaria}. Allora
+\[
+  z + w = (a + c) + i(b + d),
+\]
+\[
+  z \cdot w = (a + ib)(c + id) = ac + iad + ibc + i^2 bd = ac - bd + (ad + bc)\,i ,
+\]
+dove si è usato $i^2 = -1$.
+
+\section{Riepilogo di esempi di strutture}
+
+\begin{itemize}
+  \item $(\mathbb{N}\setminus\{0\}, +)$: semigruppo (non monoide).
+  \item $(\mathbb{N}, +)$: monoide (non gruppo).
+  \item $(\mathbb{Z}, +)$: gruppo abeliano.
+  \item $(2\mathbb{Z}, +, \cdot)$: anello commutativo non unitario.
+  \item $(\mathbb{Z}, +, \cdot)$: anello unitario commutativo (non campo).
+  \item $(\mathbb{R}, +, \cdot)$, $(\mathbb{Q}, +, \cdot)$, $(\mathbb{C}, +, \cdot)$: campi; anche $(\mathbb{Z}_2, +, \cdot)$ è un campo.
+\end{itemize}
+
+\end{document}

@@ -2405,4 +2405,898 @@ Dimostrare per induzione che $25 \mid 2^{5n} - 7^n$ per ogni $n \ge 1$.
 \end{align*}
 quindi $25 \mid 2^{5(k+1)} - 7^{k+1}$, che era la tesi. \hfill $\square$
 
+\section[Operazioni interne, semigruppi e monoidi (Lezione 9 -- 19 ottobre 2026)]{Operazioni interne, semigruppi e monoidi}
+\noindent\emph{Lezione 9 -- 19 ottobre 2026}
+\subsection{Operazioni interne e gruppoidi}
+
+\begin{definizione}
+Una \emph{operazione interna} su un insieme $A$ è una funzione
+\[
+  * : A \times A \to A, \qquad (x, y) \mapsto x * y = {*}(x, y).
+\]
+L'insieme $A$ con l'operazione interna $*$ si chiama \emph{gruppoide} e si indica con $(A, *)$.
+\end{definizione}
+
+\begin{esempio}
+\begin{itemize}
+  \item $(\mathbb{Z}, +)$ con $+ : \mathbb{Z}\times\mathbb{Z} \to \mathbb{Z}$, $(h, k) \mapsto h + k$, è un gruppoide; è commutativo e associativo.
+  \item $(\mathbb{N}, \cdot)$ con $\cdot : \mathbb{N}\times\mathbb{N} \to \mathbb{N}$, $(a, b) \mapsto a\cdot b$, è commutativo e associativo.
+  \item $(\mathbb{N}, -)$ \emph{non} è un gruppoide: $-: \mathbb{N}\times\mathbb{N} \to \mathbb{Z}$, $(a, b) \mapsto a - b$ non ha valori in $\mathbb{N}$.
+  \item $(\mathbb{Z}, -)$ è un gruppoide, ma non è commutativo e non è associativo: $(5-2)-6 = 3 - 6 = -3$, mentre $5 - (2 - 6) = 5 - (-4) = 9$.
+  \item $(\mathbb{N}\setminus\{0\}, :)$ \emph{non} è un gruppoide: $: (a, b) \mapsto a : b = \frac{a}{b}$ va da $\mathbb{N}\setminus\{0\} \times \mathbb{N}\setminus\{0\}$ in $\mathbb{Q}$.
+  \item Sia $A$ un insieme e $\mathcal{P}(A)$ l'insieme delle sue parti: $\cup : \mathcal{P}(A)\times\mathcal{P}(A) \to \mathcal{P}(A)$, $(X, Y) \mapsto X \cup Y$ è un'operazione interna; $(\mathcal{P}(A), \cup)$ è un gruppoide, commutativo e associativo (e lo stesso vale per $\cap$).
+\end{itemize}
+\end{esempio}
+
+\subsubsection{Tavola di un'operazione}
+
+Se $A = \{x_1, \dots, x_n\}$ è finito possiamo costruire la \emph{tavola} associata all'operazione $*$: nella riga di $x_i$ e colonna di $x_j$ si scrive $x_i * x_j$.
+\[
+\begin{array}{c|cccc}
+  * & x_1 & x_2 & \cdots & x_n \\ \hline
+  x_1 & x_1 * x_1 & x_1 * x_2 & \cdots & x_1 * x_n \\
+  x_2 & x_2 * x_1 & x_2 * x_2 & \cdots & x_2 * x_n \\
+  \vdots & \vdots & \vdots & \ddots & \vdots \\
+  x_n & x_n * x_1 & x_n * x_2 & \cdots & x_n * x_n
+\end{array}
+\]
+Se la tavola è simmetrica rispetto alla diagonale l'operazione è commutativa.
+
+\begin{esempio}[$A = \{a\}$]
+$\mathcal{P}(A) = \{\emptyset, \{a\}\} = \{\emptyset, A\}$. Le tavole di $\cap$ e $\cup$ sono
+\[
+\begin{array}{c|cc}
+  \cap & \emptyset & A \\ \hline
+  \emptyset & \emptyset & \emptyset \\
+  A & \emptyset & A
+\end{array}
+\qquad\qquad
+\begin{array}{c|cc}
+  \cup & \emptyset & A \\ \hline
+  \emptyset & \emptyset & A \\
+  A & A & A
+\end{array}
+\]
+Entrambe sono simmetriche rispetto alla diagonale, quindi le operazioni sono commutative. Per $\cap$ l'elemento $A$ è l'elemento neutro, per $\cup$ lo è $\emptyset$.
+\end{esempio}
+
+\begin{esempio}[$A = \{a, b\}$, differenza insiemistica]
+Sia $|\mathcal{P}(A)| = 2^{|A|} = 2^2 = 4$. La tavola di $(\mathcal{P}(A), \setminus)$ è
+\[
+\begin{array}{c|cccc}
+  \setminus & \emptyset & \{a\} & \{b\} & A \\ \hline
+  \emptyset & \emptyset & \emptyset & \emptyset & \emptyset \\
+  \{a\} & \{a\} & \emptyset & \{a\} & \emptyset \\
+  \{b\} & \{b\} & \{b\} & \emptyset & \emptyset \\
+  A & A & \{b\} & \{a\} & \emptyset
+\end{array}
+\]
+Non è commutativa ($\{a\}\setminus\{b\} = \{a\}$ ma $\{b\}\setminus\{a\} = \{b\}$) e non esiste l'elemento neutro.
+\end{esempio}
+
+\begin{esempio}
+Sia $A = \{e, a, b\}$ con l'operazione $*$ definita dalla tavola
+\[
+\begin{array}{c|ccc}
+  * & e & a & b \\ \hline
+  e & e & a & b \\
+  a & a & e & e \\
+  b & b & e & e
+\end{array}
+\]
+$*$ è un'operazione interna, definita dalla tavola; è commutativa (la tavola è simmetrica) e $e$ è l'elemento neutro. \emph{Non} vale l'associatività perché $a$ ha due inversi: $a * a = e$ e $a * b = e$. Oppure: $(b * a) * a = e * a = a$ mentre $b * (a * a) = b * e = b$, quindi l'operazione non è associativa.
+\end{esempio}
+
+\subsection{Proprietà delle operazioni interne}
+
+\begin{definizione}
+Un gruppoide $(A, *)$ è detto
+\begin{itemize}
+  \item \emph{commutativo} se $\forall a, b \in A$: $a * b = b * a$;
+  \item \emph{associativo} se $\forall a, b, c \in A$: $(a * b) * c = a * (b * c)$.
+\end{itemize}
+Un gruppoide associativo $(A, *)$ è detto \emph{semigruppo}.
+\end{definizione}
+
+\begin{definizione}[Elemento neutro]
+Sia $(A, *)$ un gruppoide. Un elemento $e \in A$ è \emph{elemento neutro} per $*$ se
+\[
+  \forall a \in A \qquad a * e = e * a = a .
+\]
+\end{definizione}
+
+\begin{definizione}[Elemento invertibile]
+Se esiste l'elemento neutro $e \in A$, dato $a \in A$ l'\emph{inverso} di $a$ (se esiste) è l'elemento $a'$ tale che
+\[
+  a * a' = a' * a = e .
+\]
+Allora $a$ è detto \emph{elemento invertibile}.
+\end{definizione}
+
+\begin{esempio}
+\begin{itemize}
+  \item $(\mathbb{N}, +)$: $0$ è l'elemento neutro; $0$ ha inverso, nessun altro numero ha inverso.
+  \item $(\mathbb{Z}, +)$: $0$ è l'elemento neutro; tutti i numeri sono invertibili (l'inverso di $k$ è $-k$).
+  \item $(\mathbb{N}\setminus\{0\}, +)$: non c'è elemento neutro.
+  \item $(\mathbb{N}, \cdot)$: $1$ è l'elemento neutro e $1$ è invertibile.
+  \item $(\mathcal{P}(A), \cap)$: $A$ è l'elemento neutro ($X \subseteq A \Rightarrow A \cap X = X = X \cap A$). Non c'è inverso: solo $A$ è invertibile.
+  \item $(\mathcal{P}(A), \cup)$: $\emptyset$ è l'elemento neutro. Non c'è inverso: solo $\emptyset$ è invertibile.
+\end{itemize}
+\end{esempio}
+
+\begin{esempio}[$h * k = h + k + hk$ su $\mathbb{Z}$]
+Sia $* : \mathbb{Z}\times\mathbb{Z} \to \mathbb{Z}$, $(h, k) \mapsto h * k = h + k + hk$. Cerchiamo, se esiste, un elemento neutro $x \in \mathbb{Z}$. Deve valere $x * k = k$, cioè $x + k + xk = k$, quindi $x(1 + k) = 0$. Poiché $k$ è un numero qualsiasi, $x$ deve essere zero. Verifichiamo che $x = 0$ sia elemento neutro: $0 * k = 0 + k + 0\cdot k = k$ e $h * 0 = h + 0 + h\cdot 0 = h$. Dunque $0$ è elemento neutro.
+\end{esempio}
+
+\begin{esempio}[$h * k = h^2 + k^2$ su $\mathbb{Z}$]
+Esiste un elemento neutro? Se $x \in \mathbb{Z}$ fosse neutro, dovrebbe valere $x * k = k$, cioè $x^2 + k^2 = k$, cioè $x^2 = k - k^2$ per ogni $k$. Ma il secondo membro varia con $k$, quindi anche $x$ varierebbe: non ci sarà mai elemento neutro. (Ad esempio $0 * k = 0^2 + k^2 = k^2 \neq k$.)
+\end{esempio}
+
+\begin{definizione}[Monoide]
+Un \emph{monoide} è un semigruppo $(A, *)$ con elemento neutro.
+\end{definizione}
+
+\begin{proposizione}
+\begin{enumerate}
+  \item Sia $(A, *)$ un gruppoide. Se esiste l'elemento neutro, è unico.
+  \item Sia $(A, *)$ un monoide. Se $a$ è invertibile, allora l'inverso di $a$ è unico.
+\end{enumerate}
+\end{proposizione}
+
+\begin{proof}
+1) Siano $e_1, e_2 \in A$ elementi neutri in $(A, *)$. Poiché $e_1$ è neutro, $\forall x \in A$ vale $e_1 * x = x * e_1 = x$; poiché $e_2$ è neutro, $\forall x \in A$ vale $e_2 * x = x * e_2 = x$. Prendendo $x = e_2$ nella prima e $x = e_1$ nella seconda:
+\[
+  e_1 = e_1 * e_2 = e_2 ,
+\]
+cioè l'elemento neutro è unico.
+
+2) Sia $a$ invertibile, con $a_1'$ e $a_2'$ inversi, cioè $a * a_1' = e = a_1' * a$ e $a * a_2' = e = a_2' * a$. Allora, usando l'associatività,
+\[
+  a_1' = a_1' * e = a_1' * (a * a_2') = (a_1' * a) * a_2' = e * a_2' = a_2' ,
+\]
+cioè $a_1' = a_2'$ e l'inverso è unico.
+\end{proof}
+
+\section[Gruppi (Lezione 9 -- 19 ottobre 2026)]{Gruppi}
+\noindent\emph{Lezione 9 -- 19 ottobre 2026}
+\subsection{Gruppi}
+
+\begin{definizione}
+$(G, *)$ è un \emph{gruppo} se
+\begin{enumerate}
+  \item $*$ è associativa: $\forall a, b, c \in G$ \quad $(a * b) * c = a * (b * c)$;
+  \item esiste l'elemento neutro: $\exists e \in G$ tale che $\forall a \in G$ \quad $e * a = a * e = a$;
+  \item ogni elemento è invertibile: $\forall a \in G$ \quad $\exists a' \in G$ tale che $a * a' = a' * a = e$.
+\end{enumerate}
+Un gruppo $(G, *)$ è \emph{abeliano} se $*$ è commutativa: $\forall a, b \in G$ \quad $a * b = b * a$.
+\end{definizione}
+
+\begin{esempio}
+\begin{itemize}
+  \item $(\mathbb{Q}\setminus\{0\}, \cdot)$ è un gruppo commutativo: l'operazione è associativa, l'elemento neutro è $1$ e l'inverso di $\frac{a}{b}$ è $\frac{b}{a}$ (se $q \in \mathbb{Q}$ l'inverso è $q^{-1}$).
+  \item $(\mathbb{Z}, +)$ è un gruppo abeliano: associativa, $0$ elemento neutro, e se $k \in \mathbb{Z}$ allora $-k$ è l'inverso.
+\end{itemize}
+\end{esempio}
+
+\subsubsection{Notazione}
+
+\begin{center}
+\begin{tabular}{@{}p{3.5cm} p{4.5cm} p{4.5cm}@{}}
+\toprule
+$(G, *)$ gruppo & Notazione additiva $(G, +)$ & Notazione moltiplicativa $(G, \cdot)$ \\
+\midrule
+$e$ elemento neutro & $0$ elemento neutro & $1$ elemento neutro \\[2pt]
+$a'$ inverso di $a$ & $(-a)$ \emph{opposto} di $a$ & $a^{-1}$ \emph{inverso} di $a$ \\[2pt]
+$\underbrace{a * a * \dots * a}_{n\text{ volte}}$ & $\underbrace{a + \dots + a}_{n\text{ volte}} = na$ & $\underbrace{a \cdot a \cdot \ldots \cdot a}_{n\text{ volte}} = a^n$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{definizione}[Gruppo ciclico]
+Un gruppo $(G, *)$ è un \emph{gruppo ciclico} se esiste un elemento $g \in G$ tale che $\forall a \in G$
+\[
+  a = \underbrace{g * g * \dots * g}_{\text{qualche volta}}
+  \quad\text{oppure}\quad a = e\ (= g^0)
+  \quad\text{oppure}\quad a = g^{-1} * g^{-1} * \dots * g^{-1} .
+\]
+\end{definizione}
+
+\begin{esempio}[$\mathbb{Z}_{12}$: l'aritmetica dell'orologio]
+$\mathbb{Z}_{12} = \{[1], [2], \dots, [12]\}$ con la somma ad esempio $[3] + [4] = [7]$, $[8] + [5] = [1]$. Si può costruire la tavola della somma, con $[12]$ elemento neutro e ogni elemento invertibile (ad esempio $[5] + [?] = [12]$ dà $[?] = [7]$). Poiché $[2] = [1] + [1]$, $[3] = [1] + [1] + [1]$, \dots, il gruppo è ciclico, generato da $[1]$.
+\end{esempio}
+
+\begin{esempio}[$(\mathbb{Z}, +)$ è ciclico]
+$(\mathbb{Z}, +)$ è un gruppo ciclico: $+1$ genera tutti i numeri. Infatti, se $h \in \mathbb{Z}$:
+\begin{itemize}
+  \item $h > 0$: $h = \underbrace{1 + 1 + \dots + 1}_{h\text{ volte}}$;
+  \item $h = 0$: elemento neutro;
+  \item $h < 0$: $h = \underbrace{(-1) + (-1) + \dots + (-1)}_{(-h)\text{ volte}}$.
+\end{itemize}
+\end{esempio}
+
+\subsubsection{Simmetrie di un rettangolo}
+
+\begin{esempio}
+Consideriamo un rettangolo $ABCD$ (con $A$, $B$ in basso e $D$, $C$ in alto) e le sue simmetrie:
+\begin{itemize}
+  \item $a_1$: simmetria rispetto all'asse verticale, $(ABCD) \mapsto (BADC)$;
+  \item $a_2$: simmetria rispetto all'asse orizzontale, $(ABCD) \mapsto (DCBA)$;
+  \item $\tau$: rotazione di $180^\circ$, $(ABCD) \mapsto (CDAB)$;
+  \item $\mathrm{Id}$: identità, $(ABCD) \mapsto (ABCD)$.
+\end{itemize}
+La composizione di simmetrie è ancora una simmetria del rettangolo. Ad esempio
+\[
+  \mathrm{Id} * \tau\,(ABCD) = \mathrm{Id}(CDAB) = (CDAB), \qquad
+  \tau * \tau\,(ABCD) = \tau(CDAB) = (ABCD),
+\]
+\[
+  \tau * a_1\,(ABCD) = \tau(BADC) = (DCBA) = a_2\,(ABCD).
+\]
+Dunque $\tau * a_1 = a_2$ (il resto della tavola della composizione viene completato nella lezione successiva).
+\end{esempio}
+
+\section[Simmetrie, anelli e campi (Lezione 10 -- 20 ottobre 2026)]{Simmetrie, anelli e campi}
+\noindent\emph{Lezione 10 -- 20 ottobre 2026}
+\subsection{Il gruppo delle simmetrie del rettangolo}
+
+Riprendiamo le simmetrie del rettangolo $ABCD$: $\mathrm{Id}$, $\tau$ (rotazione di $180^\circ$), $a_1$ (simmetria rispetto all'asse verticale) e $a_2$ (simmetria rispetto all'asse orizzontale):
+\[
+  \begin{gathered}
+  (ABCD) \xrightarrow{a_1} (BADC), \qquad
+  (ABCD) \xrightarrow{a_2} (DCBA), \\
+  (ABCD) \xrightarrow{\tau} (CDAB), \qquad
+  (ABCD) \xrightarrow{\mathrm{Id}} (ABCD).
+  \end{gathered}
+\]
+La tavola della composizione è
+\[
+\begin{array}{c|cccc}
+  * & \mathrm{Id} & \tau & a_1 & a_2 \\ \hline
+  \mathrm{Id} & \mathrm{Id} & \tau & a_1 & a_2 \\
+  \tau & \tau & \mathrm{Id} & a_2 & a_1 \\
+  a_1 & a_1 & a_2 & \mathrm{Id} & \tau \\
+  a_2 & a_2 & a_1 & \tau & \mathrm{Id}
+\end{array}
+\]
+Ad esempio $a_1 * a_2\,(ABCD) = a_1\big(a_2(ABCD)\big) = a_1(DCBA) = (CDAB)$, cioè $a_1 * a_2 = \tau$.
+
+\begin{esempio}[Gruppo \emph{non} ciclico]
+Questo è un gruppo non ciclico: vale $\tau * \tau = \mathrm{Id}$, $a_1 * a_1 = \mathrm{Id}$, $a_2 * a_2 = \mathrm{Id}$, quindi nessun elemento, composto con se stesso, genera tutti gli altri.
+\end{esempio}
+
+\begin{esempio}[Simmetrie del triangolo equilatero]
+Sia $ABC$ un triangolo equilatero. Le sue simmetrie sono le tre riflessioni $a_1, a_2, a_3$ rispetto agli assi, la rotazione $\tau$ di $120^\circ$, la rotazione $\tau^2$ di $240^\circ$ e l'identità. Ad esempio
+\[
+  (ABC) \xrightarrow{a_1} (ACB), \qquad (ABC) \xrightarrow{\tau} (CAB), \qquad \tau * \tau = \tau^2 .
+\]
+La tavola della composizione ($\mathrm{Id}, a_1, a_2, a_3, \tau, \tau^2$) è stata solo impostata a lezione.
+\end{esempio}
+
+\subsection{Anelli}
+
+\begin{definizione}[Anello]
+Una struttura $(A, \oplus, \otimes)$ è un \emph{anello} se
+\begin{enumerate}
+  \item $(A, \oplus)$ è un gruppo abeliano (con $0$ elemento neutro per $\oplus$ e, per $a \in A$, l'opposto indicato con $-a$);
+  \item valgono le \emph{distributive}:
+  \[
+    (a \oplus b) \otimes c = (a \otimes c) \oplus (b \otimes c), \qquad
+    a \otimes (b \oplus c) = (a \otimes b) \oplus (a \otimes c);
+  \]
+  \item $(A, \otimes)$ è un semigruppo ($\otimes$ è associativa).
+\end{enumerate}
+\end{definizione}
+
+\begin{itemize}
+  \item Se inoltre esiste l'elemento neutro per $\otimes$ (indicato con $1$) l'anello è detto \emph{unitario} (anello con unità).
+  \item Se $\otimes$ è commutativa, l'anello è detto \emph{anello commutativo}.
+\end{itemize}
+
+\begin{definizione}[Corpo e campo]
+Sia $(A, \oplus, \otimes)$ un anello unitario.
+\begin{itemize}
+  \item È detto \emph{corpo} se $\forall a \in A$, $a \neq 0$, esiste l'inverso $a^{-1}$, con $a^{-1} \otimes a = a \otimes a^{-1} = 1$.
+  \item È detto \emph{campo} se $\forall a \in A$, $a \neq 0$, esiste l'inverso $a^{-1}$ e inoltre $(A, \otimes)$ è commutativa.
+\end{itemize}
+\end{definizione}
+
+\begin{esempio}[$2\mathbb{Z}$]
+$2\mathbb{Z} = \{2k \mid k \in \mathbb{Z}\} = \{\dots, -4, -2, 0, 2, 4, \dots\}$. È $(2\mathbb{Z}, +, \cdot)$ un anello?
+\begin{enumerate}
+  \item $(2\mathbb{Z}, +)$ è un gruppo abeliano? $+$ è associativa; esiste l'elemento neutro $0$; $\forall 2k \in 2\mathbb{Z}$, $-2k$ è l'opposto; $+$ è commutativa. Sì.
+  \item Le distributive valgono.
+  \item Il prodotto è associativo e commutativo.
+\end{enumerate}
+Dunque $(2\mathbb{Z}, +, \cdot)$ è un anello commutativo (senza unità).
+\end{esempio}
+
+\begin{esempio}
+\begin{itemize}
+  \item $(\mathbb{R}, +, \cdot)$ e $(\mathbb{Q}, +, \cdot)$ sono \emph{campi}.
+  \item $(\mathbb{Z}, +, \cdot)$ è un anello commutativo unitario, ma non è un campo (gli unici elementi invertibili sono $+1$ e $-1$).
+  \item $\mathbb{Z}_2 = \{0, 1\}$ con le operazioni
+  \[
+  \begin{array}{c|cc}
+    + & 0 & 1 \\ \hline
+    0 & 0 & 1 \\
+    1 & 1 & 0
+  \end{array}
+  \qquad
+  \begin{array}{c|cc}
+    \cdot & 0 & 1 \\ \hline
+    0 & 0 & 0 \\
+    1 & 0 & 1
+  \end{array}
+  \]
+  Per $+$ l'elemento neutro è $0$, per $\cdot$ è $1$: $(\mathbb{Z}_2, +, \cdot)$ è un campo.
+\end{itemize}
+\end{esempio}
+
+\section[Il campo dei numeri complessi (Lezione 10 -- 20 ottobre 2026)]{Il campo dei numeri complessi}
+\noindent\emph{Lezione 10 -- 20 ottobre 2026}
+\subsection{Il campo dei numeri complessi}
+
+Consideriamo $\mathbb{R}^2 = \mathbb{R}\times\mathbb{R} = \{(x, y) \mid x, y \in \mathbb{R}\}$ con le operazioni
+\begin{align*}
+  (x_1, y_1) + (x_2, y_2) &= (x_1 + x_2,\ y_1 + y_2),\\
+  (x_1, y_1)\cdot(x_2, y_2) &= (x_1 x_2 - y_1 y_2,\ x_1 y_2 + x_2 y_1).
+\end{align*}
+$(\mathbb{R}^2, +, \cdot) = \mathbb{C}$ è l'\emph{insieme dei numeri complessi}; $z = (x, y)$.
+
+\subsubsection{Proprietà}
+
+\begin{enumerate}
+  \item \emph{$(\mathbb{C}, +)$ è un gruppo abeliano.}
+  \begin{itemize}
+    \item $z_1 + z_2 = z_2 + z_1$ (commutativa);
+    \item $z_1 + (z_2 + z_3) = (z_1 + z_2) + z_3$ (associativa);
+    \item esiste $0 = (0, 0)$ elemento neutro: $(x, y) + (0, 0) = (0, 0) + (x, y) = (x, y)$;
+    \item per ogni $z = (x, y)$ esiste l'inverso (opposto) $-z = (-x, -y)$: $(x, y) + (-x, -y) = (x - x, y - y) = (0, 0) = 0$.
+  \end{itemize}
+  \item \emph{Distributive:} $z_1\cdot(z_2 + z_3) = z_1 z_2 + z_1 z_3$ e $(z_1 + z_2)\cdot z_3 = z_1 z_3 + z_2 z_3$.
+  \item \emph{Associativa del prodotto:} $z_1\cdot(z_2\cdot z_3) = (z_1\cdot z_2)\cdot z_3$. Quindi $(\mathbb{C}, +, \cdot)$ è un anello.
+  \item \emph{Commutativa del prodotto:} $z_1 \cdot z_2 = z_2 \cdot z_1$. Quindi è un anello commutativo.
+  \item \emph{Elemento neutro del prodotto:} $1 = (1, 0)$ è l'unità per $\cdot$:
+  \[
+    (1, 0)\cdot(x, y) = (1\cdot x - 0\cdot y,\ 1\cdot y + 0\cdot x) = (x, y).
+  \]
+  Quindi $(\mathbb{C}, +, \cdot)$ è un anello commutativo con unità.
+  \item \emph{Inverso moltiplicativo:} per ogni $z = (x, y) \neq (0, 0)$ esiste l'inverso
+  \[
+    z^{-1} = \left( \frac{x}{x^2 + y^2},\ -\frac{y}{x^2 + y^2} \right).
+  \]
+  Infatti
+  \[
+    (x, y)\cdot\left( \frac{x}{x^2+y^2},\ \frac{-y}{x^2+y^2} \right)
+    = \left( \frac{x^2}{x^2+y^2} - \frac{y(-y)}{x^2+y^2},\ \frac{x(-y)}{x^2+y^2} + \frac{y\,x}{x^2+y^2} \right) = (1, 0) = 1 .
+  \]
+\end{enumerate}
+Dunque $(\mathbb{C}, +, \cdot)$ è un \emph{campo}.
+
+\subsubsection{Scrittura $a + ib$}
+
+Per semplicità scriviamo $(1, 0) = 1$ e $(0, 1) = i$ (nuovo simbolo, \emph{unità immaginaria}). Allora
+\[
+  (x, y) = (x, 0) + (0, y) = x\,(1, 0) + y\,(0, 1) = x + yi .
+\]
+I numeri $(x, 0)$ sono i numeri reali: $(x_1, 0) + (x_2, 0) = (x_1 + x_2, 0)$ e $(x_1, 0)\cdot(x_2, 0) = (x_1 x_2, 0)$; quindi $\mathbb{R} \subseteq \mathbb{C}$.
+
+\begin{osservazione}
+$i^2 = i\cdot i = (0, 1)\cdot(0, 1) = (-1, 0) = -(1, 0) = -1$. Anche $(-i)^2 = (-i)(-i) = (0, -1)(0, -1) = (-1, 0) = -1$.
+\end{osservazione}
+
+L'equazione $x^2 + 1 = 0$ con $x \in \mathbb{R}$ non ha soluzioni. L'equazione $z^2 + 1 = 0$ con $z \in \mathbb{C}$, cioè $z^2 = -1$, ha soluzioni $z_1 = i$, $z_2 = -i$.
+
+\begin{esempio}[Equazione di secondo grado su $\mathbb{C}$]
+\[
+  z^2 - 2z + 10 = 0, \qquad
+  z_{1,2} = \frac{2 \pm \sqrt{4 - 40}}{2} = \frac{2 \pm \sqrt{-36}}{2} = \frac{2 \pm \sqrt{36\cdot(-1)}}{2} = \frac{2 \pm 6\sqrt{-1}}{2} ,
+\]
+cioè $z_1 = \dfrac{2 + 6i}{2} = 1 + 3i$ e $z_2 = \dfrac{2 - 6i}{2} = 1 - 3i$.
+\end{esempio}
+
+Possiamo scrivere i numeri complessi in questo modo: $z = a + ib$, $w = c + id$ con $a, b, c, d \in \mathbb{R}$; $a = a(1, 0)$ è la \emph{parte reale}, $b = b(0, 1)$ la \emph{parte immaginaria}. Allora
+\[
+  z + w = (a + c) + i(b + d),
+\]
+\[
+  z \cdot w = (a + ib)(c + id) = ac + iad + ibc + i^2 bd = ac - bd + (ad + bc)\,i ,
+\]
+dove si è usato $i^2 = -1$.
+
+\subsection{Riepilogo di esempi di strutture}
+
+\begin{itemize}
+  \item $(\mathbb{N}\setminus\{0\}, +)$: semigruppo (non monoide).
+  \item $(\mathbb{N}, +)$: monoide (non gruppo).
+  \item $(\mathbb{Z}, +)$: gruppo abeliano.
+  \item $(2\mathbb{Z}, +, \cdot)$: anello commutativo non unitario.
+  \item $(\mathbb{Z}, +, \cdot)$: anello unitario commutativo (non campo).
+  \item $(\mathbb{R}, +, \cdot)$, $(\mathbb{Q}, +, \cdot)$, $(\mathbb{C}, +, \cdot)$: campi; anche $(\mathbb{Z}_2, +, \cdot)$ è un campo.
+\end{itemize}
+
+\section[Proprietà degli anelli e domini di integrità (Lezione 10 -- 20 ottobre 2026)]{Proprietà degli anelli e domini di integrità}
+\noindent\emph{Lezione 10 -- 20 ottobre 2026}
+\subsection{Proprietà degli anelli}
+
+Sia $(A, \oplus, \otimes)$ un anello e $a, b, c \in A$. Valgono le seguenti proprietà:
+\begin{enumerate}
+  \item $a \oplus b = a \oplus c \iff b = c$ (legge di cancellazione per $\oplus$);
+  \item $a \otimes 0 = 0 \otimes a = 0$;
+  \item $(-a)\otimes b = a \otimes (-b) = -(a \otimes b)$;
+  \item $(-a)\otimes(-b) = a \otimes b$;
+  \item $(a \ominus b)\otimes c = a \otimes c \ominus b \otimes c$ e $a \otimes (b \ominus c) = a \otimes b \ominus a \otimes c$ (dove $a \ominus b = a \oplus (-b)$);
+  \item $(na)\otimes b = n\,(a \otimes b) = a \otimes (nb)$ per $n > 0$, dove $na = \underbrace{a \oplus a \oplus \dots \oplus a}_{n\text{ volte}}$;
+  \item $(na)\otimes(mb) = (nm)(a \otimes b)$ per $n, m \in \mathbb{Z}$ (con $ka = \underbrace{(-a)\oplus\dots\oplus(-a)}_{|k|\text{ volte}}$ per $k$ negativo);
+  \item se esiste l'unità $1 \in A$, allora $\forall a \in A$: $-a = (-1)\otimes a$.
+\end{enumerate}
+
+\subsection{Domini di integrità e divisori dello zero}
+
+\begin{definizione}[Legge di annullamento del prodotto]
+Sia $(A, \oplus, \otimes)$ un anello. Vale la \emph{legge di annullamento del prodotto} se
+\[
+  \forall a, b \in A \qquad a \otimes b = 0 \implies (a = 0 \ \text{oppure}\ b = 0).
+\]
+\end{definizione}
+
+\begin{definizione}[Dominio di integrità]
+Un anello $(A, \oplus, \otimes)$ è detto \emph{dominio di integrità} se vale la legge di annullamento del prodotto.
+\end{definizione}
+
+\begin{definizione}[Divisore dello zero]
+Sia $(A, \oplus, \otimes)$ un anello. Un elemento $a \in A$ è detto \emph{divisore dello zero} se $a \neq 0$ e $\exists b \neq 0$, $b \in A$, tale che $a \otimes b = 0$ oppure $b \otimes a = 0$.
+\end{definizione}
+
+\begin{proposizione}
+Sia $(A, \oplus, \otimes)$ un anello. Sono equivalenti:
+\begin{enumerate}
+  \item in $A$ vale la legge di annullamento del prodotto;
+  \item in $A$ non ci sono divisori dello zero;
+  \item l'insieme $A\setminus\{0\}$ è stabile per $\otimes$ (cioè $\otimes$ è un'operazione interna a $A\setminus\{0\}$).
+\end{enumerate}
+\end{proposizione}
+
+\begin{proof}
+$1) \Rightarrow 2)$. Per assurdo sia $a$ un divisore dello zero, cioè $a \neq 0$ ed esiste $b \neq 0$ tale che $a \otimes b = 0$. Per la legge di annullamento del prodotto allora $a = 0$ (impossibile) oppure $b = 0$ (impossibile): assurdo. Dunque non esistono divisori dello zero.
+
+$2) \Rightarrow 3)$. Siano $a, b \in A\setminus\{0\}$; possiamo avere $a \otimes b = 0$? Se fosse $a \otimes b = 0$ allora $a \neq 0$, $b \neq 0$ e $a$ sarebbe un divisore dello zero, ma non esistono per ipotesi. Quindi $a \otimes b \neq 0$, cioè $a \otimes b \in A\setminus\{0\}$, cioè $\otimes$ è interna ad $A\setminus\{0\}$.
+
+$3) \Rightarrow 1)$. Siano $a, b \in A$ tali che $a \otimes b = 0$. Per assurdo siano $a \neq 0$ e $b \neq 0$, cioè $a, b \in A\setminus\{0\}$; poiché $\otimes$ è interna a $A\setminus\{0\}$ si avrebbe $a \otimes b \neq 0$: impossibile. Quindi $a = 0$ oppure $b = 0$, cioè vale la legge di annullamento del prodotto.
+\end{proof}
+
+\begin{osservazione}
+\begin{itemize}
+  \item $(\mathbb{Z}, +, \cdot)$, $(\mathbb{Q}, +, \cdot)$, $(\mathbb{R}, +, \cdot)$ sono domini di integrità.
+  \item In un campo (o in un corpo) vale la legge di annullamento del prodotto.
+  \item In un dominio di integrità vale: se $a \neq 0$, allora $a \otimes b = a \otimes c \iff b = c$ (legge di cancellazione del prodotto).
+\end{itemize}
+\end{osservazione}
+
+\begin{proof}[Dimostrazione della cancellazione]
+$\Leftarrow$ Vale sempre. $\Rightarrow$ Da $a \otimes b = a \otimes c$ segue $0 = a \otimes c - a \otimes b = a \otimes (c - b)$. Per la legge di annullamento del prodotto $a = 0$ oppure $c - b = 0$; ma $a \neq 0$, quindi non può succedere la prima, dunque $c - b = 0$, cioè $c = b$.
+\end{proof}
+
+\subsubsection{Notazione per i campi}
+
+Si indica un campo con $(\mathbb{K}, +, \cdot)$: $(\mathbb{K}, +, \cdot)$ è un anello commutativo con unità, e posto $\mathbb{K}^* = \mathbb{K}\setminus\{0\}$, ogni $k \in \mathbb{K}^*$ ha inverso $k^{-1}$. In un campo l'inverso moltiplicativo è unico.
+
+\begin{esempio}[Divisori dello zero in $\mathbb{Z}_{12}$]
+In $\mathbb{Z}_{12}$ la tavola del prodotto è
+\[
+\begin{array}{c|cccccc}
+  \cdot & [1] & [2] & [3] & [4] & \cdots & [12] \\ \hline
+  \relax[1] & [1] & [2] & [3] & [4] & \cdots & [12] \\
+  \relax[2] & [2] & [4] & [6] & [8] & \cdots & [12] \\
+  \relax[3] & [3] & [6] & [9] & [12] & \cdots & [12]
+\end{array}
+\]
+$(\mathbb{Z}_{12}, +, \cdot)$ è un anello commutativo con unità; $[12]$ è l'elemento neutro per la somma, cioè $[0]$. Si ha $[3]\cdot[4] = [12] = [0]$, ma $[3] \neq [12]$ e $[4] \neq [12]$: non vale la legge di annullamento del prodotto e $[3]$, $[4]$ sono divisori dello zero.
+
+Inoltre $[2]\cdot[1] = [2] = [2]\cdot[7]$ ma $[1] \neq [7]$: non vale la cancellazione del prodotto.
+\end{esempio}
+
+\section[Interi, divisibilità e divisione con resto (Lezione 11 -- 26 ottobre 2026)]{Interi, divisibilità e divisione con resto}
+\noindent\emph{Lezione 11 -- 26 ottobre 2026}
+\subsection{Gli interi come struttura algebrica}
+
+$\mathbb{Z} = \{0, \pm 1, \pm 2, \pm 3, \dots\}$ con la somma e il prodotto di interi.
+\begin{itemize}
+  \item $(\mathbb{Z}, +)$ è un gruppo abeliano: $0$ elemento neutro, l'opposto di $k \in \mathbb{Z}$ è $-k \in \mathbb{Z}$.
+  \item $(\mathbb{Z}, \cdot)$ è un semigruppo commutativo, con $+1$ elemento neutro per $\cdot$ ($1$ è l'unità); $+1$ e $-1$ sono invertibili per $\cdot$.
+  \item Valgono le distributive.
+\end{itemize}
+Quindi $(\mathbb{Z}, +, \cdot)$ è un anello commutativo con unità. Vale la legge di annullamento del prodotto: è un dominio di integrità. In particolare, se $k \neq 0$ e $k\cdot x = k\cdot y \Rightarrow x = y$ ($k, x, y \in \mathbb{Z}$): vale la legge di cancellazione del prodotto. Indicheremo $(\mathbb{Z}, +, \cdot)$ semplicemente con $\mathbb{Z}$.
+
+\subsection{Divisibilità}
+
+\begin{definizione}
+Siano $a, b \in \mathbb{Z}$. Si dice che $a$ \emph{divide} $b$, e si scrive $a \mid b$, se $\exists k \in \mathbb{Z}$ tale che $b = k\cdot a$. Se $a$ non divide $b$ ($\nexists k$ tale che $b = ka$) si scrive $a \nmid b$.
+\end{definizione}
+
+\begin{esempio}
+$5 \nmid 7$; \quad $3 \mid 33$ perché $3\cdot 11 = 33$; \quad $-4 \mid 20$ perché $\exists k = -5$ tale che $(-4)\cdot(-5) = 20$; \quad $7 \mid -21$ perché $\exists -3 \in \mathbb{Z}$ tale che $7\cdot(-3) = -21$.
+\end{esempio}
+
+\begin{osservazione}
+\begin{itemize}
+  \item $\forall a \in \mathbb{Z}$: $a \mid 0$, perché $0\cdot a = 0$.
+  \item $\forall a \in \mathbb{Z}$: $1 \mid a$, perché $a\cdot 1 = a$.
+  \item $0 \mid b \Rightarrow \exists k$ tale che $0\cdot k = b \Rightarrow b = 0$: cioè $0$ divide solo zero.
+  \item $\forall a$: $a \mid a$, perché $a\cdot 1 = a$.
+  \item La relazione $\mid$ su $\mathbb{N}$ è una relazione d'ordine parziale. Su $\mathbb{Z}$ non è una relazione d'ordine perché non è antisimmetrica: se $a \mid b \wedge b \mid a$ allora $a = b$ oppure $a = -b$ (ad esempio $5 \mid -5 \wedge -5 \mid 5$ ma $-5 \neq 5$).
+  \item $a \mid b \wedge a \mid c \Rightarrow a \mid (b + c)$; inoltre $a \mid (b + c) \wedge a \mid b \Rightarrow a \mid c$.
+\end{itemize}
+\end{osservazione}
+
+\begin{proposizione}[Lemma]
+Se $a \mid b$ e $a \mid c$ allora $a \mid (\alpha b + \beta c)$ per ogni $\alpha, \beta \in \mathbb{Z}$.
+\end{proposizione}
+
+\begin{proof}
+$a \mid b$ significa $\exists k_1 \in \mathbb{Z}$ tale che $b = k_1\cdot a$; $a \mid c$ significa $\exists k_2 \in \mathbb{Z}$ tale che $c = k_2\cdot a$. Allora
+\[
+  \alpha b + \beta c = \alpha k_1 a + \beta k_2 a = (\alpha k_1 + \beta k_2)\cdot a = h\cdot a ,
+\]
+con $h = \alpha k_1 + \beta k_2 \in \mathbb{Z}$. Cioè $a \mid (\alpha b + \beta c)$.
+\end{proof}
+
+\subsection{Divisione con resto}
+
+\begin{proposizione}
+Siano $a, b \in \mathbb{Z}$, $b \neq 0$. Allora esistono e sono unici $q, r \in \mathbb{Z}$ tali che
+\[
+  a = q\cdot b + r, \qquad 0 \le r < |b| ,
+\]
+dove $q$ è il \emph{quoziente} e $r$ il \emph{resto}.
+\end{proposizione}
+
+\begin{proof}[Dimostrazione dell'esistenza]
+Sia $T = \{k \in \mathbb{Z} \mid k = a - mb,\ m \in \mathbb{Z},\ k \ge 0\} \subseteq \mathbb{N}$.
+
+$T \neq \emptyset$? Se $a \ge 0$, allora $a \in T$ (con $m = 0$). Se $a < 0$, esiste $\bar m \in \mathbb{Z}$ tale che $\bar m b \le a$ (ad esempio $\bar m = -|a|\,b$, perché $\bar m b = -|a|\,b^2 \le -|a| = a$), cioè $0 \le a - \bar m b$, cioè $a - \bar m b \in T$. Quindi $T \neq \emptyset$.
+
+$\mathbb{N}$ è bene ordinato, quindi $T$ ha minimo. Sia $r = \min T$. Poiché $r \in T$, $r = a - qb$ per qualche $q \in \mathbb{Z}$, cioè $a = qb + r$, e $r \ge 0$. Resta da far vedere che $r < |b|$.
+
+Per assurdo sia $r \ge |b|$, cioè $r = |b| + r_0$ con $r_0 \ge 0$. Allora
+\[
+  0 \le r_0 = r - |b| = a - qb - |b| = \begin{cases} a - b(q + 1) & b > 0 \\ a - b(q - 1) & b < 0 \end{cases}
+\]
+cioè $r_0 \in T$ e $r_0 = r - |b| < r$, contro la minimalità di $r$: assurdo. Dunque $r < |b|$.
+\end{proof}
+
+\begin{proof}[Dimostrazione dell'unicità]
+Supponiamo che ci siano due coppie $q, r$ e $q', r'$ tali che $a = qb + r = q'b + r'$ con $0 \le r, r' < |b|$. Supponiamo $r \le r'$. Allora
+\[
+  0 \le r' - r = (a - q'b) - (a - qb) = b(q - q') .
+\]
+Passando ai valori assoluti:
+\[
+  0 \le |q - q'|\,|b| = |r' - r| = r' - r \le r' < |b| ,
+\]
+cioè $|q - q'|\,|b| < |b|$, cioè $|q - q'| < 1$, cioè $|q - q'| = 0$, cioè $q' = q$. Da $qb + r = q'b + r'$ segue allora $r' = r$.
+\end{proof}
+
+\begin{esempio}
+\begin{itemize}
+  \item $a = 15$, $b = 6$: $15 = 6\cdot 2 + 3$ ($q = 2$, $r = 3$).
+  \item $a = 15$, $b = -6$: $15 = (-6)\cdot(-2) + 3$.
+  \item $a = -15$, $b = 6$: $-15 = 6\cdot(-2) - 3 = 6\cdot(-2) - 3 + 6 - 6 = 6\cdot(-3) + 3$, cioè quoziente $-3$ e resto $3$.
+  \item $a = -15$, $b = -6$: $-15 = (-6)\cdot 2 - 3 = (-6)\cdot 3 + 3$.
+  \item $a = -24$, $b = 7$: $-24 = 7\cdot(-4) + 4$.
+  \item $a = 24$, $b = -7$: $24 = (-7)\cdot(-3) + 3$.
+\end{itemize}
+\end{esempio}
+
+\subsection{Classi di resto modulo 7}
+
+$a \equiv b \bmod 7$ se $7 \mid a - b$, cioè se $\exists k \in \mathbb{Z}$ tale che $a - b = 7k$, cioè $a = 7k + b$. Le classi sono
+\begin{align*}
+  [0]_7 &= \{0, \pm 7, \pm 14, \dots\},\\
+  [1]_7 &= \{1,\ 7 + 1,\ 14 + 1, \dots, 7k + 1, \dots, -7 + 1,\ -14 + 1, \dots\},\\
+  [2]_7 &= \{2,\ 7 + 2, \dots, 7k + 2, \dots, -7 + 2,\ -14 + 2, \dots\},\\
+  [-1]_7 &= \{-1 = (-1)\cdot 7 + 6,\ 6,\ 6 + 7k, \dots\} = [6]_7 .
+\end{align*}
+Le classi di congruenza modulo $n$ di $\mathbb{Z}_n = \mathbb{Z}/{\equiv_n}$ sono esattamente $n$, cioè i resti possibili della divisione per $n$: $[0], [1], \dots, [n-1]$.
+
+\section[MCD, mcm e algoritmo di Euclide (Lezione 11 -- 26 ottobre 2026)]{MCD, mcm e algoritmo di Euclide}
+\noindent\emph{Lezione 11 -- 26 ottobre 2026}
+\subsection{Massimo comune divisore}
+
+\begin{definizione}
+Siano $a, b \in \mathbb{Z}$ non entrambi nulli. Un elemento $d \in \mathbb{Z}$ è \emph{un massimo comun divisore} tra $a$ e $b$ se
+\begin{enumerate}
+  \item[i)] $d \mid a$ e $d \mid b$;
+  \item[ii)] $\forall d' \in \mathbb{Z}$ tale che $d' \mid a$ e $d' \mid b$ si ha $d' \mid d$.
+\end{enumerate}
+\end{definizione}
+
+\begin{osservazione}
+In generale, se $d$ è un massimo comun divisore tra $a$ e $b$, anche $-d$ è un massimo comun divisore tra $a$ e $b$. Chiamiamo $\operatorname{MCD}(a, b)$ quello \emph{positivo}.
+\end{osservazione}
+
+\begin{esempio}
+$\operatorname{MCD}(48, 15) = 3$, \quad $\operatorname{MCD}(3, 7) = 1$, \quad $\operatorname{MCD}(-12, 36) = 12$.
+\end{esempio}
+
+\begin{proprieta}
+\begin{itemize}
+  \item $\operatorname{MCD}(a, b) = \operatorname{MCD}(b, a) = \operatorname{MCD}(|a|, |b|)$.
+  \item $\operatorname{MCD}(ab, ac) = |a|\operatorname{MCD}(b, c)$.
+  \item $\operatorname{MCD}(0, a) = |a|$: infatti $d \mid 0$ per ogni $d$ (ogni $d$ divide $0$), e $d \mid a$; quindi $d$ è un divisore di $a$ e il più grande possibile è $|a|$.
+  \item $\operatorname{MCD}(0, 0)$ \emph{non è definito}.
+\end{itemize}
+\end{proprieta}
+
+\begin{definizione}[Numeri coprimi]
+Due numeri $a, b$ sono \emph{coprimi} (o \emph{relativamente primi}, o \emph{primi tra loro}) se $\operatorname{MCD}(a, b) = 1$.
+\end{definizione}
+
+\begin{esempio}
+$3, 5$ sono coprimi; $11$ e $36$ sono coprimi.
+\end{esempio}
+
+\subsection{Minimo comune multiplo}
+
+\begin{definizione}
+Siano $a, b \in \mathbb{Z}$. Un elemento $m \in \mathbb{Z}$ è un \emph{minimo comune multiplo} di $a$ e $b$ se
+\begin{enumerate}
+  \item[i)] $a \mid m$ e $b \mid m$;
+  \item[ii)] $\forall m' \in \mathbb{Z}$ tale che $a \mid m'$ e $b \mid m'$ si ha $m \mid m'$.
+\end{enumerate}
+\end{definizione}
+
+Se $m$ è un minimo comune multiplo di $a$ e $b$, anche $-m$ lo è; indichiamo con $\operatorname{mcm}(a, b)$ quello \emph{positivo}.
+
+\begin{esempio}
+$\operatorname{mcm}(4, 6) = 12$, \quad $\operatorname{mcm}(-7, 9) = 63$.
+\end{esempio}
+
+\begin{proprieta}
+$\operatorname{mcm}(a, b) = \operatorname{mcm}(b, a) = \operatorname{mcm}(|a|, |b|)$ e $\operatorname{mcm}(0, b) = 0$.
+\end{proprieta}
+
+\begin{proprieta}[Formula]
+Per $a, b$ non entrambi nulli:
+\[
+  \operatorname{MCD}(a, b)\cdot\operatorname{mcm}(a, b) = |a|\cdot|b| .
+\]
+\end{proprieta}
+
+\subsection{Algoritmo euclideo delle divisioni successive}
+
+\begin{teorema}[Algoritmo di Euclide]
+Siano $a, b \in \mathbb{Z}$, $a \ge b > 0$. Consideriamo queste uguaglianze (divisioni con resto):
+\begin{align*}
+  a &= q_1 b + r_1, & 0 &< r_1 < b,\\
+  b &= q_2 r_1 + r_2, & 0 &< r_2 < r_1,\\
+  r_1 &= q_3 r_2 + r_3, & 0 &< r_3 < r_2,\\
+  &\ \,\vdots\\
+  r_i &= q_{i+2}\, r_{i+1} + r_{i+2}, & 0 &< r_{i+2} < r_{i+1},\\
+  &\ \,\vdots\\
+  r_{n-3} &= q_{n-1}\, r_{n-2} + r_{n-1}, & 0 &< r_{n-1} < r_{n-2},\\
+  r_{n-2} &= q_n\, r_{n-1} + r_n, & 0 &< r_n < r_{n-1},\\
+  r_{n-1} &= q_{n+1}\, r_n .
+\end{align*}
+Allora $r_n = \operatorname{MCD}(a, b)$ (l'ultimo resto non nullo).
+\end{teorema}
+
+\begin{proof}
+L'algoritmo termina in un numero finito di passi perché $0 < r_n < r_{n-1} < \dots < r_1 < b$.
+
+\emph{Condizione i)} del MCD: dall'ultima uguaglianza $r_{n-1} = q_{n+1} r_n$, cioè $r_n \mid r_{n-1}$. Poi
+\[
+  r_{n-2} = r_{n-1} q_n + r_n = q_{n+1} r_n q_n + r_n \ \Rightarrow\ r_n \mid r_n(q_{n+1} q_n + 1) = r_{n-2}.
+\]
+Per il lemma, da $r_{n-3} = r_{n-2} q_{n-1} + r_{n-1}$ segue $r_n \mid r_{n-3}$. Risalendo tutte le uguaglianze si ottiene $r_n \mid r_i$ per ogni resto. Dalla seconda uguaglianza $b = r_1 q_2 + r_2$ e dal lemma segue $r_n \mid b$; dalla prima $a = q_1 b + r_1$ segue $r_n \mid a$. Questa è la condizione i) del MCD.
+
+\emph{Condizione ii)}: sia $d$ un altro divisore comune di $a$ e $b$. Da $d \mid a = q_1 b + r_1$ e $d \mid b$ segue, per il lemma, $d \mid r_1$; poi $d \mid b = r_1 q_2 + r_2$ e $d \mid r_1$ implicano $d \mid r_2$; $d \mid r_1 = r_2 q_3 + r_3$ implica $d \mid r_3$, e così via. Quindi $d \mid r_i$ per ogni $i$, in particolare $d \mid r_{n-2}$ e $d \mid r_{n-1}$, da cui, per il lemma, $d \mid r_n = r_{n-2} - q_n r_{n-1}$. Cioè $d \mid r_n$: è la condizione ii) del MCD.
+\end{proof}
+
+\begin{esempio}[$\operatorname{MCD}(824, 376)$]
+\begin{align*}
+  824 &= 376\cdot 2 + 72,\\
+  376 &= 72\cdot 5 + 16,\\
+  72 &= 16\cdot 4 + 8,\\
+  16 &= 8\cdot 2 + 0 .
+\end{align*}
+Dunque $\operatorname{MCD}(824, 376) = 8$ (l'ultimo resto non nullo).
+\end{esempio}
+
+\section[Numeri primi e anello delle classi di resto (Lezione 13 -- 2 novembre 2026)]{Numeri primi e anello delle classi di resto}
+\noindent\emph{Lezione 13 -- 2 novembre 2026}
+\subsection{Conseguenze del teorema di fattorizzazione}
+
+\begin{proposizione}
+I numeri primi sono infiniti.
+\end{proposizione}
+
+\begin{proof}
+Per assurdo siano finiti: $p_1, \dots, p_k$. Consideriamo $m = p_1 p_2 \cdots p_k + 1$. Per ogni $p_i$ si ha $p_i \nmid m$ (il resto della divisione di $m$ per $p_i$ è $1$), ma $m$ ha un divisore primo per il teorema di fattorizzazione: assurdo.
+\end{proof}
+
+\begin{proposizione}
+Sia $p$ un numero primo ($p > 0$). Allora $\sqrt{p}$ è irrazionale.
+\end{proposizione}
+
+\begin{proof}
+Dobbiamo dimostrare che $\sqrt{p} \notin \mathbb{Q}$. Per assurdo sia $\sqrt{p} \in \mathbb{Q}$, cioè $\exists a, b \in \mathbb{Z}$, $b \neq 0$, con $\sqrt{p} = \frac{a}{b}$. Allora $b\sqrt{p} = a$ e, elevando al quadrato, $b^2 p = a^2$. Nella fattorizzazione di $a^2$ il primo $p$ ha esponente \emph{pari}; ma nella fattorizzazione di $b^2 p$ il primo $p$ ha esponente \emph{dispari}: assurdo. Quindi $\sqrt{p} \in \mathbb{R}$ ma $\sqrt{p} \notin \mathbb{Q}$.
+\end{proof}
+
+\subsection{$\mathbb{Z}_n$: l'anello delle classi di resto}
+
+Siano $a, b \in \mathbb{Z}$, $n > 0$. Si ha $a \equiv b \bmod n \iff n \mid a - b \iff \exists k \in \mathbb{Z}$ tale che $a - b = nk$.
+
+\[
+  \mathbb{Z}_n = \{[0]_n, [1]_n, \dots, [n-1]_n\} = \mathbb{Z}/{\equiv_n}
+\]
+con
+\begin{align*}
+  [0]_n &= \{h \in \mathbb{Z} \mid 0 \equiv h \bmod n\} = \{kn \mid k \in \mathbb{Z}\},\\
+  [1]_n &= \{h \in \mathbb{Z} \mid 1 \equiv h \bmod n\} = \{kn + 1 \mid k \in \mathbb{Z}\},\\
+  &\ \,\vdots\\
+  [n-1]_n &= \{h \in \mathbb{Z} \mid n-1 \equiv h \bmod n\} = \{kn + n - 1 \mid k \in \mathbb{Z}\}.
+\end{align*}
+
+Definiamo le operazioni $+ : \mathbb{Z}_n\times\mathbb{Z}_n \to \mathbb{Z}_n$ e $\cdot : \mathbb{Z}_n\times\mathbb{Z}_n \to \mathbb{Z}_n$ con
+\[
+  [a]_n + [b]_n = [a + b]_n, \qquad [a]_n\cdot[b]_n = [a\cdot b]_n .
+\]
+
+\begin{proposizione}[Lemma]
+Siano $a, b, c, d \in \mathbb{Z}$. Se $a \equiv b \bmod n$ e $c \equiv d \bmod n$ allora
+\[
+  a + c \equiv b + d \bmod n \qquad\text{e}\qquad a\cdot c \equiv b\cdot d \bmod n .
+\]
+\end{proposizione}
+
+(Il lemma garantisce che le operazioni sono ben definite, cioè non dipendono dai rappresentanti scelti.)
+
+\begin{proposizione}
+$(\mathbb{Z}_n, +, \cdot)$ è un anello commutativo con unità. In particolare $[0]_n$ è l'elemento neutro per $+$ in $\mathbb{Z}_n$; l'opposto di $[a]_n$ è la classe $[-a]_n = [n - a]_n$; $[1]_n$ è l'unità per $\cdot$.
+\end{proposizione}
+
+\begin{esempio}[in $\mathbb{Z}_{15}$]
+\begin{align*}
+  [4]_{15} + [10]_{15} &= [4 + 10]_{15} = [14]_{15},\\
+  [10]_{15} + [13]_{15} &= [23]_{15} = [8]_{15} \qquad (23 = 1\cdot 15 + 8),\\
+  [3]_{15}\cdot[8]_{15} &= [24]_{15} = [9]_{15} \qquad (24 = 1\cdot 15 + 9).
+\end{align*}
+\end{esempio}
+
+\subsubsection{Tavole di $\mathbb{Z}_2$, $\mathbb{Z}_3$, $\mathbb{Z}_4$}
+
+$\mathbb{Z}_2 = \{[0], [1]\}$ (mod 2):
+\[
+\begin{array}{c|cc} + & 0 & 1 \\ \hline 0 & 0 & 1 \\ 1 & 1 & 0 \end{array}
+\qquad
+\begin{array}{c|cc} \cdot & 0 & 1 \\ \hline 0 & 0 & 0 \\ 1 & 0 & 1 \end{array}
+\]
+
+$\mathbb{Z}_3 = \{[0]_3, [1]_3, [2]_3\}$ (mod 3):
+\[
+\begin{array}{c|ccc} + & 0 & 1 & 2 \\ \hline 0 & 0 & 1 & 2 \\ 1 & 1 & 2 & 0 \\ 2 & 2 & 0 & 1 \end{array}
+\qquad
+\begin{array}{c|ccc} \cdot & 0 & 1 & 2 \\ \hline 0 & 0 & 0 & 0 \\ 1 & 0 & 1 & 2 \\ 2 & 0 & 2 & 1 \end{array}
+\]
+Si ha ad esempio $[2]_3\cdot[2]_3 = [2\cdot 2]_3 = [4]_3 = [1]_3$ (perché $4 = 3\cdot 1 + 1$).
+
+$\mathbb{Z}_4 = \{[0], [1], [2], [3]\}$:
+\[
+\begin{array}{c|cccc} + & 0 & 1 & 2 & 3 \\ \hline 0 & 0 & 1 & 2 & 3 \\ 1 & 1 & 2 & 3 & 0 \\ 2 & 2 & 3 & 0 & 1 \\ 3 & 3 & 0 & 1 & 2 \end{array}
+\qquad
+\begin{array}{c|cccc} \cdot & 0 & 1 & 2 & 3 \\ \hline 0 & 0 & 0 & 0 & 0 \\ 1 & 0 & 1 & 2 & 3 \\ 2 & 0 & 2 & 0 & 2 \\ 3 & 0 & 3 & 2 & 1 \end{array}
+\]
+$\mathbb{Z}_4$ ha divisori dello zero: $[2]_4\cdot[2]_4 = [0]_4$. Inoltre $[3]$ è invertibile in $\mathbb{Z}_4$: $[3]_4\cdot[3]_4 = [1]_4$.
+
+\section[Invertibili e divisori dello zero modulo $n$ (Lezione 13 -- 2 novembre 2026)]{Invertibili e divisori dello zero modulo $n$}
+\noindent\emph{Lezione 13 -- 2 novembre 2026}
+\subsection{Divisibilità, invertibili e divisori dello zero in $\mathbb{Z}_n$}
+
+\begin{definizione}
+Siano $[a]_n, [b]_n \in \mathbb{Z}_n$.
+\begin{itemize}
+  \item Diciamo che $[a]_n$ \emph{divide} $[b]_n$ ($[a]_n \mid [b]_n$) se $\exists [c]_n \in \mathbb{Z}_n$ tale che $[b]_n = [a]_n\cdot[c]_n$.
+  \item $[a]_n \in \mathbb{Z}_n$ è \emph{invertibile} se $\exists [a']_n \in \mathbb{Z}_n$ tale che $[a]_n\cdot[a']_n = [1]_n$.
+  \item $[a]_n \in \mathbb{Z}_n$, $[a]_n \neq [0]_n$, è un \emph{divisore dello zero} se $\exists [b]_n \neq [0]_n$ tale che $[a]_n\cdot[b]_n = [0]_n$.
+\end{itemize}
+\end{definizione}
+
+\begin{osservazione}
+In generale $\mathbb{Z}_n$ non è un dominio di integrità, cioè in $\mathbb{Z}_n$ non vale la legge di annullamento del prodotto: ad esempio $[2]_6\cdot[3]_6 = [6]_6 = [0]_6$.
+
+Non sempre vale la legge di cancellazione del prodotto. Ad esempio in $\mathbb{Z}_{12}$: $[5]\cdot[8] = [40] = [4]$ e $[8]\cdot[8] = [64] = [4]$ ($64 = 12\cdot 5 + 4$), quindi $[5]\cdot[8] = [8]\cdot[8]$ ma $[5] \neq [8]$.
+
+Però $\mathbb{Z}_2$, $\mathbb{Z}_3$, $\mathbb{Z}_5$ sono campi.
+\end{osservazione}
+
+\subsection{Proprietà delle congruenze}
+
+\begin{proprieta}[Corollario]
+Sia $n > 0$ e $\forall a, b, c \in \mathbb{Z}$. Se $a \equiv b \bmod n$, allora
+\[
+  a + c \equiv b + c \bmod n, \qquad a\cdot c \equiv b\cdot c \bmod n, \qquad a^i \equiv b^i \bmod n .
+\]
+In termini di classi: $[a]_n = [b]_n \Rightarrow [a + c]_n = [b + c]_n$, $[ac]_n = [bc]_n$, $[a^i]_n = [b^i]_n$.
+\end{proprieta}
+
+\begin{proprieta}
+\begin{itemize}
+  \item $ac \equiv bc \bmod n$ e $\operatorname{MCD}(c, n) = 1 \Rightarrow a \equiv b \bmod n$ (cioè $[ac]_n = [bc]_n$ e $\operatorname{MCD}(c, n) = 1 \Rightarrow [a]_n = [b]_n$).
+  \item $ac \equiv bc \bmod n$ e $\operatorname{MCD}(c, n) = d \Rightarrow a\cdot\frac{c}{d} \equiv b\cdot\frac{c}{d} \bmod \frac{n}{d} \Rightarrow a \equiv b \bmod \frac{n}{d}$.
+  \item $a \equiv b \bmod n$ e $p \mid n \Rightarrow a \equiv b \bmod p$.
+  \item $a \equiv b \bmod r$ e $a \equiv b \bmod s \Rightarrow a \equiv b \bmod \operatorname{mcm}(r, s)$.
+\end{itemize}
+\end{proprieta}
+
+\begin{osservazione}[Rappresentanti di $\mathbb{Z}_n$]
+Si può rappresentare $\mathbb{Z}_n$ con qualunque insieme di $n$ interi consecutivi. Ad esempio
+\[
+  \mathbb{Z}_6 = \{[0], [1], [2], [3], [4], [5]\} = \{[7], [8], [9], [10], [11], [12]\} = \{[-2], [-1], [0], [1], [2], [3]\},
+\]
+in generale $\mathbb{Z}_n = \{[c]_n, [c + 1]_n, \dots, [c + (n-1)]_n\}$. Per esempio in $\mathbb{Z}_6$: $[0]_6 = \{6k \mid k \in \mathbb{Z}\} = [6]_6 = [12]_6 = \{\dots, -6, 0, 6, 12, \dots\}$; $[1]_6 = \{6k + 1\} = [7]_6 = \{\dots, -11, -5, 1, 7, 13, \dots\}$; $[2]_6 = \{6k + 2\} = [8]_6 = [-4]_6 = \{\dots, -10, -4, 2, 8, \dots\}$.
+\end{osservazione}
+
+\begin{proposizione}
+Sia $c$ tale che $\operatorname{MCD}(c, n) = 1$. Allora
+\[
+  \mathbb{Z}_n = \{[c\cdot 0], [c\cdot 1], [c\cdot 2], \dots, [c(n-1)]\} .
+\]
+\end{proposizione}
+
+\begin{esempio}
+In $\mathbb{Z}_6$, con $c = 5$ e $\operatorname{MCD}(5, 6) = 1$:
+\[
+  \mathbb{Z}_6 = \{[5\cdot 0], [5\cdot 1], [5\cdot 2], [5\cdot 3], [5\cdot 4], [5\cdot 5]\} = \{[0], [5], [10], [15], [20], [25]\}.
+\]
+\end{esempio}
+
+\subsection{Invertibili e divisori dello zero}
+
+\begin{proposizione}
+Sia $[a]_n \in \mathbb{Z}_n$, $[a]_n \neq [0]_n$. Allora
+\[
+  [a]_n \text{ è un divisore dello zero} \iff [a]_n \text{ non è invertibile.}
+\]
+\end{proposizione}
+
+\begin{proof}
+$\Rightarrow$ Sia $[a]$ un divisore dello zero, cioè $\exists [b] \neq [0]$ tale che $[a]\cdot[b] = [0]$. Se $[a]$ fosse invertibile, esisterebbe $[a']$ con $[a]\cdot[a'] = [1]$ e
+\[
+  [a']\cdot[a]\cdot[b] = [a']\cdot[0] \ \Rightarrow\ [1]\cdot[b] = [b] = [0] ,
+\]
+ma $[b] \neq [0]$: assurdo.
+
+$\Leftarrow$ Sia $[a]$ non invertibile, cioè $\forall [b] \in \{[0], \dots, [n-1]\}$ si ha $[a]\cdot[b] \neq [1]$. Allora gli $n$ prodotti $[a]\cdot[b]$ assumono al più $n - 1$ valori distinti, quindi devono esserci due classi $[b_1] \neq [b_2]$ tali che $[a]\cdot[b_1] = [a]\cdot[b_2]$, cioè $[ab_1] = [ab_2]$, cioè $ab_1 \equiv ab_2 \bmod n$, cioè $\exists k \in \mathbb{Z}$ tale che $ab_1 - ab_2 = kn$. Cioè $a(b_1 - b_2) \equiv 0 \bmod n$, cioè $[a]\cdot[b_1 - b_2] = [0]$, con $[a] \neq [0]$ per ipotesi e $[b_1 - b_2] \neq [0]$ perché $b_1 \neq b_2$ (come classi). Quindi $[a]$ è un divisore dello zero.
+\end{proof}
+
+\begin{proposizione}
+In $\mathbb{Z}_n$ la classe $[c]_n$ è invertibile se e solo se $\operatorname{MCD}(c, n) = 1$.
+\end{proposizione}
+
+\begin{proof}
+$\Rightarrow$ Sia $[c]$ invertibile: $\exists [c'] \in \mathbb{Z}_n$ con $[c]\cdot[c'] = [1]$, cioè $[c\cdot c'] = [1]$, cioè $c\cdot c' - 1 = kn$ per qualche $k$, cioè $c\cdot c' - kn = 1$. Allora $\operatorname{MCD}(c, n) \mid (c\cdot c' - kn) = 1$, cioè $\operatorname{MCD}(c, n) = 1$.
+
+$\Leftarrow$ Sia $\operatorname{MCD}(c, n) = 1$. Per il teorema di Bézout esistono $\alpha, \beta \in \mathbb{Z}$ tali che $1 = \operatorname{MCD}(c, n) = \alpha c + \beta n$, cioè $\alpha c - 1 = -\beta n$, cioè $\alpha c \equiv 1 \bmod n$, cioè $[\alpha]_n\cdot[c]_n = [1]_n$. Quindi $[\alpha]$ è l'inverso di $[c]$ modulo $n$.
+\end{proof}
+
+\begin{esempio}[Inverso di $[13]_{30}$ in $\mathbb{Z}_{30}$]
+Si usa l'algoritmo di Euclide \emph{esteso} tra $13$ e $30$. Si costruisce la tabella con colonne $q$, $r$, $s$, $t$ (si parte con $r = 30, 13$; $s = 1, 0$; $t = 0, 1$; e ad ogni passo $q$ è il quoziente, $r$ il resto, $s_{\text{nuovo}} = s_{\text{prec-prec}} - q\cdot s_{\text{prec}}$, e analogamente per $t$):
+\[
+\begin{array}{c|rrr}
+  q & r & s & t \\ \hline
+  - & 30 & 1 & 0 \\
+  - & 13 & 0 & 1 \\
+  2 & 4 & 1 & -2 \\
+  3 & 1 & -3 & 7 \\
+  4 & 0 & 13 & -30
+\end{array}
+\]
+L'ultimo resto non nullo è $1 = \operatorname{MCD}(30, 13)$, con $s = -3$ e $t = 7$:
+\[
+  1 = 30\cdot(-3) + 13\cdot 7 .
+\]
+Quindi $[7]_{30}$ è l'inverso di $[13]_{30}$. Verifica: $[7]\cdot[13] = [91] = [1]_{30}$, perché $91 = 3\cdot 30 + 1$.
+\end{esempio}
+
 \end{document}

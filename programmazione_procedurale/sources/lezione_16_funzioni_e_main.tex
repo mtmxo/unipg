@@ -1,0 +1,411 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\NewTColorBox{osservazione}{}{nota,
+  before upper={\textbf{Osservazione.}\ }}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Funzioni e funzione main}
+\author{Marco Cerbella}
+\date{Lezione 16 -- 3 novembre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Funzioni}
+
+\subsection{Introduzione e main}
+
+Tutte le istruzioni di un programma C sono contenute in funzioni. Il C è un linguaggio procedurale: ogni funzione svolge un certo compito. Un nome speciale di funzione è \lstinline|main()|: la funzione con questo nome è la prima a essere eseguita quando il programma parte. Il primo comando eseguito nel programma è il primo comando della \lstinline|main| (dall'alto verso il basso). Tutte le altre funzioni sono sottoprogrammi della \lstinline|main()| e possono avere i nomi che si vuole.
+
+Ogni funzione è definita esattamente una volta. Un programma può dichiarare e chiamare una funzione tante volte quante ne servono.
+
+\subsection{Definizione di funzione}
+
+La definizione di una funzione consiste in un'\emph{intestazione} (o dichiaratore) e in un \emph{blocco} della funzione. L'intestazione specifica il nome della funzione, il tipo del valore restituito e i tipi e i nomi dei parametri, se ce ne sono. Le istruzioni nel blocco specificano che cosa fa la funzione.
+\begin{codice}
+tipo nome_funzione (tipo nome_parametro1, tipo nome_parametro2, ...) {
+    // istruzioni;
+}
+\end{codice}
+
+\begin{osservazione}
+Scrivere sempre il tipo del valore restituito: se non è specificato è \lstinline|int|.
+\end{osservazione}
+
+\subsection{Dichiarazione di funzione}
+
+Dichiarando una funzione prima di usarla si informa il compilatore del suo tipo: la dichiarazione descrive cioè l'\emph{interfaccia} della funzione. Una dichiarazione definisce
+\begin{itemize}
+    \item il tipo della funzione;
+    \item il numero e i tipi dei suoi parametri;
+    \item il tipo del valore restituito.
+\end{itemize}
+Gli identificatori dei parametri in una dichiarazione di funzione sono facoltativi. Se si scrivono i nomi, il loro scope termina con il prototipo stesso. Le due forme sono entrambe valide:
+\begin{codice}
+tipo nome_funzione (tipo nome_parametro1, tipo nome_parametro2, ...);
+tipo nome_funzione (tipo, tipo, ...);
+\end{codice}
+
+\subsection{Scope degli identificatori}
+
+\begin{itemize}
+    \item \emph{Block scope}: gli identificatori dichiarati in un blocco hanno block scope. Si può usare un tale identificatore solo dalla sua dichiarazione fino alla fine del blocco più piccolo che contiene la dichiarazione. Il blocco più piccolo che la contiene è spesso, ma non necessariamente, il corpo di una definizione di funzione. In C11 le dichiarazioni non devono essere necessariamente poste prima di tutte le istruzioni nel blocco di una funzione. Anche i nomi dei parametri nell'intestazione di una definizione di funzione hanno block scope, e sono validi nel blocco corrispondente della funzione.
+    \item \emph{Function prototype scope}: i nomi dei parametri in un prototipo di funzione hanno function prototype scope. Poiché questi nomi non hanno significato al di fuori del prototipo stesso, hanno valore solo di commento e si possono anche omettere.
+\end{itemize}
+
+\begin{esempio}
+\begin{codice}
+int p;
+int fun1(int q);
+int fun2(int r)
+{
+    int s = r + 3;
+    while (r != s)
+        r--;
+}
+\end{codice}
+\lstinline|p|, \lstinline|fun1| e \lstinline|fun2| sono visibili in tutto il file (da dove sono dichiarati); \lstinline|q| ha scope il solo prototipo; \lstinline|r| e \lstinline|s| hanno scope il blocco di \lstinline|fun2|.
+\end{esempio}
+
+\subsection{Parametri di una funzione}
+
+I parametri di una funzione sono normali variabili locali. Il programma li crea e li inizializza con i valori dei corrispondenti argomenti quando avviene una chiamata di funzione. Il loro scope è il blocco della funzione (block scope).
+\begin{codice}
+long double factorial(unsigned int n)
+{
+    long double f = 1;
+    while (n > 1)
+        f *= n--;
+    return f;
+}
+\end{codice}
+
+\subsection{Dichiarazione e definizione}
+
+Una definizione di funzione è anche una dichiarazione di funzione. Le due versioni seguenti sono equivalenti: nella prima \lstinline|fun2| è dichiarata prima della \lstinline|main| e definita dopo; nella seconda è definita prima della \lstinline|main|, e la definizione fa anche da dichiarazione.
+\begin{codice}
+int fun2(int);
+int main() {
+    int a = 5;
+    a = fun2(a);
+}
+int fun2(int r) {
+    int s = r + 5;
+    while (r != s)
+        r--;
+    return r;
+}
+\end{codice}
+\begin{codice}
+int fun2(int r) {
+    int s = r + 5;
+    while (r != s)
+        r--;
+    return r;
+}
+int main() {
+    int a = 5;
+    a = fun2(a);
+}
+\end{codice}
+
+In sintesi:
+\begin{itemize}
+    \item prima di chiamare (usare) una funzione bisogna dichiararla;
+    \item si possono dichiarare tutte le funzioni all'inizio del file e definirle in un ordine qualunque più sotto nello stesso file; oppure si possono evitare le dichiarazioni in testa, ma allora vanno definite \emph{prima} di essere chiamate;
+    \item una funzione deve anche essere definita, altrimenti non si sa che cosa fare quando viene chiamata;
+    \item nello stesso file non si possono avere due definizioni di funzioni con la stessa intestazione e lo stesso identificatore (nome).
+\end{itemize}
+
+\begin{esempio}[Dichiarazioni e ordine delle definizioni]
+Questa versione è corretta: \lstinline|fun1| e \lstinline|fun2| sono dichiarate in testa.
+\begin{codice}
+int fun1(int);
+int fun2(int);
+int main() {
+    int a = 5;
+    a = fun1(a);
+}
+int fun1(int q) {
+    return (fun2(q) + 1);
+}
+int fun2(int r) {
+    int s = r + 5;
+    while (r != s)
+        r--;
+    return r;
+}
+\end{codice}
+Questa invece è \emph{sbagliata}: \lstinline|fun1| chiama \lstinline|fun2|, che non è stata dichiarata prima di quel punto (e non è definita prima).
+\begin{codice}
+int fun1(int);
+int main() {
+    int a = 5;
+    a = fun1(a);
+}
+int fun1(int q) {
+    return (fun2(q) + 1);   // errore: fun2 non dichiarata
+}
+int fun2(int r) {
+    int s = r + 5;
+    while (r != s)
+        r--;
+    return r;
+}
+\end{codice}
+Si può correggere dichiarando \lstinline|fun2| in testa, oppure definendola prima di \lstinline|fun1|.
+\end{esempio}
+
+\subsection{return}
+
+L'istruzione \lstinline|return| termina l'esecuzione della funzione corrente e salta indietro al punto in cui la funzione era stata chiamata:
+\[
+\texttt{return [espressione];}
+\]
+L'espressione viene valutata e il risultato viene restituito al chiamante come valore della chiamata di funzione. Questo valore restituito viene convertito al tipo restituito dalla funzione, se necessario. Una funzione può contenere un numero qualunque di istruzioni \lstinline|return|; il primo \lstinline|return| eseguito fa uscire dalla funzione. \lstinline|return| è un'istruzione di salto incondizionato (come \lstinline|goto|).
+
+\begin{esempio}
+\begin{codice}
+// Restituisce il minore di due argomenti interi.
+int min(int a, int b)
+{
+    if (a < b)
+        return a;
+    else
+        return b;
+}
+int main()
+{
+    int a = 5;
+    int b = 6;
+    int c = min(a, b);
+    printf("%d", c);
+}
+\end{codice}
+\begin{risultato}
+5
+\end{risultato}
+\end{esempio}
+
+Un \lstinline|return| senza espressione può essere usato solo in una funzione di tipo \lstinline|void|; anzi, queste funzioni non hanno nemmeno bisogno di un'istruzione \lstinline|return|. Se in una funzione non si incontra nessun \lstinline|return|, il flusso del programma torna al chiamante quando si raggiunge la fine del blocco della funzione.
+
+\section{La funzione main}
+
+Si può definire la funzione \lstinline|main()| in una delle due forme seguenti:
+\begin{codice}
+int main(void) { /* ... */ }                  // nessun parametro, restituisce int
+int main(int argc, char *argv[]) { /* ... */ } // due parametri di tipo int e char **, restituisce int
+\end{codice}
+
+\subsection{Parametri della main}
+
+I parametri \lstinline|argc| e \lstinline|argv| (ai quali si possono dare altri nomi) rappresentano gli \emph{argomenti sulla riga di comando} del programma. Funzionano così:
+\begin{itemize}
+    \item \lstinline|argc| (da \emph{argument count}) è $0$ oppure il numero dei token stringa nella riga di comando che ha avviato il programma. Il nome del programma stesso è incluso in questo conteggio;
+    \item \lstinline|argv| (da \emph{argument vector}) è un array di puntatori a \lstinline|char| che puntano ai singoli token stringa ricevuti sulla riga di comando. Il numero di elementi di questo array è uno in più del valore di \lstinline|argc|: l'ultimo elemento, \lstinline|argv[argc]|, è sempre un puntatore nullo;
+    \item la prima stringa, \lstinline|argv[0]|, contiene il nome con cui è stato invocato il programma. Se l'ambiente di esecuzione non fornisce il nome del programma, la stringa è vuota;
+    \item se \lstinline|argc| è maggiore di $1$, le stringhe da \lstinline|argv[1]| a \lstinline|argv[argc - 1]| contengono gli argomenti sulla riga di comando del programma.
+\end{itemize}
+
+\begin{esempio}[Un esempio classico]
+\begin{codice}
+#include <stdio.h>
+int main(int argc, char *argv[])
+{
+    if (argc == 0)
+        puts("No command line available.");
+    else {
+        printf("The program now running: %s\n", argv[0]);  // nome del programma
+        if (argc == 1)
+            puts("No arguments received on the command line.");
+        else {
+            puts("The command line arguments:");
+            for (int i = 1; i < argc; ++i)    // un argomento per riga
+                puts(argv[i]);
+        }
+    }
+}
+\end{codice}
+Se su un sistema Unix si lancia il programma con la riga di comando
+\begin{comando}
+$ ./args one two "and three"
+\end{comando}
+l'output è
+\begin{risultato}
+The program now running: ./args
+The command line arguments:
+one
+two
+and three
+\end{risultato}
+\end{esempio}
+
+\subsection{Valore restituito dalla main}
+
+Il valore restituito dalla \lstinline|main| viene passato al processo padre che l'ha eseguita (per esempio la shell). Il valore restituito dalla \lstinline|main| dovrebbe indicare come è terminato il programma: l'uscita normale è generalmente rappresentata dal valore $0$; una terminazione anomala è di solito segnalata da un valore diverso da zero.
+
+\section{Come vengono eseguite le funzioni}
+
+\subsection{Uscire da una funzione}
+
+Se il programma raggiunge un'istruzione \lstinline|return| o la parentesi graffa di chiusura \lstinline|}| del blocco della funzione, l'esecuzione della funzione termina e il programma torna alla funzione chiamante. Se il programma «esce dal fondo» della funzione raggiungendo la graffa di chiusura, il valore restituito al chiamante è \emph{indefinito}. Per questo motivo bisogna usare un \lstinline|return| per terminare qualunque funzione che non abbia tipo \lstinline|void|. Il valore dell'espressione di \lstinline|return| viene restituito alla funzione chiamante.
+
+\subsection{Chiamare una funzione}
+
+L'istruzione che esegue una funzione, la \emph{chiamata di funzione}, consiste nel nome della funzione e nell'operatore \lstinline|()|. Per esempio, l'istruzione seguente chiama la funzione \lstinline|maximum()| per calcolare il massimo di due numeri:
+\begin{codice}
+maximum(a, b);
+\end{codice}
+Il programma prima alloca lo spazio di memoria per i parametri, poi copia i valori degli argomenti nelle locazioni corrispondenti. Quindi salta all'inizio della funzione, e l'esecuzione della funzione comincia con la prima definizione di variabile o istruzione del blocco.
+
+\begin{esempio}
+\begin{codice}
+#include <stdio.h>
+int sum(int p, int q) {
+    int r = 0;
+    r = p + q;
+    return r;
+}
+int main(void) {
+    int i = 3, j = 5, s = 0;
+    s = sum(i, j);
+    printf("%d\n", s);
+    return 0;
+}
+\end{codice}
+\begin{risultato}
+8
+\end{risultato}
+Al momento della chiamata, \lstinline|p| e \lstinline|q| ricevono copie dei valori di \lstinline|i| ($3$) e \lstinline|j| ($5$): \lstinline|i| e \lstinline|j| sono passati \emph{per valore}. \lstinline|r| vale prima $0$ e poi $8$, che viene restituito e assegnato a \lstinline|s|.
+\end{esempio}
+
+\subsection{Parametri formali e attuali}
+
+Quando una funzione viene chiamata, i valori (le espressioni) passati nella chiamata si chiamano \emph{argomenti} o \emph{parametri attuali} (i due termini hanno lo stesso significato). Al momento della chiamata, ogni parametro attuale viene assegnato al corrispondente \emph{parametro formale} nella definizione della funzione. Nell'esempio precedente \lstinline|p| e \lstinline|q| sono i parametri formali; i valori di \lstinline|i| e \lstinline|j| sono i parametri attuali.
+
+\subsection{Allocazione delle variabili}
+
+L'\emph{allocazione di memoria} significa che una parte della memoria viene riservata, per esempio per una variabile. Una \emph{variabile automatica} è una variabile locale che viene allocata e deallocata automaticamente quando il flusso del programma entra nel suo scope e ne esce. Per \emph{deallocazione} si intende che quella parte di memoria non è più riservata per quella variabile. Le variabili \lstinline|p| e \lstinline|q| vengono allocate quando la funzione è chiamata e deallocate quando se ne esce.
+
+\section{Overloading di funzioni}
+
+L'\emph{overloading} è una caratteristica di un linguaggio di programmazione che permette di avere più funzioni con lo stesso nome ma con firme diverse (tipo dei parametri e tipo restituito). È presente nella maggior parte dei linguaggi orientati agli oggetti, come C++ e Java. \textbf{Il C non supporta questa caratteristica.} Per fare l'overloading di una funzione in C++ la si può definire più volte, ciascuna identificata in modo univoco dal tipo degli argomenti che accetta; il tipo restituito non viene considerato.
+
+\begin{esempio}
+\begin{codice}
+#include <stdio.h>
+int min(int x, int y) {
+    return (x < y ? x : y);
+}
+float min(float x, float y) {
+    return (x < y ? x : y);
+}
+int main() {
+    int a = min(4, 1);
+    float b = min(4.56F, 1.23F);
+}
+\end{codice}
+Compilando con \texttt{gcc} si ottiene l'errore \texttt{conflicting types for 'min'}; compilando lo stesso file come C++ (\texttt{g++}) funziona.
+\end{esempio}
+
+\section{Riferimenti}
+
+Sul libro: sezioni 5.1--5.6, 15.3, 7.4.
+
+\end{document}

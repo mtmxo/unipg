@@ -1,0 +1,211 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\newrunin{osservazione}{Osservazione}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{MCD, mcm e algoritmo di Euclide}
+\author{Marco Cerbella}
+\date{Lezione 11 -- 26 ottobre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Massimo comune divisore}
+
+\begin{definizione}
+Siano $a, b \in \mathbb{Z}$ non entrambi nulli. Un elemento $d \in \mathbb{Z}$ è \emph{un massimo comun divisore} tra $a$ e $b$ se
+\begin{enumerate}
+  \item[i)] $d \mid a$ e $d \mid b$;
+  \item[ii)] $\forall d' \in \mathbb{Z}$ tale che $d' \mid a$ e $d' \mid b$ si ha $d' \mid d$.
+\end{enumerate}
+\end{definizione}
+
+\begin{osservazione}
+In generale, se $d$ è un massimo comun divisore tra $a$ e $b$, anche $-d$ è un massimo comun divisore tra $a$ e $b$. Chiamiamo $\operatorname{MCD}(a, b)$ quello \emph{positivo}.
+\end{osservazione}
+
+\begin{esempio}
+$\operatorname{MCD}(48, 15) = 3$, \quad $\operatorname{MCD}(3, 7) = 1$, \quad $\operatorname{MCD}(-12, 36) = 12$.
+\end{esempio}
+
+\begin{proprieta}
+\begin{itemize}
+  \item $\operatorname{MCD}(a, b) = \operatorname{MCD}(b, a) = \operatorname{MCD}(|a|, |b|)$.
+  \item $\operatorname{MCD}(ab, ac) = |a|\operatorname{MCD}(b, c)$.
+  \item $\operatorname{MCD}(0, a) = |a|$: infatti $d \mid 0$ per ogni $d$ (ogni $d$ divide $0$), e $d \mid a$; quindi $d$ è un divisore di $a$ e il più grande possibile è $|a|$.
+  \item $\operatorname{MCD}(0, 0)$ \emph{non è definito}.
+\end{itemize}
+\end{proprieta}
+
+\begin{definizione}[Numeri coprimi]
+Due numeri $a, b$ sono \emph{coprimi} (o \emph{relativamente primi}, o \emph{primi tra loro}) se $\operatorname{MCD}(a, b) = 1$.
+\end{definizione}
+
+\begin{esempio}
+$3, 5$ sono coprimi; $11$ e $36$ sono coprimi.
+\end{esempio}
+
+\section{Minimo comune multiplo}
+
+\begin{definizione}
+Siano $a, b \in \mathbb{Z}$. Un elemento $m \in \mathbb{Z}$ è un \emph{minimo comune multiplo} di $a$ e $b$ se
+\begin{enumerate}
+  \item[i)] $a \mid m$ e $b \mid m$;
+  \item[ii)] $\forall m' \in \mathbb{Z}$ tale che $a \mid m'$ e $b \mid m'$ si ha $m \mid m'$.
+\end{enumerate}
+\end{definizione}
+
+Se $m$ è un minimo comune multiplo di $a$ e $b$, anche $-m$ lo è; indichiamo con $\operatorname{mcm}(a, b)$ quello \emph{positivo}.
+
+\begin{esempio}
+$\operatorname{mcm}(4, 6) = 12$, \quad $\operatorname{mcm}(-7, 9) = 63$.
+\end{esempio}
+
+\begin{proprieta}
+$\operatorname{mcm}(a, b) = \operatorname{mcm}(b, a) = \operatorname{mcm}(|a|, |b|)$ e $\operatorname{mcm}(0, b) = 0$.
+\end{proprieta}
+
+\begin{proprieta}[Formula]
+Per $a, b$ non entrambi nulli:
+\[
+  \operatorname{MCD}(a, b)\cdot\operatorname{mcm}(a, b) = |a|\cdot|b| .
+\]
+\end{proprieta}
+
+\section{Algoritmo euclideo delle divisioni successive}
+
+\begin{teorema}[Algoritmo di Euclide]
+Siano $a, b \in \mathbb{Z}$, $a \ge b > 0$. Consideriamo queste uguaglianze (divisioni con resto):
+\begin{align*}
+  a &= q_1 b + r_1, & 0 &< r_1 < b,\\
+  b &= q_2 r_1 + r_2, & 0 &< r_2 < r_1,\\
+  r_1 &= q_3 r_2 + r_3, & 0 &< r_3 < r_2,\\
+  &\ \,\vdots\\
+  r_i &= q_{i+2}\, r_{i+1} + r_{i+2}, & 0 &< r_{i+2} < r_{i+1},\\
+  &\ \,\vdots\\
+  r_{n-3} &= q_{n-1}\, r_{n-2} + r_{n-1}, & 0 &< r_{n-1} < r_{n-2},\\
+  r_{n-2} &= q_n\, r_{n-1} + r_n, & 0 &< r_n < r_{n-1},\\
+  r_{n-1} &= q_{n+1}\, r_n .
+\end{align*}
+Allora $r_n = \operatorname{MCD}(a, b)$ (l'ultimo resto non nullo).
+\end{teorema}
+
+\begin{proof}
+L'algoritmo termina in un numero finito di passi perché $0 < r_n < r_{n-1} < \dots < r_1 < b$.
+
+\emph{Condizione i)} del MCD: dall'ultima uguaglianza $r_{n-1} = q_{n+1} r_n$, cioè $r_n \mid r_{n-1}$. Poi
+\[
+  r_{n-2} = r_{n-1} q_n + r_n = q_{n+1} r_n q_n + r_n \ \Rightarrow\ r_n \mid r_n(q_{n+1} q_n + 1) = r_{n-2}.
+\]
+Per il lemma, da $r_{n-3} = r_{n-2} q_{n-1} + r_{n-1}$ segue $r_n \mid r_{n-3}$. Risalendo tutte le uguaglianze si ottiene $r_n \mid r_i$ per ogni resto. Dalla seconda uguaglianza $b = r_1 q_2 + r_2$ e dal lemma segue $r_n \mid b$; dalla prima $a = q_1 b + r_1$ segue $r_n \mid a$. Questa è la condizione i) del MCD.
+
+\emph{Condizione ii)}: sia $d$ un altro divisore comune di $a$ e $b$. Da $d \mid a = q_1 b + r_1$ e $d \mid b$ segue, per il lemma, $d \mid r_1$; poi $d \mid b = r_1 q_2 + r_2$ e $d \mid r_1$ implicano $d \mid r_2$; $d \mid r_1 = r_2 q_3 + r_3$ implica $d \mid r_3$, e così via. Quindi $d \mid r_i$ per ogni $i$, in particolare $d \mid r_{n-2}$ e $d \mid r_{n-1}$, da cui, per il lemma, $d \mid r_n = r_{n-2} - q_n r_{n-1}$. Cioè $d \mid r_n$: è la condizione ii) del MCD.
+\end{proof}
+
+\begin{esempio}[$\operatorname{MCD}(824, 376)$]
+\begin{align*}
+  824 &= 376\cdot 2 + 72,\\
+  376 &= 72\cdot 5 + 16,\\
+  72 &= 16\cdot 4 + 8,\\
+  16 &= 8\cdot 2 + 0 .
+\end{align*}
+Dunque $\operatorname{MCD}(824, 376) = 8$ (l'ultimo resto non nullo).
+\end{esempio}
+
+\end{document}

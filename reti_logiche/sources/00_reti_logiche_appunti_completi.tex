@@ -12,7 +12,7 @@
 \usepackage{tikz}
 \usepackage[most]{tcolorbox}
 \usepackage[hidelinks]{hyperref}
-\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning, automata}
 
 % Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
 \widowpenalty=10000
@@ -1127,5 +1127,353 @@ Le colonne $11$ e $10$ formano un $k$-cubo $4 \times 2$ (implicante $z$). Le qua
 f(x,y,z,w) = z + y'w'.
 \]
 \end{esempio}
+
+\section[Mappe di Karnaugh: il punto di vista del libro (Lezione 6)]{Mappe di Karnaugh: il punto di vista del libro}
+\noindent\emph{Lezione 6}
+\subsection{Mappe di Karnaugh: il punto di vista del libro}
+
+Questa lezione riprende le mappe di Karnaugh (lezione 5) seguendo il libro di testo di Harris \& Harris, \emph{Digital Design and Computer Architecture}, sezione 2.7.
+
+Dopo aver provato a minimizzare equazioni booleane con l'algebra di Boole, ci si accorge che, se non si sta attenti, si può finire con un'equazione completamente diversa invece che semplificata. Le mappe di Karnaugh (\emph{K-map}) sono un metodo grafico per semplificare le equazioni booleane; furono inventate nel 1953 da Maurice Karnaugh, ingegnere delle telecomunicazioni ai Bell Labs. Funzionano bene per problemi con fino a quattro variabili e, soprattutto, aiutano a capire come manipolare le equazioni booleane.
+
+\begin{osservazione}
+Maurice Karnaugh (1924--) si è laureato in fisica al City College di New York nel 1948 e ha conseguito il dottorato in fisica a Yale nel 1952. Ha lavorato ai Bell Labs e all'IBM dal 1952 al 1993 e come professore di informatica al Polytechnic University di New York dal 1980 al 1999.
+\end{osservazione}
+
+\subsection{Perché una mappa}
+
+Minimizzare una funzione logica significa combinare dei termini. Due termini che contengono un implicante $P$ e la forma vera e quella complementare di una stessa variabile $A$ si combinano eliminando $A$:
+\[
+PA + PA' = P.
+\]
+Le mappe di Karnaugh rendono evidenti questi termini combinabili, mettendoli uno accanto all'altro in una griglia.
+
+\subsubsection{Mappa di una funzione a tre ingressi}
+
+Consideriamo la funzione $Y$ di tre ingressi $A, B, C$ con $Y = 1$ solo per $ABC = 000$ e $ABC = 001$ (e $0$ altrove). La riga superiore della mappa riporta i quattro possibili valori degli ingressi $A$ e $B$; la colonna di sinistra riporta i due possibili valori dell'ingresso $C$. Ogni quadrato della mappa corrisponde a una riga della tabella di verità e contiene il valore dell'uscita $Y$ per quella riga.
+
+\begin{center}
+\begin{tabular}{c|cccc}
+ & \multicolumn{4}{c}{$AB$}\\
+$C$ & $00$ & $01$ & $11$ & $10$ \\
+\midrule
+$0$ & 1 & 0 & 0 & 0 \\
+$1$ & 1 & 0 & 0 & 0 \\
+\end{tabular}
+\end{center}
+
+Come ogni riga di una tabella di verità, ogni quadrato di una K-map rappresenta un singolo \emph{mintermine}: la cella in alto a sinistra è $A'B'C'$, quella sotto è $A'B'C$, e così via per tutti gli otto mintermini.
+
+\subsection{Codice di Gray e adiacenza}
+
+Ogni quadrato (mintermine) differisce da un quadrato adiacente per una sola variabile. Quindi i quadrati adiacenti condividono tutti i letterali tranne uno, che compare in forma vera in un quadrato e in forma complementare nell'altro. Per esempio i quadrati che rappresentano i mintermini $A'BC'$ e $A'BC$ sono adiacenti e differiscono solo per la variabile $C$.
+
+Le combinazioni di $A$ e $B$ nella riga superiore sono in un ordine particolare: $00, 01, 11, 10$. Questo ordine si chiama \emph{codice di Gray}. Si distingue dal normale ordine binario ($00, 01, 10, 11$) perché voci adiacenti differiscono per una sola variabile: per esempio passando da $01$ a $11$ cambia solo $A$ (da $0$ a $1$), mentre passando da $01$ a $10$ cambierebbe sia $A$ (da $1$ a $0$) sia $B$ (da $0$ a $1$). Scrivere le combinazioni in ordine binario non darebbe la proprietà desiderata, cioè quadrati adiacenti che differiscono per una sola variabile.
+
+\begin{osservazione}
+I codici di Gray valgono per un numero qualunque di bit. Per esempio una sequenza di Gray a $3$ bit è
+\[
+000,\ 001,\ 011,\ 010,\ 110,\ 111,\ 101,\ 100.
+\]
+Furono brevettati nel 1953 (brevetto USA 2\,632\,058) da Frank Gray, ricercatore ai Bell Labs; sono utili soprattutto negli encoder meccanici, perché un leggero disallineamento provoca un errore in un solo bit. Un problema collegato fu proposto da Lewis Carroll nel 1879: collegare due parole della stessa lunghezza con parole intermedie che differiscono dalla precedente per una sola lettera, per esempio da SHIP a DOCK: SHIP, SLIP, SLOP, SLOT, SOOT, LOOT, LOOK, LOCK, DOCK.
+\end{osservazione}
+
+\subsubsection{La mappa si ``arrotola''}
+
+La K-map si ``avvolge'' su se stessa: i quadrati all'estrema destra sono di fatto adiacenti a quelli all'estrema sinistra, perché differiscono per una sola variabile, $A$. In altre parole si può arrotolare la mappa in un cilindro, poi unire le estremità del cilindro per ottenere un toro (una ciambella) e avere comunque la garanzia che quadrati adiacenti differiscano per una sola variabile.
+
+\subsection{Minimizzazione con le K-map}
+
+\subsubsection{Ragionare per cerchi}
+
+Nella K-map della funzione precedente nell'equazione compaiono solo due mintermini, $A'B'C'$ e $A'B'C$, indicati dagli $1$ nella colonna di sinistra. Leggere i mintermini da una K-map è esattamente equivalente a leggere le equazioni in somma di prodotti direttamente dalla tabella di verità. Come prima si può usare l'algebra di Boole:
+\[
+Y = A'B'C' + A'B'C = A'B'(C' + C) = A'B'.
+\]
+Le K-map permettono di fare questa semplificazione graficamente, cerchiando gli $1$ in quadrati adiacenti. Per ogni cerchio si scrive l'\emph{implicante} corrispondente. Un implicante è il prodotto di uno o più letterali; le variabili le cui forme vera e complementare sono entrambe dentro il cerchio vengono escluse dall'implicante. Nel nostro caso la variabile $C$ ha dentro il cerchio sia la forma vera ($1$) sia la forma complementare ($0$), quindi non viene inclusa nell'implicante: $Y$ è vera quando $A = B = 0$, indipendentemente da $C$. L'implicante è $A'B'$, lo stesso risultato ottenuto con l'algebra di Boole.
+
+\subsubsection{Regole}
+
+La K-map dà un modo visivo semplice per minimizzare la logica: basta cerchiare tutti i blocchi rettangolari di $1$ della mappa, usando il minor numero possibile di cerchi. Ogni cerchio deve essere il più grande possibile. Poi si leggono gli implicanti cerchiati.
+
+Più formalmente, un'equazione booleana è minimizzata quando è scritta come somma del minor numero di \emph{implicanti primi}. Ogni cerchio sulla K-map rappresenta un implicante; i cerchi più grandi possibili sono gli implicanti primi.
+
+\begin{definizione}
+Un \emph{implicante primo} è un implicante che non può essere ulteriormente ingrandito, cioè non può essere combinato con altri mintermini per eliminare una variabile.
+\end{definizione}
+
+Per esempio, nella mappa precedente $A'B'C'$ e $A'B'C$ sono implicanti, ma non primi. Solo $A'B'$ è un implicante primo.
+
+Le regole per trovare un'equazione minimizzata da una K-map sono:
+\begin{itemize}
+    \item usare il minor numero di cerchi necessario a coprire tutti gli $1$;
+    \item tutti i quadrati dentro ogni cerchio devono contenere $1$;
+    \item ogni cerchio deve coprire un blocco rettangolare che ha, in ogni direzione, un numero di quadrati che è una potenza di $2$ ($1$, $2$ o $4$);
+    \item ogni cerchio deve essere il più grande possibile;
+    \item un cerchio può passare oltre i bordi della K-map (avvolgendosi);
+    \item un $1$ in una K-map può essere cerchiato più volte, se questo consente di usare meno cerchi.
+\end{itemize}
+
+\begin{esempio}[Minimizzazione di una funzione di tre variabili]
+Sia $Y = F(A,B,C)$ con la K-map seguente:
+\begin{center}
+\begin{tabular}{c|cccc}
+ & \multicolumn{4}{c}{$AB$}\\
+$C$ & $00$ & $01$ & $11$ & $10$ \\
+\midrule
+$0$ & 1 & 0 & 1 & 1 \\
+$1$ & 1 & 0 & 0 & 1 \\
+\end{tabular}
+\end{center}
+Si cerchiano gli $1$ con il minor numero di cerchi possibile. Ogni cerchio rappresenta un implicante primo, e le dimensioni di ciascun cerchio sono potenze di due ($2 \times 1$ e $2 \times 2$). Si forma l'implicante primo di ciascun cerchio scrivendo le variabili che compaiono nel cerchio solo in forma vera o solo in forma complementare.
+
+\begin{itemize}
+    \item Il cerchio $2 \times 1$ comprende i quadrati $AB = 11$ e $AB = 10$ nella riga $C = 0$. In esso compaiono sia $B$ sia $B'$, quindi $B$ non fa parte dell'implicante; compaiono invece solo $A$ in forma vera e $C$ in forma complementare: l'implicante primo è $AC'$.
+    \item Il cerchio $2 \times 2$ copre tutti i quadrati in cui $B = 0$ (le colonne $00$ e $10$, che sono adiacenti perché la mappa si avvolge ai bordi): l'implicante primo è $B'$.
+\end{itemize}
+Perciò
+\[
+Y = AC' + B'.
+\]
+Si noti che il quadrato in alto a destra ($AB = 10$, $C = 0$) è coperto due volte, per rendere gli implicanti primi i più grandi possibili: come nelle tecniche con l'algebra di Boole, equivale a condividere un mintermine per ridurre la dimensione di un implicante. Si noti anche che il cerchio da quattro quadrati si avvolge attorno ai lati della K-map.
+\end{esempio}
+
+\begin{osservazione}
+Il libro prosegue con l'esempio~2.10, un decodificatore per display a sette segmenti: un circuito con ingresso a $4$ bit $D_{3:0}$ e sette uscite $S_a, \dots, S_g$ che pilotano i LED per mostrare una cifra da $0$ a $9$ (gli ingressi illegali $10$--$15$ producono un display spento). Se ne cerca la tabella di verità e, con le K-map, le equazioni delle uscite $S_a$ e $S_b$. Le pagine fornite con questa lezione terminano all'inizio dell'esempio: vi si ricorda in particolare di etichettare righe e colonne in ordine di Gray anche quando si riportano i valori dell'uscita, e che l'insieme minimo di implicanti primi non è unico.
+\end{osservazione}
+
+\subsection{Riferimenti}
+
+Harris \& Harris, \emph{Digital Design and Computer Architecture} (in italiano \emph{Sistemi digitali e architettura dei calcolatori}), sezione 2.7, disponibile su UniStudium (pagine 71--75 fornite). Per le slide della lezione si veda la lezione~5.
+
+\section[Reti sequenziali e macchine a stati finiti (Lezione 7)]{Reti sequenziali e macchine a stati finiti}
+\noindent\emph{Lezione 7}
+\subsection{Reti logiche sequenziali}
+
+\subsubsection{Circuiti combinatori e circuiti sequenziali}
+
+Nelle reti logiche combinatorie viste finora le uscite (il valore delle funzioni calcolate) dipendono \emph{esclusivamente} dalle configurazioni di bit in ingresso.
+
+Nelle reti logiche \emph{sequenziali} invece la configurazione dei bit in ingresso non determina univocamente l'uscita: è necessario portarsi dietro un \emph{riassunto della storia del sistema} per determinare l'uscita.
+
+\begin{esempio}[Riconoscitore del codice di Gray]
+Un circuito sequenziale con due variabili binarie in ingresso $(x_0, x_1)$ e una variabile in uscita $z$, tale che $z = 1$ se e solo se viene riconosciuto il codice di Gray, cioè si riconosce una sequenza di configurazioni in ingresso nell'ordine
+\[
+(0,0) \to (0,1) \to (1,1) \to (1,0).
+\]
+\end{esempio}
+
+\begin{esempio}[Il semaforo]
+Si consideri il circuito controllore di un semaforo.
+\begin{itemize}
+    \item Il semaforo si può trovare in tre stati: rosso, giallo oppure verde.
+    \item La lampada attualmente accesa dipende dalla temporizzazione associata a rosso, arancione e verde, e dallo stato precedente del semaforo.
+\end{itemize}
+\end{esempio}
+
+\subsubsection{Parole chiave}
+
+\begin{itemize}
+    \item \textbf{Stato}: in pratica, lo stato codifica le informazioni relative alla storia del sistema utili a calcolare l'uscita del sistema.
+    \item \textbf{Determinismo}: ci interessano sistemi deterministici: fissati l'ingresso e lo stato, l'uscita e l'evoluzione dello stato sono fissate.
+    \item \textbf{Modello del tempo}: in una generica macchina a stati finiti (modello di un sistema fisico) l'evoluzione dello stato è dettata da un \emph{evento}. Se gli eventi sono prodotti da una sorgente indipendente di sincronizzazione (il segnale di \emph{clock}) si parla di macchine a stati \emph{sincrone}, altrimenti di macchine a stati \emph{asincrone}.
+\end{itemize}
+
+\subsection{Macchine a stati finiti (FSM)}
+
+Le macchine a stati finiti sono un modello matematico per la descrizione di ``macchine'' dotate di memoria che eseguono algoritmi. Nel nostro contesto permettono di modellare ad alto livello i circuiti sequenziali (per esempio il controllore di un semaforo).
+\begin{itemize}
+    \item L'evoluzione del circuito è rappresentata come una sequenza di stati.
+    \item Si è in uno \emph{stato presente} e si evolverà in uno \emph{stato futuro}.
+    \item La realizzazione fisica consiste in una rete (combinatoria) per il calcolo delle uscite e dello stato futuro, a partire da ingressi e stato presente, e in un \emph{registro di attualizzazione} dello stato.
+\end{itemize}
+
+\begin{definizione}[Macchina a stati finiti: macchine di Mealy e di Moore]
+Una macchina a stati finiti (sincrona) $M$ è una tupla
+\[
+M = \langle S,\, X,\, Z,\, \lambda,\, \delta,\, s_0\rangle
+\]
+dove:
+\begin{itemize}
+    \item $X = \{x_1, \dots, x_n\}$ è l'\emph{alfabeto di ingresso};
+    \item $Z = \{z_1, \dots, z_m\}$ è l'\emph{alfabeto di uscita};
+    \item $S = \{s_0, \dots, s_p\}$ è un insieme finito di \emph{stati} e $s_0$ è lo \emph{stato iniziale};
+    \item $\delta$ e $\lambda$ sono due funzioni, rispettivamente di \emph{stato prossimo} e di \emph{uscita}:
+    \begin{itemize}
+        \item $z_k = \lambda(x_k, s_k)$ e $s_{k+1} = \delta(x_k, s_k)$ per le macchine di \textbf{Mealy};
+        \item $z_k = \lambda(s_k)$ e $s_{k+1} = \delta(x_k, s_k)$ per le macchine di \textbf{Moore};
+    \end{itemize}
+\end{itemize}
+dove $x_k \in X$, $z_k \in Z$ e $s_k \in S$ rappresentano rispettivamente il simbolo di ingresso, il simbolo di uscita e lo stato all'istante $k$.
+\end{definizione}
+
+Dunque in una macchina di Moore l'uscita dipende solo dallo stato; in una macchina di Mealy dipende dallo stato \emph{e} dall'ingresso.
+
+\subsubsection{Rappresentazione con grafi di transizione dello stato}
+
+I grafi di transizione dello stato sono una rappresentazione grafica molto comoda nelle fasi iniziali di progetto, in cui si passa da una descrizione formale della macchina sequenziale alla sua realizzazione fisica. Si tratta di un grafo orientato in cui ogni stato è rappresentato da un \emph{nodo} e ogni \emph{arco} corrisponde a una transizione dello stato. In particolare ogni transizione (arco) indica il prossimo stato in corrispondenza di un determinato ingresso.
+\begin{itemize}
+    \item In una FSM di \textbf{Moore} i simboli di uscita sono associati agli \emph{stati} (si scrivono dentro il nodo).
+    \item In una FSM di \textbf{Mealy} i simboli di uscita sono associati alle \emph{transizioni} (si scrivono sull'arco, nella forma ingresso/uscita).
+\end{itemize}
+
+\tikzset{
+  stato/.style = {circle, draw, minimum size=1.1cm, inner sep=1pt},
+  arco/.style  = {-{Stealth}, thick}
+}
+
+\begin{esempio}[Tabella e grafo di una macchina di Moore]
+Alfabeto di ingresso $\{0,1\}$, tre stati $s_0, s_1, s_2$ (iniziale $s_0$), uscita $U \in \{0,1\}$.
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+stato & \multicolumn{2}{c|}{ingresso} & uscita $U$\\
+ & $0$ & $1$ & \\
+\midrule
+$s_0$ & $s_0$ & $s_1$ & $1$ \\
+$s_1$ & $s_2$ & $s_1$ & $0$ \\
+$s_2$ & $s_0$ & $s_0$ & $0$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+\begin{center}
+\begin{tikzpicture}[node distance=3cm]
+  \node[stato] (s0) {$s_0/1$};
+  \node[stato, right=of s0] (s1) {$s_1/0$};
+  \node[stato, below right=1.6cm and 1.5cm of s0] (s2) {$s_2/0$};
+  \path[arco]
+    (s0) edge[loop above] node[above] {$0$} (s0)
+    (s0) edge node[above] {$1$} (s1)
+    (s1) edge[loop above] node[above] {$1$} (s1)
+    (s1) edge[bend left=15] node[right] {$0$} (s2)
+    (s2) edge[bend left=15] node[left] {$0,1$} (s0);
+\end{tikzpicture}
+\end{center}
+\end{esempio}
+
+\begin{esempio}[Tabella e grafo di una macchina di Mealy]
+Stessi stati e alfabeto; ogni cella della tabella riporta \emph{stato prossimo/uscita}.
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+stato & \multicolumn{2}{c}{ingresso}\\
+ & $0$ & $1$ \\
+\midrule
+$s_0$ & $s_0/1$ & $s_1/1$ \\
+$s_1$ & $s_2/0$ & $s_1/0$ \\
+$s_2$ & $s_0/0$ & $s_0/0$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+\begin{center}
+\begin{tikzpicture}[node distance=3cm]
+  \node[stato] (s0) {$s_0$};
+  \node[stato, right=of s0] (s1) {$s_1$};
+  \node[stato, below right=1.6cm and 1.5cm of s0] (s2) {$s_2$};
+  \path[arco]
+    (s0) edge[loop above] node[above] {$0/1$} (s0)
+    (s0) edge node[above] {$1/1$} (s1)
+    (s1) edge[loop above] node[above] {$1/0$} (s1)
+    (s1) edge[bend left=15] node[right] {$0/0$} (s2)
+    (s2) edge[bend left=15] node[left] {$0/0,\ 1/0$} (s0);
+\end{tikzpicture}
+\end{center}
+\end{esempio}
+
+\subsection{Moore e Mealy a confronto}
+
+Una macchina di Moore
+\[
+M_{\text{Moore}} = \langle S_{\text{Moore}},\, X,\, Z,\, \lambda_{\text{Moore}},\, \delta_{\text{Moore}},\, s_0\rangle
+\]
+e una macchina di Mealy
+\[
+M_{\text{Mealy}} = \langle S_{\text{Mealy}},\, X,\, Z,\, \lambda_{\text{Mealy}},\, \delta_{\text{Mealy}},\, s_0\rangle
+\]
+sono \emph{equivalenti}, dal punto di vista ingresso-uscita, se e solo se, ignorando l'uscita $z_0 = \lambda_{\text{Moore}}(s_0)$ di $M_{\text{Moore}}$, ogni possibile sequenza di simboli in ingresso genera una coppia di sequenze di simboli di uscita, una per $M_{\text{Moore}}$ e una per $M_{\text{Mealy}}$, identiche.
+
+\subsubsection{Da Moore a Mealy}
+
+È sufficiente associare l'uscita appartenente a uno stato a \emph{tutte le transizioni che partono da tale stato}.
+
+\begin{center}
+\begin{tikzpicture}
+  \node[stato] (a) {$s/0$};
+  \path[arco] (a) edge[loop above] node[above] {$1$} (a)
+              (a) edge node[above, pos=0.9] {$0$} ++(-2,0);
+  \node at (3,0) {$\leadsto$};
+  \node[stato] (b) at (6,0) {$s$};
+  \path[arco] (b) edge[loop above] node[above] {$1/0$} (b)
+              (b) edge node[above, pos=0.9] {$0/0$} ++(-2,0);
+\end{tikzpicture}
+\end{center}
+
+\subsubsection{Da Mealy a Moore}
+
+\begin{itemize}
+    \item Ogni stato della macchina di Mealy va \emph{replicato} tante volte quante sono le transizioni con uscite differenti verso tale stato.
+    \item I nuovi stati avranno il valore di uscita uguale a quello della transizione da cui sono stati originati.
+\end{itemize}
+Per esempio, se a uno stato $s$ della macchina di Mealy arrivano transizioni con uscita $0$ e transizioni con uscita $1$, nella macchina di Moore $s$ diventa una coppia di stati $s/0$ e $s/1$: le transizioni con uscita $0$ arrivano in $s/0$, quelle con uscita $1$ arrivano in $s/1$, e da ciascuno dei due stati replicati partono le stesse transizioni che partivano da $s$.
+
+\subsection{Esempi}
+
+\subsubsection{Riconoscere la parola ``via''}
+
+\begin{esercizio}
+Si realizzi una macchina a stati finiti che riceve in ingresso una sequenza di caratteri e riconosce la parola ``via''. L'uscita prodotta è $0$ se non si sta riconoscendo la parola, $1$ mentre la si sta riconoscendo e $2$ una volta che sia stata riconosciuta.
+\end{esercizio}
+
+\begin{osservazione}
+Nelle slide l'esercizio è solo enunciato. Una soluzione possibile (aggiunta qui, non presente nelle slide) è una macchina di Moore con quattro stati: $s_0$ (nessun carattere riconosciuto, uscita $0$), $s_1$ (visto ``v'', uscita $1$), $s_2$ (visto ``vi'', uscita $1$), $s_3$ (visto ``via'', uscita $2$). Da $s_0$: con ``v'' si va in $s_1$, con qualunque altro carattere si resta in $s_0$. Da $s_1$: con ``i'' si va in $s_2$, con ``v'' si resta in $s_1$, altrimenti si torna in $s_0$. Da $s_2$: con ``a'' si va in $s_3$, con ``v'' si torna in $s_1$, altrimenti in $s_0$. Da $s_3$: con ``v'' si va in $s_1$, altrimenti in $s_0$.
+\end{osservazione}
+
+\subsubsection{Il semaforo all'incrocio}
+
+Si consideri un incrocio tra due strade, nord-sud (NS) ed est-ovest (EO), controllate da un semaforo.
+\begin{itemize}
+    \item Il semaforo può commutare ogni $30$ secondi: per semplicità si considerano solamente rosso e verde.
+    \item È presente un sensore in grado di ``leggere'', per ogni direttrice, se esiste almeno un'auto in attesa oppure un'auto che si accinga ad attraversare (condizioni trattate allo stesso modo).
+    \item Il semaforo deve cambiare colore, da rosso a verde, quando esiste un'auto in attesa sulla sua direttrice.
+    \item Se ci sono auto in attesa su entrambe le direttrici il semaforo deve cambiare colore (al termine del tempo di commutazione).
+\end{itemize}
+
+\textbf{Ingressi.} Auto NS presente/assente: $i_{NS} = 1/0$. Auto EO presente/assente: $i_{EO} = 1/0$.
+
+\textbf{Stati.} Semaforo NS verde (quindi semaforo EO rosso); semaforo EO verde (quindi semaforo NS rosso).
+
+\textbf{Uscite.} Luce NS verde (quindi luce EO rossa); luce EO verde (quindi luce NS rossa). Nel nostro caso le uscite coincidono con gli stati.
+
+Tabella di transizione (ingresso $(i_{EO}, i_{NS})$; uscita = luce verde dello stato):
+\begin{center}
+\begin{tabular}{lccccl}
+\toprule
+stato $S$ & $(0,0)$ & $(0,1)$ & $(1,0)$ & $(1,1)$ & uscita\\
+\midrule
+Verde NS & Verde NS & Verde NS & Verde EO & Verde EO & luce verde NS\\
+Verde EO & Verde EO & Verde NS & Verde EO & Verde NS & luce verde EO\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tikzpicture}[node distance=5cm]
+  \node[stato, minimum size=2.2cm, align=center] (ns) {Verde NS\\\small luce verde NS};
+  \node[stato, minimum size=2.2cm, align=center, right=of ns] (eo) {Verde EO\\\small luce verde EO};
+  \path[arco]
+    (ns) edge[loop left, looseness=6] node[left] {$00,\,01$} (ns)
+    (eo) edge[loop right, looseness=6] node[right] {$00,\,10$} (eo)
+    (ns) edge[bend left=20] node[above] {$10,\,11$} (eo)
+    (eo) edge[bend left=20] node[below] {$01,\,11$} (ns);
+\end{tikzpicture}
+\end{center}
+Le etichette sugli archi sono le coppie $(i_{EO}, i_{NS})$. La macchina è di Moore: l'uscita dipende solo dallo stato.
+
+\subsection{Riferimenti ed esercizi per casa}
+
+\begin{itemize}
+    \item Capitolo~6 del libro di testo: C.~Bolchini et al., \emph{Reti Logiche}, Maggioli Editore. Tutto il capitolo tranne le sottosezioni 6.3.3, 6.3.4, 6.3.5.
+    \item Esercizio~6.1 del libro di testo (le soluzioni sono sul libro di testo).
+\end{itemize}
 
 \end{document}
