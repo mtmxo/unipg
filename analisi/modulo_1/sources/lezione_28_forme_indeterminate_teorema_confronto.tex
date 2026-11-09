@@ -1,0 +1,187 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\newrunin{osservazione}{Osservazione}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Forma indeterminata $\infty-\infty$ e teorema del confronto}
+\author{Marco Cerbella}
+\date{Lezione 13 -- 5 novembre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Forma indeterminata $\infty - \infty$}
+
+Consideriamo le funzioni
+\[
+f_1(x) = x + x^2, \qquad f_2(x) = x + 1, \qquad f_3(x) = x + \frac{1}{x}, \qquad g(x) = x,
+\]
+con $\displaystyle\lim_{x\to+\infty} g(x) = +\infty$. Si ha
+\[
+\lim_{x\to+\infty} f_1(x) = +\infty, \qquad \lim_{x\to+\infty} f_2(x) = +\infty, \qquad \lim_{x\to+\infty} f_3(x) = +\infty \quad\left(\tfrac{1}{x} \to 0\right).
+\]
+Quindi $\displaystyle\lim_{x\to+\infty}\big(f_i(x) - g(x)\big)$ è una forma indeterminata $\infty - \infty$. Eppure i tre limiti hanno risultati diversi:
+\begin{align*}
+  \lim_{x\to+\infty}\big(f_1(x) - g(x)\big) &= \lim_{x\to+\infty}(x + x^2 - x) = \lim_{x\to+\infty} x^2 = +\infty,\\
+  \lim_{x\to+\infty}\big(f_2(x) - g(x)\big) &= 1,\\
+  \lim_{x\to+\infty}\big(f_3(x) - g(x)\big) &= 0 .
+\end{align*}
+Per questo $\infty - \infty$ è una \emph{forma indeterminata}: il risultato dipende dalle funzioni coinvolte.
+
+\begin{esempio}[Raccoglimento]
+\[
+\lim_{x\to-\infty}\left(x + x^2\right) \quad (\text{F.I. } \infty - \infty): \qquad
+\lim_{x\to-\infty} x^2\left(\frac{x}{x^2} + \frac{x^2}{x^2}\right) = \lim_{x\to-\infty} x^2\left(\frac{1}{x} + 1\right) = +\infty ,
+\]
+perché $x^2 \to +\infty$ e la parentesi tende a $0 + 1 = 1$.
+\end{esempio}
+
+\begin{esempio}[Razionalizzazione]
+\[
+\lim_{x\to+\infty}\left(\sqrt{1 + x} - \sqrt{x}\right) \quad (\text{F.I. } \infty - \infty).
+\]
+Si moltiplica e divide per $\sqrt{1 + x} + \sqrt{x}$ e si usa $(a - b)(a + b) = a^2 - b^2$:
+\begin{align*}
+  \lim_{x\to+\infty}\left(\sqrt{1+x} - \sqrt{x}\right)\cdot\frac{\sqrt{1+x} + \sqrt{x}}{\sqrt{1+x} + \sqrt{x}}
+  &= \lim_{x\to+\infty}\frac{\left(\sqrt{1+x} - \sqrt{x}\right)\left(\sqrt{1+x} + \sqrt{x}\right)}{\sqrt{1+x} + \sqrt{x}}\\
+  &= \lim_{x\to+\infty}\frac{1 + x - x}{\sqrt{1+x} + \sqrt{x}}
+   = \lim_{x\to+\infty}\frac{1}{\sqrt{1+x} + \sqrt{x}} = 0,
+\end{align*}
+perché al denominatore $\sqrt{1+x} + \sqrt{x} \to +\infty + \infty = +\infty$.
+\end{esempio}
+
+\section{Teorema del confronto}
+
+\begin{teorema}[del confronto]
+Siano $f : D_f \to \mathbb{R}$, $h : D_h \to \mathbb{R}$, $g : D_g \to \mathbb{R}$. Se
+\begin{enumerate}
+  \item per $x \to c$, $f(x) \to \ell$ e $g(x) \to \ell$;
+  \item esiste un intorno $I(c)$ di $c$ nel quale siano definite le tre funzioni (tranne al più nel punto $c$) e tale che
+  \[
+    f(x) \le h(x) \le g(x) \qquad \forall x \in I(c)\setminus\{c\},
+  \]
+\end{enumerate}
+allora anche $h(x) \to \ell$ per $x \to c$.
+\end{teorema}
+
+Le due funzioni $f$ e $g$ «stringono» $h$: se $f(x) \to \ell$ e $g(x) \to \ell$ e $f(x) \le h(x) \le g(x)$, allora anche $h(x) \to \ell$.
+
+\begin{proof}
+Vogliamo dimostrare che $\forall\varepsilon > 0$ esiste $I(c)$ (un intervallo $]c - \delta, c + \delta[$) tale che $\forall x \in I(c)\setminus\{c\}$ si abbia $|h(x) - \ell| < \varepsilon$.
+
+Fissiamo $\varepsilon > 0$. Poiché $\displaystyle\lim_{x\to c} f(x) = \ell$, esiste un intorno $I'(c)$ tale che $\forall x \in I'(c)\setminus\{c\}$, $|f(x) - \ell| < \varepsilon$, cioè
+\[
+  -\varepsilon < f(x) - \ell < \varepsilon \quad\Longrightarrow\quad -\varepsilon + \ell < f(x) < \varepsilon + \ell .
+\]
+Poiché $\displaystyle\lim_{x\to c} g(x) = \ell$, esiste un intorno $I''(c)$ tale che $\forall x \in I''(c)\setminus\{c\}$, $|g(x) - \ell| < \varepsilon$, cioè
+\[
+  -\varepsilon + \ell < g(x) < \varepsilon + \ell .
+\]
+Dall'ipotesi 2, $\forall x \in I(c)\cap I'(c)\cap I''(c)\setminus\{c\}$ si ha
+\[
+  -\varepsilon + \ell < f(x) \le h(x) \le g(x) < \ell + \varepsilon ,
+\]
+dove la prima disuguaglianza vale perché $x \in I'(c)$, la seconda e la terza perché $x \in I(c)$, la quarta perché $x \in I''(c)$. Posto $I'''(c) = I(c)\cap I'(c)\cap I''(c)$, per ogni $x \in I'''(c)\setminus\{c\}$ si ha
+\[
+  -\varepsilon + \ell < h(x) < \ell + \varepsilon \iff |h(x) - \ell| < \varepsilon .
+\]
+Quindi $h(x) \to \ell$ per $x \to c$.
+\end{proof}
+
+\end{document}

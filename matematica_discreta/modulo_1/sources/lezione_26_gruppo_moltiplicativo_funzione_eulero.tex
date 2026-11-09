@@ -1,0 +1,222 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\newrunin{osservazione}{Osservazione}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Gruppo moltiplicativo di $\mathbb{Z}_n$ e funzione di Eulero}
+\author{Marco Cerbella}
+\date{Lezione 14 -- 3 novembre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Il gruppo moltiplicativo di $\mathbb{Z}_n$}
+
+\begin{itemize}
+  \item $(\mathbb{Z}_n, \cdot)$ non è mai un gruppo, perché $[0]$ non è invertibile.
+  \item $(\mathbb{Z}_p\setminus\{[0]\}, \cdot)$ con $p$ primo è un gruppo (infatti $(\mathbb{Z}_p, +, \cdot)$ è un campo).
+  \item $(\mathbb{Z}_n\setminus\{[0]\}, \cdot)$ in generale non è un gruppo.
+\end{itemize}
+Possiamo però definire
+\[
+  \mathbb{Z}_n^* = \left\{ [a]_n : \operatorname{MCD}(a, n) = 1 \right\} \subset \mathbb{Z}_n .
+\]
+$(\mathbb{Z}_n^*, \cdot)$ è un gruppo, detto \emph{gruppo moltiplicativo di $\mathbb{Z}_n$}.
+
+\begin{esempio}
+\begin{itemize}
+  \item $\mathbb{Z}_p^* = \{[1], \dots, [p-1]\}$, con $p$ primo.
+  \item $\mathbb{Z}_6^* = \{[1], [5]\}$.
+  \item $\mathbb{Z}_9^* = \{[1], [2], [4], [5], [7], [8]\}$.
+\end{itemize}
+\end{esempio}
+
+\section{La funzione di Eulero}
+
+\begin{definizione}[Funzione di Eulero]
+Sia $n \ge 1$. La \emph{funzione di Eulero} $\varphi$ è
+\[
+  \varphi(n) = |\mathbb{Z}_n^*| = \Big|\big\{ a \mid 1 \le a \le n,\ \operatorname{MCD}(a, n) = 1 \big\}\Big| .
+\]
+\end{definizione}
+
+\begin{esempio}
+$\varphi(6) = 2$, \qquad $\varphi(9) = 6$.
+\end{esempio}
+
+\begin{osservazione}
+$\varphi(p) = p - 1$ se $p$ è primo, e $\varphi(p^2) = p^2 - p$.
+\end{osservazione}
+
+\begin{proposizione}
+Sia $p$ primo e $n \ge 1$ intero. Allora
+\[
+  \varphi(p^n) = p^n - p^{n-1} = p^{n-1}(p - 1) .
+\]
+\end{proposizione}
+
+\begin{proof}
+Tra $1$ e $p^n$ ci sono $p^n$ numeri. Quelli non coprimi con $p^n$ hanno la forma $k\cdot p$, e $k$ può avere tutti i valori da $1$ fino a $p^{n-1}$: ci sono $p^{n-1}$ possibili numeri non coprimi con $p^n$. Quindi $\varphi(p^n) = p^n - p^{n-1}$.
+\end{proof}
+
+\begin{esempio}
+$\varphi(125) = \varphi(5^3) = 5^3 - 5^2 = 125 - 25 = 100$.
+\end{esempio}
+
+\section{La biiezione $\mathbb{Z}_{nk} \to \mathbb{Z}_n \times \mathbb{Z}_k$}
+
+Consideriamo la funzione
+\[
+  \psi : \mathbb{Z}_{nk} \to \mathbb{Z}_n \times \mathbb{Z}_k, \qquad [a]_{nk} \mapsto \big([a]_n, [a]_k\big).
+\]
+
+\begin{esempio}
+\begin{itemize}
+  \item $\psi_1 : \mathbb{Z}_{12} \to \mathbb{Z}_3 \times \mathbb{Z}_4$:
+  \[
+    \begin{gathered}
+    [0]_{12} \mapsto ([0]_3, [0]_4), \quad [1]_{12} \mapsto ([1]_3, [1]_4), \quad [3]_{12} \mapsto ([0]_3, [3]_4),\\
+    [6]_{12} \mapsto ([0]_3, [2]_4), \quad [7]_{12} \mapsto ([1]_3, [3]_4).
+    \end{gathered}
+  \]
+  $\psi_1$ è biunivoca.
+  \item $\psi_2 : \mathbb{Z}_{12} \to \mathbb{Z}_6 \times \mathbb{Z}_2$:
+  \[
+    \begin{gathered}
+    [0]_{12} \mapsto ([0]_6, [0]_2), \quad [1]_{12} \mapsto ([1]_6, [1]_2), \quad [3]_{12} \mapsto ([3]_6, [1]_2),\\
+    [6]_{12} \mapsto ([0]_6, [0]_2), \quad [7]_{12} \mapsto ([1]_6, [1]_2).
+    \end{gathered}
+  \]
+  $\psi_2$ \emph{non è iniettiva} (ad esempio $[1]_{12}$ e $[7]_{12}$ hanno la stessa immagine) e \emph{non è suriettiva}: non esiste $[a]_{12}$ tale che $\psi_2([a]_{12}) = ([0]_6, [1]_2)$.
+\end{itemize}
+\end{esempio}
+
+\begin{osservazione}
+$[a]_{nk}$ è invertibile in $\mathbb{Z}_{nk}$ se e solo se $[a]_n$ è invertibile in $\mathbb{Z}_n$ e $[a]_k$ è invertibile in $\mathbb{Z}_k$.
+
+\emph{Dimostrazione.} $\Rightarrow$ Se $[a]_{nk}$ è invertibile in $\mathbb{Z}_{nk}$, allora $\operatorname{MCD}(a, nk) = 1$, quindi $a$ non ha fattori comuni con $n$ e non ne ha con $k$, cioè $\operatorname{MCD}(a, n) = 1$ e $\operatorname{MCD}(a, k) = 1$: $[a]_n$ è invertibile in $\mathbb{Z}_n$ e $[a]_k$ è invertibile in $\mathbb{Z}_k$. $\Leftarrow$ Viceversa, se $\operatorname{MCD}(a, n) = 1$ e $\operatorname{MCD}(a, k) = 1$, allora $a$ non ha fattori comuni né con $n$ né con $k$, quindi $\operatorname{MCD}(a, nk) = 1$.
+\end{osservazione}
+
+\begin{proposizione}
+Se $\operatorname{MCD}(n, k) = 1$, allora $\psi : \mathbb{Z}_{nk} \to \mathbb{Z}_n \times \mathbb{Z}_k$, $\psi([a]_{nk}) = ([a]_n, [a]_k)$, è \emph{biunivoca}.
+\end{proposizione}
+
+\begin{proof}
+Si ha $|\mathbb{Z}_{nk}| = nk$ e $|\mathbb{Z}_n\times\mathbb{Z}_k| = |\mathbb{Z}_n|\cdot|\mathbb{Z}_k| = nk$. Proviamo che $\psi$ è iniettiva. Siano $[a]_{nk}, [b]_{nk}$ tali che $\psi([a]_{nk}) = \psi([b]_{nk})$, cioè $([a]_n, [a]_k) = ([b]_n, [b]_k)$, cioè
+\[
+  \begin{cases} [a]_n = [b]_n \\ [a]_k = [b]_k \end{cases}
+  \quad\text{cioè}\quad
+  \begin{cases} a \equiv b \pmod n \\ a \equiv b \pmod k \end{cases}
+  \ \Rightarrow\ a \equiv b \pmod{\operatorname{mcm}(n, k)} .
+\]
+Ma $\operatorname{MCD}(n, k) = 1$, quindi $\operatorname{mcm}(n, k) = nk$, cioè $a \equiv b \pmod{nk}$, cioè $[a]_{nk} = [b]_{nk}$. Quindi $\psi$ è iniettiva; dominio e codominio hanno la stessa cardinalità finita, quindi $\psi$ è biunivoca.
+\end{proof}
+
+\begin{proposizione}[Moltiplicatività di $\varphi$]
+Sia $\operatorname{MCD}(n, k) = 1$. Allora
+\[
+  \varphi(nk) = \varphi(n)\cdot\varphi(k) .
+\]
+\end{proposizione}
+
+\begin{proof}
+$\varphi(nk) = |\mathbb{Z}_{nk}^*| = |\mathbb{Z}_n^*\times\mathbb{Z}_k^*| = |\mathbb{Z}_n^*|\cdot|\mathbb{Z}_k^*| = \varphi(n)\cdot\varphi(k)$, dove si è usato che, per l'osservazione precedente, la restrizione $\psi : \mathbb{Z}_{nk}^* \to \mathbb{Z}_n^*\times\mathbb{Z}_k^*$ è biunivoca.
+\end{proof}
+
+\end{document}

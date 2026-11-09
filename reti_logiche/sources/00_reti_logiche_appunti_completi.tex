@@ -12,7 +12,7 @@
 \usepackage{tikz}
 \usepackage[most]{tcolorbox}
 \usepackage[hidelinks]{hyperref}
-\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning, automata}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning, automata, calc}
 
 % Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
 \widowpenalty=10000
@@ -1475,5 +1475,248 @@ Le etichette sugli archi sono le coppie $(i_{EO}, i_{NS})$. La macchina è di Mo
     \item Capitolo~6 del libro di testo: C.~Bolchini et al., \emph{Reti Logiche}, Maggioli Editore. Tutto il capitolo tranne le sottosezioni 6.3.3, 6.3.4, 6.3.5.
     \item Esercizio~6.1 del libro di testo (le soluzioni sono sul libro di testo).
 \end{itemize}
+
+\section[Bistabili, latch, flip-flop e sintesi di circuiti sequenziali (Lezione 8)]{Bistabili, latch, flip-flop e sintesi di circuiti sequenziali}
+\noindent\emph{Lezione 8}
+\subsection{Elementi bistabili}
+
+Il blocco costitutivo fondamentale di un registro di memoria è un elemento \emph{bistabile}: un elemento circuitale con due stati stabili, in grado dunque di memorizzare un bit di informazione. Un elemento con $N$ stati stabili conserva $\log_2 N$ bit.
+
+\begin{definizione}[Stato stabile]
+Dato un circuito (sequenziale), si dice \emph{stato stabile} del circuito un'attribuzione di valori di verità a tutti i fili del circuito in accordo con il comportamento delle porte logiche.
+\end{definizione}
+
+\subsubsection{Due negatori collegati a croce}
+
+Il bistabile più semplice è formato da una coppia di negatori $I_1$, $I_2$ collegati a croce: l'ingresso di $I_1$ è l'uscita di $I_2$ e viceversa.
+
+\begin{center}
+\begin{tikzpicture}[>=Stealth, every node/.style={font=\small}]
+  \node[draw, regular polygon, regular polygon sides=3, shape border rotate=-90, minimum size=1cm, inner sep=0] (i1) at (0,1) {};
+  \node[draw, regular polygon, regular polygon sides=3, shape border rotate=90, minimum size=1cm, inner sep=0] (i2) at (0,-0.4) {};
+  \node at (-0.15,1) {$I_1$};
+  \node at (0.15,-0.4) {$I_2$};
+  \draw (i1.east) -- ++(1.2,0) coordinate (q) node[right] {$Q$};
+  \draw (i2.west) -- ++(-1.2,0) coordinate (qn) node[left] {$\overline{Q}$};
+  \draw (i1.west) -- ++(-0.5,0) |- (i2.west |- qn) ;
+  \draw (i2.east) -- ++(0.5,0) |- (i1.east |- q);
+\end{tikzpicture}
+\end{center}
+
+L'analisi di un elemento sequenziale differisce da quella di un circuito combinatorio perché il primo è \emph{ciclico}: le uscite $Q$ e $\overline{Q}$ dipendono l'una dall'altra. Si studiano i due casi $Q = 0$ e $Q = 1$.
+
+\begin{itemize}
+  \item \textbf{Caso $Q = 0$.} $I_2$ riceve in ingresso $0$ e produce $1$ su $\overline{Q}$; $I_1$ riceve $1$ da $\overline{Q}$ e produce $0$ su $Q$. Lo stato è stabile perché viene confermata la premessa iniziale ($Q = 0$).
+  \item \textbf{Caso $Q = 1$.} $I_2$ riceve $1$ e produce $0$ su $\overline{Q}$; $I_1$ riceve $0$ e produce $1$ su $Q$. Anche questo stato è stabile.
+\end{itemize}
+
+\begin{osservazione}
+Il circuito ha in realtà anche un terzo possibile stato, con entrambe le uscite circa a metà tra $0$ e $1$: è detto stato \emph{metastabile}. Inoltre, la variabile di stato è una sola: $\overline{Q}$ non contiene informazione aggiuntiva, essendo il complemento di $Q$.
+\end{osservazione}
+
+\paragraph{Limiti.} Due negatori collegati a croce memorizzano un bit, e un insieme di coppie di negatori potrebbe codificare le variabili di stato di una macchina a stati finiti; tuttavia l'utente non ha a disposizione \emph{alcun ingresso} per controllare tali variabili. I latch e i flip-flop che seguono sono provvisti di ingressi per controllare il valore delle variabili di stato, e sono quindi più utili per codificare gli stati di una FSM.
+
+\subsection{Latch}
+
+\subsubsection{Latch SR}
+
+Il latch SR si realizza con due porte NOR $N_1$, $N_2$ collegate a croce. Ha due ingressi $S$ (\emph{Set}) e $R$ (\emph{Reset}) e due uscite $Q$ e $\overline{Q}$.
+
+\begin{center}
+\begin{tikzpicture}[>=Stealth, every node/.style={font=\small}]
+  \node[draw, minimum width=1.6cm, minimum height=0.8cm] (n1) at (0,1) {NOR $N_1$};
+  \node[draw, minimum width=1.6cm, minimum height=0.8cm] (n2) at (0,-1) {NOR $N_2$};
+  \draw (-0.8,1.2) -- (-1.6,1.2) node[left] {$R$};
+  \draw (-0.8,-1.2) -- (-1.6,-1.2) node[left] {$S$};
+  \draw (0.8,1) -- (1.8,1) node[right] {$Q$};
+  \draw (0.8,-1) -- (1.8,-1) node[right] {$\overline{Q}$};
+  \fill (1.2,1) circle (1.5pt);
+  \fill (1.2,-1) circle (1.5pt);
+  \draw (1.2,1) -- (1.2,0) -- (-1.2,0) -- (-1.2,-0.8) -- (-0.8,-0.8);
+  \draw (1.0,-1) -- (1.0,0.3) -- (-1.0,0.3) -- (-1.0,0.8) -- (-0.8,0.8);
+\end{tikzpicture}
+\end{center}
+
+\paragraph{Analisi.}
+\begin{itemize}
+  \item \textbf{$S = 0$, $R = 0$.} Nessun ingresso è attivo: l'uscita $Q$ ricorda il suo valore precedente $Q_{\mathrm{prec}}$ (e $\overline{Q}$ il suo complemento). Vi sono due stati stabili, a seconda di $Q_{\mathrm{prec}}$.
+  \item \textbf{$S = 1$, $R = 0$.} $N_2$ riceve almeno un valore vero ($S = 1$) e produce $0$ su $\overline{Q}$; a questo punto $N_1$ ha entrambi gli ingressi a $0$ e produce $Q = 1$. Quando viene attivato $S$, $Q$ viene \emph{settato} a $1$.
+  \item \textbf{$S = 0$, $R = 1$.} $N_1$ riceve almeno un valore vero ($R = 1$) e produce $0$ su $Q$; $N_2$ ha entrambi gli ingressi a $0$ e produce $\overline{Q} = 1$. Quando viene attivato $R$, $Q$ viene \emph{resettato} a $0$.
+  \item \textbf{$S = 1$, $R = 1$.} $N_1$ e $N_2$ vedono entrambe almeno un ingresso a $1$ e producono entrambe $0$. Non ha senso: significa settare e resettare contemporaneamente, e $Q$ e $\overline{Q}$ non sono l'una l'opposto dell'altra (inconsistenti).
+\end{itemize}
+
+\begin{center}
+\begin{tabular}{cc|cc}
+\toprule
+$S$ & $R$ & $Q$ & $\overline{Q}$ \\
+\midrule
+0 & 0 & $Q_{\mathrm{prec}}$ & $\overline{Q}_{\mathrm{prec}}$ \\
+0 & 1 & 0 & 1 \\
+1 & 0 & 1 & 0 \\
+1 & 1 & 0 & 0 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{Limiti.} Il latch SR è scomodo per due motivi:
+\begin{itemize}
+  \item si comporta in modo inconsistente quando $S$ e $R$ sono attivati contemporaneamente (entrambe le uscite valgono $0$);
+  \item gli ingressi $S$ e $R$ combinano gli aspetti del \emph{come} e del \emph{quando}: attivare uno di essi determina non solo come debba diventare lo stato $Q$, ma anche quando debba cambiare.
+\end{itemize}
+Questi limiti sono superati dal latch D.
+
+\subsubsection{Latch D}
+
+Il latch D ha due ingressi:
+\begin{itemize}
+  \item un ingresso dati $D$, che controlla il \emph{prossimo stato};
+  \item un ingresso di clock $CLK$, che controlla il \emph{momento} del cambio di stato.
+\end{itemize}
+Si ottiene da un latch SR ponendo $S = D \cdot CLK$ e $R = \overline{D} \cdot CLK$.
+
+\begin{center}
+\begin{tikzpicture}[>=Stealth, every node/.style={font=\small}]
+  \node[draw, minimum width=1.0cm, minimum height=0.7cm] (a1) at (2,0.9) {AND};
+  \node[draw, minimum width=1.0cm, minimum height=0.7cm] (a2) at (2,-0.9) {AND};
+  \node[draw, minimum width=0.8cm, minimum height=0.5cm] (inv) at (0.4,0.7) {NOT};
+  \node[draw, minimum width=1.6cm, minimum height=2.2cm] (sr) at (4.4,0) {latch SR};
+  \draw[->] (a1.east) -- (3.6,0.9) node[pos=0.8, above, font=\footnotesize] {$R$};
+  \draw[->] (a2.east) -- (3.6,-0.9) node[pos=0.8, below, font=\footnotesize] {$S$};
+  \draw (5.2,0.9) -- (6.0,0.9) node[right] {$Q$};
+  \draw (5.2,-0.9) -- (6.0,-0.9) node[right] {$\overline{Q}$};
+  \draw (-1.2,-1.1) node[left] {$D$} -- (1.5,-1.1);
+  \fill (-0.4,-1.1) circle (1.5pt);
+  \draw (-0.4,-1.1) -- (-0.4,0.7) -- (inv.west);
+  \draw (inv.east) -- (1.5,0.7);
+  \draw (-1.2,1.9) node[left] {$CLK$} -- (0.9,1.9);
+  \fill (0.9,1.9) circle (1.5pt);
+  \draw (0.9,1.9) -- (0.9,-0.7) -- (1.5,-0.7);
+  \draw (0.9,1.1) -- (1.5,1.1);
+  \fill (0.9,1.1) circle (1.5pt);
+\end{tikzpicture}
+\end{center}
+
+\paragraph{Analisi.}
+\begin{center}
+\begin{tabular}{cc|ccc|cc}
+\toprule
+$CLK$ & $D$ & $\overline{D}$ & $S$ & $R$ & $Q$ & $\overline{Q}$ \\
+\midrule
+0 & $\times$ & $\overline{\times}$ & 0 & 0 & $Q_{\mathrm{prec}}$ & $\overline{Q}_{\mathrm{prec}}$ \\
+1 & 0 & 1 & 0 & 1 & 0 & 1 \\
+1 & 1 & 0 & 1 & 0 & 1 & 0 \\
+\bottomrule
+\end{tabular}
+\end{center}
+Quando $CLK = 0$ il latch ricorda lo stato precedente; quando $CLK = 1$ copia $D$ su $Q$. Il caso $S = R = 1$ non può mai presentarsi, perché $S$ e $R$ sono sempre uno il complemento dell'altro quando $CLK = 1$.
+
+\paragraph{Limiti.} Il latch D aggiorna \emph{continuamente} il suo stato finché $CLK = 1$, mentre sarebbe utile aggiornare lo stato solo in un momento preciso. Questo limite è superato dai flip-flop.
+
+\subsection{Flip-flop D}
+
+Un flip-flop D si realizza con due latch D in cascata, controllati da due segnali di clock complementari: il primo latch $L_1$ è detto \emph{master}, il secondo $L_2$ \emph{slave}; il nodo $N_1$ collega i due latch.
+
+\begin{center}
+\begin{tikzpicture}[>=Stealth, every node/.style={font=\small}]
+  \node[draw, minimum width=1.4cm, minimum height=1.2cm] (l1) at (0,0) {$L_1$ (master)};
+  \node[draw, minimum width=1.4cm, minimum height=1.2cm] (l2) at (3.2,0) {$L_2$ (slave)};
+  \draw[->] (-1.6,0) node[left] {$D$} -- (l1.west) node[pos=0.5, above, font=\footnotesize] {};
+  \draw[->] (l1.east) -- (l2.west) node[midway, above, font=\footnotesize] {$N_1$};
+  \draw[->] (l2.east) -- ++(1.2,0) node[right] {$Q$};
+  \draw[->] (-1.6,1.4) node[left] {$CLK$} -- (l1.north |- 0,1.4) -- (l1.north);
+  \draw (0.0,1.4) -- (1.0,1.4) node[draw, circle, inner sep=1.5pt, fill=white] (c) {} (c) -- (3.2,1.4) edge[->] (l2.north);
+\end{tikzpicture}
+\end{center}
+
+\paragraph{Analisi.}
+\begin{itemize}
+  \item Quando $CLK = 0$, il master è trasparente e qualsiasi valore di $D$ viene portato in $N_1$; lo slave è opaco e mantiene l'uscita.
+  \item Quando $CLK$ diventa $1$, il master si blocca e il valore di $N_1$ viene trasmesso sull'uscita dell'elemento ($Q$ in $L_2$).
+\end{itemize}
+In altre parole, un flip-flop D \emph{copia $D$ su $Q$ al fronte di salita del clock} e ricorda il suo stato in tutti gli altri casi.
+
+Il simbolo circuitale del flip-flop D è un rettangolo con ingressi $D$ e $CLK$ (quest'ultimo contrassegnato da un triangolo, che indica la sensibilità al fronte) e uscite $Q$ e $\overline{Q}$; esiste una versione semplificata con la sola uscita $Q$.
+
+\subsection{Registro di memoria}
+
+\begin{definizione}[Registro a $N$ bit]
+Un \emph{registro} a $N$ bit è un banco di $N$ flip-flop che condividono un ingresso di clock $CLK$ in comune, in modo che tutti i bit vengano aggiornati allo stesso tempo.
+\end{definizione}
+
+\subsection{Sintesi di un circuito sequenziale: esempio}
+
+\begin{esempio}[Semaforo di un incrocio]
+\textbf{Specifiche.}
+\begin{itemize}
+  \item Incrocio tra due strade, nord-sud (NS) ed est-ovest (EO), controllate da un semaforo.
+  \item Il semaforo può commutare ogni $30$ secondi; per semplicità si considerano solo rosso e verde.
+  \item Un sensore legge, per ogni direttrice, se esiste almeno un'auto in attesa oppure un'auto che si accinga ad attraversare (condizioni trattate allo stesso modo).
+  \item Il semaforo deve cambiare colore, da rosso a verde, quando esiste un'auto in attesa sulla sua direttrice.
+  \item Se ci sono auto in attesa su entrambe le direttrici il semaforo deve cambiare colore (al termine del tempo di commutazione).
+\end{itemize}
+
+\textbf{Codifica.} Il primo passo è modellare il circuito con una macchina a stati finiti.
+\begin{itemize}
+  \item Gli ingressi sono codificati con due variabili booleane $i_{EO}$, $i_{NS}$.
+  \item Serve $1$ bit per codificare lo stato (due stati possibili): serve dunque un solo bistabile, un flip-flop D $F$ con uscite $Q_F$, $\overline{Q}_F$. Si pone $Q_F = 1$ per lo stato VerdeNS e $Q_F = 0$ per VerdeEO.
+  \item Serve $1$ bit per l'uscita: $u = 1$ codifica LuceVerdeNS, $u = 0$ codifica LuceVerdeEO.
+\end{itemize}
+
+\textbf{Tabella di transizione.} $D_F$ è lo stato futuro.
+\begin{center}
+\begin{tabular}{c|cc|cc}
+\toprule
+$Q_F$ & $i_{EO}$ & $i_{NS}$ & $D_F$ & $u$ \\
+\midrule
+1 & 0 & 0 & 1 & 1 \\
+1 & 0 & 1 & 1 & 1 \\
+1 & 1 & 0 & 0 & 1 \\
+1 & 1 & 1 & 0 & 1 \\
+0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 1 & 1 & 0 \\
+0 & 1 & 0 & 0 & 0 \\
+0 & 1 & 1 & 1 & 0 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Mappe di Karnaugh.} Dalla tabella si ottengono
+\[
+D_F = \overline{Q}_F\, i_{NS} + Q_F\, \overline{i_{EO}}, \qquad u = Q_F .
+\]
+Infatti, per $Q_F = 0$ lo stato futuro vale $1$ solo se $i_{NS} = 1$ (cioè $D_F = i_{NS}$), mentre per $Q_F = 1$ vale $1$ solo se $i_{EO} = 0$ (cioè $D_F = \overline{i_{EO}}$). L'uscita coincide con lo stato.
+
+\textbf{Circuito.} Il circuito si sintetizza con due porte AND, una porta OR e un negatore: il flip-flop D $F$ ha in ingresso $D_F = \overline{Q}_F\, i_{NS} + Q_F\, \overline{i_{EO}}$ e l'uscita $u$ è $Q_F$.
+
+\begin{center}
+\begin{tikzpicture}[>=Stealth, every node/.style={font=\small}]
+  \node[draw, minimum width=1.0cm, minimum height=0.7cm] (a1) at (2,1) {AND};
+  \node[draw, minimum width=1.0cm, minimum height=0.7cm] (a2) at (2,-1) {AND};
+  \node[draw, minimum width=0.9cm, minimum height=0.8cm] (o) at (4,0) {OR};
+  \node[draw, minimum width=1.2cm, minimum height=1.8cm] (ff) at (6,0) {$F$};
+  \node[draw, minimum width=0.8cm, minimum height=0.5cm] (n) at (0.2,0.8) {NOT};
+  \draw (-1.2,0.8) node[left] {$i_{EO}$} -- (n.west);
+  \draw (n.east) -- (1.5,0.8);
+  \draw (-1.2,-0.8) node[left] {$i_{NS}$} -- (1.5,-0.8);
+  \draw (2.5,1) -- (3.0,1) -- (3.0,0.2) -- (3.55,0.2);
+  \draw (2.5,-1) -- (3.0,-1) -- (3.0,-0.2) -- (3.55,-0.2);
+  \draw[->] (4.45,0) -- (5.4,0) node[midway, above, font=\footnotesize] {$D_F$};
+  \draw (6.6,0.5) -- (7.8,0.5) node[right] {$u = Q_F$};
+  \draw (6.6,-0.5) -- (7.0,-0.5);
+  \fill (7.0,0.5) circle (1.5pt);
+  \draw (7.0,0.5) -- (7.0,2.2) -- (1.0,2.2) -- (1.0,1.2) -- (1.5,1.2);
+  \draw (7.0,-0.5) -- (7.0,-2.2) -- (1.0,-2.2) -- (1.0,-1.2) -- (1.5,-1.2);
+  \node[font=\footnotesize] at (5.6,0.5) {};
+  \node[font=\footnotesize, above] at (4,2.2) {$Q_F$};
+  \node[font=\footnotesize, below] at (4,-2.2) {$\overline{Q}_F$};
+\end{tikzpicture}
+\end{center}
+\end{esempio}
+
+\begin{osservazione}
+In sintesi, il procedimento per realizzare un circuito sequenziale è: modellare il problema con una FSM; codificare ingressi, stati e uscite con variabili booleane; scrivere la tabella di transizione (stato futuro e uscita in funzione di stato presente e ingressi); semplificare con le mappe di Karnaugh; realizzare la rete combinatoria e collegarla a un registro di flip-flop D che memorizza lo stato.
+\end{osservazione}
+
+\paragraph{Riferimenti.} Capitolo 3 del libro di supporto (S.\ Harris et al., \emph{Sistemi Digitali e Architettura dei Calcolatori}), sezioni 3.1, 3.2, 3.2.1, 3.2.2, 3.2.3 e 3.2.4.
 
 \end{document}

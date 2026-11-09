@@ -3461,4 +3461,355 @@ Compilando con \texttt{gcc} si ottiene l'errore \texttt{conflicting types for 'm
 
 Sul libro: sezioni 5.1--5.6, 15.3, 7.4.
 
+\section[Esempi su cicli e istruzioni di selezione (Lezione 17 -- 9 novembre 2026)]{Esempi su cicli e istruzioni di selezione}
+\noindent\emph{Lezione 17 -- 9 novembre 2026}
+\subsection{Perché i cicli sono importanti}
+
+Un \emph{ciclo} è una delle strutture logiche di base della programmazione: definire un ciclo permette al calcolatore di eseguire lo stesso compito ripetutamente. Ogni volta che nella descrizione in linguaggio naturale delle specifiche del programma compaiono le parole «ogni» o «per ciascuno» serve un ciclo. Anche «per sempre» corrisponde a un ciclo: \lstinline|while(1)|.
+
+\subsection{Esempi sui cicli}
+
+\subsubsection{Condizioni logiche: \texttt{=} e \texttt{==}}
+
+\begin{codice}
+int x = 1;
+while (x = 1) {          // ERRORE: assegnamento, non confronto
+    //...
+    printf("Insert 1 to continue");
+    scanf("%d", &x);
+}
+\end{codice}
+Se si usa un solo segno di uguale per controllare l'uguaglianza, il programma \emph{assegna} il valore a destra alla variabile a sinistra, e il risultato dell'espressione è il valore assegnato. In questo caso il valore è sempre $1$, che viene trattato come sempre vero: il ciclo non termina mai. La versione corretta è
+\begin{codice}
+int x = 1;
+while (x == 1) {
+    //...
+    printf("Insert 1 to continue");
+    scanf("%d", &x);
+}
+\end{codice}
+
+\subsubsection{Trasformare i cicli}
+
+Uno stesso ciclo si può scrivere con \lstinline|for|, \lstinline|while| o \lstinline|do...while|:
+\begin{codice}
+int n = 4;
+for (int i = 0; i < n; i++) {
+    printf("OK\n");
+}
+\end{codice}
+\begin{codice}
+int n = 4;
+int i = 0;
+while (i < n) {
+    printf("OK\n");
+    i++;
+}
+\end{codice}
+\begin{codice}
+int n = 4;
+int i = 0;
+do {
+    printf("OK\n");
+    i++;
+} while (i < n);
+\end{codice}
+
+\subsubsection{do...while}
+
+Il corpo di un \lstinline|do...while| viene eseguito \emph{almeno una volta}:
+\begin{codice}
+#include <stdio.h>
+int main() {
+    double number, sum = 0;
+    // il corpo del ciclo viene eseguito almeno una volta
+    do {
+        printf("Enter a number: ");
+        scanf("%lf", &number);
+        sum += number;
+    } while (number != 0.0);
+    printf("Sum = %.2lf", sum);
+    return 0;
+}
+\end{codice}
+
+\subsubsection{Scorrere un array}
+
+\begin{codice}
+#include <stdio.h>
+int main() {
+    int foo[] = {16, 2, 77, 40, 12071};
+    int n, result = 0;
+    for (n = 0; n < 5; ++n) {
+        result += foo[n];
+    }
+    printf("%d", result);      // stampa 12206
+    return 0;
+}
+\end{codice}
+La somma $16 + 2 + 77 + 40 + 12071$ dà $12206$.
+
+\begin{osservazione}
+Nelle slide l'esempio includeva \lstinline|<stdlib.h>| ma usava \lstinline|printf|; qui è stato corretto con \lstinline|<stdio.h>|.
+\end{osservazione}
+
+\subsubsection{Scorrere una matrice}
+
+\begin{codice}
+const int width = 5;
+const int height = 3;
+int main() {
+    int mat[height][width];
+    for (int n = 0; n < height; n++)
+        for (int m = 0; m < width; m++)
+            mat[n][m] = (n + 1) * (m + 1);
+}
+\end{codice}
+
+\subsubsection{Array come argomenti di funzione}
+
+Quando il nome di un array compare come argomento di una funzione, il compilatore lo converte implicitamente in un puntatore al primo elemento dell'array. Perciò \lstinline|int name[]| e \lstinline|int *name| sono equivalenti:
+\begin{codice}
+#include <stdio.h>
+void fun(int a[], int n) {
+    for (int i = 0; i < n; ++i)
+        a[i] = i;
+}
+int main() {
+    int a[3];
+    fun(a, 3);
+}
+\end{codice}
+\begin{codice}
+#include <stdio.h>
+void fun(int* a, int n) {
+    for (int i = 0; i < n; ++i)
+        *(a + i) = i;
+}
+int main() {
+    int a[3];
+    fun(a, 3);
+}
+\end{codice}
+In C non esistono davvero «variabili array»: si lavora in realtà con puntatori, con una sintassi alternativa.
+
+\subsubsection{Passare una matrice}
+
+\begin{codice}
+#include <stdio.h>
+int matrix_sum(int row, int column, int m[row][column]) {
+    int sum = 0;
+    for (int i = 0; i < row; i++)
+        for (int j = 0; j < column; j++)
+            sum += m[i][j];
+    return sum;
+}
+
+int main() {
+    int m[2][3] = {1, 4, 5, 2, 1, 1};
+    int result;
+    result = matrix_sum(2, 3, m);
+    printf("%d", result);      // stampa 14
+}
+\end{codice}
+La matrice $2\times 3$ contiene per righe $\begin{smallmatrix}1&4&5\\2&1&1\end{smallmatrix}$, e la somma dei suoi elementi è $14$.
+
+\subsubsection{Un esempio avanzato: cicli annidati (bubble sort)}
+
+\begin{codice}
+#include <stdio.h>
+int main() {
+    int n, c, d, swap;
+    printf("Enter number of elements\n");
+    scanf("%d", &n);
+    printf("Enter %d integers\n", n);
+    int array[n];
+    for (c = 0; c < n; c++)
+        scanf("%d", &array[c]);
+    for (c = 0; c < (n - 1); c++)
+    {
+        for (d = 0; d < n - c - 1; d++)
+        {
+            if (array[d] > array[d+1])
+            {
+                swap       = array[d];
+                array[d]   = array[d+1];
+                array[d+1] = swap;
+            }
+        }
+    }
+    return 0;
+}
+\end{codice}
+Il ciclo esterno esegue $n - 1$ passate; a ogni passata il ciclo interno confronta gli elementi adiacenti e li scambia se sono nell'ordine sbagliato, spostando così il massimo dei rimanenti in fondo all'array.
+
+\subsection{Esempi sulle istruzioni di selezione}
+
+\subsubsection{Condizioni logiche}
+
+\begin{codice}
+int age = 17;
+if (age = 18)           // assegnamento!
+    printf("OK!");
+\end{codice}
+Il valore dell'espressione \lstinline|age = 18| è $18$, che in C è vero: stampa sempre «OK!» e \lstinline|age| diventa $18$. Invece
+\begin{codice}
+int age = 17;
+if (age == 18)
+    printf("OK!");
+\end{codice}
+stampa «OK!» solo quando \lstinline|age| è uguale a $18$, e \lstinline|age| rimane $17$.
+
+\subsubsection{Pari o dispari}
+
+\begin{codice}
+#include <stdio.h>
+int main() {
+    int number = 0;
+    printf("Enter an integer: ");
+    scanf("%d", &number);
+    // vero se il resto è 0
+    if (number % 2 == 0)
+        printf("%d is an even integer.", number);
+    else
+        printf("%d is an odd integer.", number);
+    return 0;
+}
+\end{codice}
+
+\subsubsection{Catena di if}
+
+Una sequenza di \lstinline|if| indipendenti \emph{non} equivale a una catena \lstinline|else if|. Nel primo caso tutte le condizioni vengono valutate; con \lstinline|score = 95| tutte sono vere e il voto finale sarà quello dell'ultimo \lstinline|if| soddisfatto:
+\begin{codice}
+char grade = 'F';
+int score = 0;
+scanf("%d", &score);
+if (score >= 90) grade = 'A';
+if (score >= 80) grade = 'B';
+if (score >= 70) grade = 'C';
+if (score >= 60) grade = 'D';
+printf("Your grade is %c", grade);     // con 95 stampa D!
+\end{codice}
+Con la catena \lstinline|else if| solo il primo ramo vero viene eseguito:
+\begin{codice}
+char grade = 'D';
+int score = 0;
+scanf("%d", &score);
+if (score >= 90)
+    grade = 'A';
+else if (score >= 80)
+    grade = 'B';
+else if (score >= 70)
+    grade = 'C';
+else if (score >= 60)
+    grade = 'D';
+printf("Your grade is %c", grade);
+\end{codice}
+
+\begin{osservazione}
+Nelle slide l'ultimo confronto era scritto \lstinline|if (score >= 60);| con un punto e virgola finale: sarebbe un'istruzione vuota (errore comune descritto più sotto). Qui è stato tolto.
+\end{osservazione}
+
+\subsubsection{Attenzione all'annidamento}
+
+Le due forme seguenti sono \emph{equivalenti}, perché l'\lstinline|else| si associa sempre all'ultimo \lstinline|if| senza \lstinline|else|:
+\begin{codice}
+if (x > 10) {
+    if (x < 20)
+        printf("x is between 10 and 20");
+    else
+        printf("x is greater than 20");
+}
+\end{codice}
+\begin{codice}
+if (x > 10)
+    if (x < 20)
+        printf("x is between 10 and 20");
+    else
+        printf("x is greater than 20");
+\end{codice}
+Invece, \emph{racchiudendo} il primo \lstinline|if| interno in un blocco, l'\lstinline|else| si associa all'\lstinline|if| esterno:
+\begin{codice}
+if (x > 10) {
+    if (x < 20)
+        printf("x is between 10 and 20");
+}
+else
+    printf("x is less than 10");      // in realtà: x <= 10
+\end{codice}
+
+\subsubsection{Errori comuni}
+
+\begin{enumerate}
+    \item \emph{Punto e virgola dopo la condizione.} L'istruzione vuota diventa il corpo dell'\lstinline|if|, e la \lstinline|printf| viene eseguita sempre:
+\begin{codice}
+if (age >= 18);                       // il ';' chiude l'if
+    printf("You can drink!\n");       // stampata sempre
+\end{codice}
+    \item \emph{Più istruzioni senza blocco.} Solo la prima istruzione dipende dall'\lstinline|if|; la seconda viene sempre eseguita:
+\begin{codice}
+if (age >= 18)
+    printf("You can drink!\n");
+    printf("Age greater than 18\n");  // stampata sempre
+\end{codice}
+    \item \emph{\lstinline|else| con condizione.} Un \lstinline|else| non può avere una condizione:
+\begin{codice}
+if (a < b)
+    { /* ... */ }
+else if (a > b)
+    { /* ... */ }
+else (a == b)                         // ERRORE: else non ha condizione
+    { /* ... */ }
+\end{codice}
+    \item \emph{Confronti concatenati.} L'operatore \lstinline|>| è associativo da sinistra a destra, quindi con \lstinline|x = 15|:
+\begin{codice}
+int x = 15;
+if (20 > x > 10)                      // (20 > x) > 10  ->  1 > 10  ->  falso
+    printf("x is between 10 and 20");
+\end{codice}
+    L'espressione \lstinline|20 > x| è vera ($1$), e poi $1 > 10$ è falso ($0$). La forma corretta usa un operatore logico:
+\begin{codice}
+if (x > 10 && x < 20)
+    printf("x is between 10 and 20");
+\end{codice}
+\end{enumerate}
+Regole pratiche: (1) se ci sono più casi, un \lstinline|if| per ciascuno; (2) se la condizione è lunga, scomporla e usare gli operatori logici.
+
+\subsubsection{Cicli infiniti e overflow}
+
+\begin{codice}
+#include <stdio.h>
+#include <stdlib.h>
+int main() {
+    int i = 1;
+    while (1) {
+        i++;
+        if (i < 0) {
+            printf("%d\n", i);
+            break;
+        }
+    }
+}
+\end{codice}
+Il ciclo sembra infinito, ma \lstinline|i| continua a crescere fino a superare il massimo valore rappresentabile: la slide mostra l'output $-2147483648$. Questo è l'\emph{overflow}. Con un \lstinline|int| in complemento a due a $32$ bit:
+\begin{center}
+\small
+\begin{tabular}{@{}ll@{}}
+\texttt{01111111 11111111 11111111 11111111} & $2\,147\,483\,647$ \\
+\texttt{01111111 11111111 11111111 11111110} & $2\,147\,483\,646$ \\
+\dots & \dots \\
+\texttt{00000000 00000000 00000000 00000001} & $1$ \\
+\texttt{00000000 00000000 00000000 00000000} & $0$ \\
+\texttt{10000000 00000000 00000000 00000000} & $-2\,147\,483\,648$ \\
+\texttt{10000000 00000000 00000000 00000001} & $-2\,147\,483\,647$ \\
+\dots & \dots \\
+\texttt{11111111 11111111 11111111 11111111} & $-1$ \\
+\end{tabular}
+\end{center}
+Aggiungendo $1$ al massimo $2\,147\,483\,647$ si passa al valore più negativo $-2\,147\,483\,648$.
+
+\begin{osservazione}
+Per gli interi \emph{con segno}, lo standard C considera l'overflow comportamento non definito: l'output mostrato è quello tipico su una macchina con complemento a due, non un risultato garantito.
+\end{osservazione}
+
 \end{document}

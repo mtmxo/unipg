@@ -1,0 +1,178 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\newrunin{osservazione}{Osservazione}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Limiti di esponenziali, logaritmi e trigonometriche}
+\author{Marco Cerbella}
+\date{Lezione 13 -- 5 novembre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Limiti delle funzioni esponenziali e logaritmiche}
+
+Sia $a > 0$, $a \neq 1$. Valgono
+\[
+\lim_{x\to+\infty} a^x = \begin{cases} +\infty & a > 1 \\ 0 & 0 < a < 1 \end{cases}
+\qquad
+\lim_{x\to-\infty} a^x = \begin{cases} 0 & a > 1 \\ +\infty & 0 < a < 1 \end{cases}
+\]
+\[
+\lim_{x\to+\infty} \log_a x = \begin{cases} +\infty & a > 1 \\ -\infty & 0 < a < 1 \end{cases}
+\qquad
+\lim_{x\to 0^+} \log_a x = \begin{cases} -\infty & a > 1 \\ +\infty & 0 < a < 1 \end{cases}
+\]
+Il grafico di $a^x$ passa per $(0, 1)$, quello di $\log_a x$ per $(1, 0)$.
+
+\begin{esempio}[Giustificazione dei limiti dell'esponenziale]
+Se $0 < a < 1$ si pone $a = \dfrac{1}{b}$ con $b > 1$, e quindi $a^x = \left(\dfrac{1}{b}\right)^x = \dfrac{1}{b^x}$.
+\begin{itemize}
+  \item $0 < a < 1$, $x \to +\infty$: $a^x = \dfrac{1}{b^x} \to 0$, perché $b^x \to +\infty$ ($b > 1$).
+  \item $a > 1$, $x \to -\infty$: si pone $x = -z$ con $z > 0$ (e $z \to +\infty$); allora $a^x = a^{-z} = \dfrac{1}{a^z} \to 0$.
+  \item $0 < a < 1$, $x \to -\infty$: $a = \dfrac{1}{b}$, $x = -z$, $z > 0$, da cui $a^x = \left(\dfrac{1}{b}\right)^{-z} = \dfrac{1}{b^{-z}} = b^z \to +\infty$.
+\end{itemize}
+\end{esempio}
+
+\begin{esempio}[Giustificazione dei limiti del logaritmo]
+Sia $\log_a x = c \iff a^c = x$.
+\begin{itemize}
+  \item Se $a > 1$ e $x \to +\infty$, allora $c \to +\infty$.
+  \item Se $0 < a < 1$ e $x \to +\infty$: posto $a = \dfrac{1}{b}$ con $b > 1$, si ha $\log_{1/b} x = c \iff \left(\dfrac{1}{b}\right)^c = x$. Il limite $x \to +\infty$ è possibile solo se $c < 0$, quindi $c \to -\infty$: infatti se $c < 0$, $c = -d$ con $d > 0$, e $\left(\dfrac{1}{b}\right)^c = \left(\dfrac{1}{b}\right)^{-d} = b^d$.
+  \item Se $a > 1$ e $x \to 0^+$: $c < 0$ e $c \to -\infty$.
+  \item Se $0 < a < 1$ e $x \to 0^+$: $c > 0$ e $c \to +\infty$. Infatti $\left(\dfrac{1}{b}\right)^c = x \to 0$, cioè $\dfrac{1}{b^c} \to 0$, cioè $b^c \to +\infty$, cioè $c \to +\infty$.
+\end{itemize}
+\end{esempio}
+
+\section{Esempi di limiti con somme}
+
+\begin{esempio}
+\begin{itemize}
+  \item $\displaystyle\lim_{x\to+\infty}\left(\frac{1}{x} + e^x\right) = +\infty$, perché $\frac{1}{x} \to 0$ e $e^x \to +\infty$ ($e > 1$).
+  \item $\displaystyle\lim_{x\to-\infty}\left(\frac{1}{x} + e^x\right) = 0$, perché $\frac{1}{x} \to 0$ e $e^x \to 0$.
+  \item $\displaystyle\lim_{x\to+\infty}\left(\frac{1}{x} + e^{-x}\right) = 0$, perché $\frac{1}{x} \to 0$ e $e^{-x} \to 0$.
+  \item $\displaystyle\lim_{x\to+\infty}\left(x + \ln x\right) = +\infty$, perché $x \to +\infty$ e $\ln x \to +\infty$ (logaritmo in base $e > 1$).
+  \item $\displaystyle\lim_{x\to 0^+}\left(x + \ln x\right) = -\infty$, perché $x \to 0$ e $\ln x \to -\infty$.
+\end{itemize}
+\end{esempio}
+
+\section{Limiti delle funzioni trigonometriche}
+
+\[
+\lim_{x\to\pm\infty}\sin x, \qquad \lim_{x\to\pm\infty}\cos x, \qquad \lim_{x\to\pm\infty}\tan x \qquad\text{non esistono.}
+\]
+\[
+\lim_{x\to\left(\frac{\pi}{2} + k\pi\right)^{\pm}} \tan x = \mp\infty, \quad k \in \mathbb{Z}, \qquad\qquad
+\lim_{x\to\pm\infty}\arctan x = \pm\frac{\pi}{2}.
+\]
+
+\begin{proposizione}
+Tutte le funzioni periodiche \emph{non} hanno limite per $x \to +\infty$ o $x \to -\infty$, tranne $f(x) = a$ con $a \in \mathbb{R}$, funzione costante, per cui $\displaystyle\lim_{x\to\pm\infty} f(x) = \lim_{x\to\pm\infty} a = a$.
+\end{proposizione}
+
+\begin{esempio}[Limite della tangente in $\frac{\pi}{2}$]
+Sulla circonferenza goniometrica sia $A = (1, 0)$ e $Q$ l'intersezione tra la retta tangente in $A$ e la retta per l'origine che forma l'angolo $x$: $\tan x = \overline{AQ}$.
+\begin{itemize}
+  \item Se $0 < x < \frac{\pi}{2}$ e $x \to \frac{\pi}{2}$, il punto $Q$ sale lungo la tangente: $\tan x \to +\infty$.
+  \item Se $\frac{\pi}{2} < x < \pi$ e $x \to \frac{\pi}{2}$, il punto $Q'$ scende, $\tan x' = \overline{AQ'}$ (con segno negativo): $\tan x \to -\infty$.
+\end{itemize}
+Quindi $\displaystyle\lim_{x\to\frac{\pi}{2}^-}\tan x = +\infty$ e $\displaystyle\lim_{x\to\frac{\pi}{2}^+}\tan x = -\infty$.
+\end{esempio}
+
+\end{document}

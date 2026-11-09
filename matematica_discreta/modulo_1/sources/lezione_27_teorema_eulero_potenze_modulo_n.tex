@@ -1,0 +1,178 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\newrunin{osservazione}{Osservazione}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Teorema di Eulero e potenze modulo $n$}
+\author{Marco Cerbella}
+\date{Lezione 14 -- 3 novembre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Calcolo di $\varphi(n)$}
+
+\begin{teorema}[Corollario]
+Sia $n = p_1^{h_1}\cdot p_2^{h_2}\cdots p_r^{h_r}$ la fattorizzazione in primi. Allora
+\[
+  \varphi(n) = \varphi(p_1^{h_1})\cdot\varphi(p_2^{h_2})\cdots\varphi(p_r^{h_r}) = \left(p_1^{h_1} - p_1^{h_1 - 1}\right)\left(p_2^{h_2} - p_2^{h_2 - 1}\right)\cdots\left(p_r^{h_r} - p_r^{h_r - 1}\right).
+\]
+\end{teorema}
+
+\begin{esempio}
+\begin{align*}
+  \varphi(1000) &= \varphi(10^3) = \varphi(5^3\cdot 2^3) = \varphi(5^3)\,\varphi(2^3)\\
+  &= (5^3 - 5^2)(2^3 - 2^2) = (125 - 25)(8 - 4) = 100\cdot 4 = 400,\\
+  \varphi(360) &= \varphi(2^3\cdot 3^2\cdot 5) = \varphi(2^3)\,\varphi(3^2)\,\varphi(5)\\
+  &= (2^3 - 2^2)(3^2 - 3)(5 - 1) = 4\cdot 6\cdot 4 = 96 .
+\end{align*}
+\end{esempio}
+
+\section{Teorema di Eulero}
+
+\begin{teorema}[di Eulero]
+Sia $n > 1$ e $a \in \mathbb{Z}$. Se $\operatorname{MCD}(a, n) = 1$ allora
+\[
+  a^{\varphi(n)} \equiv 1 \pmod n .
+\]
+\end{teorema}
+
+(Per $n = p$ primo, $\varphi(p) = p - 1$ e si ritrova il corollario del piccolo teorema di Fermat.)
+
+\section{Come calcolare le potenze modulo $n$}
+
+Si vuole calcolare $a^b \bmod n$.
+\begin{enumerate}
+  \item Se $a > n$, si riduce la base modulo $n$: $a = n\cdot q + a'$, e $a^b \equiv (a')^b \pmod n$.
+  \item Se $\operatorname{MCD}(a', n) = 1$, si applica il teorema di Eulero: si calcola $\varphi(n)$ e si divide $b$ per $\varphi(n)$: $b = q\cdot\varphi(n) + r$. Allora
+  \[
+    a^b \equiv (a')^b \equiv (a')^{q\varphi(n) + r} = \left((a')^{\varphi(n)}\right)^q\cdot(a')^r \equiv (a')^r \pmod n,
+  \]
+  perché $(a')^{\varphi(n)} \equiv 1 \pmod n$.
+\end{enumerate}
+
+\begin{esempio}[$187^{5\,867\,432} \bmod 12$]
+Si riduce la base modulo $12$: $187 = 12\cdot 15 + 7$, quindi $187^{5\,867\,432} \equiv 7^{5\,867\,432} \pmod{12}$. Si verifica che $\operatorname{MCD}(7, 12) = 1$, quindi si può applicare il teorema di Eulero:
+\[
+  \varphi(12) = \varphi(3\cdot 2^2) = \varphi(3)\,\varphi(2^2) = (3 - 1)(2^2 - 2) = 4 .
+\]
+Poiché $5\,867\,432$ è divisibile per $4$ (il resto è $0$), 
+\[
+  187^{5\,867\,432} \equiv 7^{5\,867\,432} \equiv 7^0 \equiv 1 \pmod{12} .
+\]
+\end{esempio}
+
+\begin{esempio}[$4^{48\,642\,369} - 33^{1\,759\,468} \bmod 10$]
+Qui $\operatorname{MCD}(4, 10) = 2$: i numeri non sono coprimi, quindi \emph{non} si può applicare il teorema di Eulero. Si cercano le potenze di $4$ modulo $10$:
+\[
+  \begin{gathered}
+  4^0 = 1,\quad 4^1 = 4,\quad 4^2 = 16 \equiv 6,\\
+  4^3 = 4^2\cdot 4 \equiv 6\cdot 4 = 24 \equiv 4,\quad 4^4 = 4^3\cdot 4 \equiv 4\cdot 4 = 16 \equiv 6 \pmod{10}.
+  \end{gathered}
+\]
+Le potenze pari di $4$ sono $\equiv 6$, quelle dispari $\equiv 4 \pmod{10}$. L'esponente $48\,642\,369$ è dispari, quindi $4^{48\,642\,369} \equiv 4 \pmod{10}$.
+
+Per l'altro termine: $33 \equiv 3 \pmod{10}$ e $\operatorname{MCD}(3, 10) = 1$, quindi si può applicare Eulero con $\varphi(10) = \varphi(2)\,\varphi(5) = (2 - 1)(5 - 1) = 4$. Poiché $1\,759\,468$ è divisibile per $4$ (resto $0$),
+\[
+  33^{1\,759\,468} \equiv 3^{1\,759\,468} \equiv 3^0 \equiv 1 \pmod{10}.
+\]
+In conclusione $4^{48\,642\,369} - 33^{1\,759\,468} \equiv 4 - 1 \equiv 3 \pmod{10}$.
+\end{esempio}
+
+\end{document}

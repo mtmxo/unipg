@@ -3085,4 +3085,202 @@ Disegnando i grafici di $x$, $x^2$, $x^3$, $x^4$ si vede che:
 \end{itemize}
 Per $x > 1$ si ha invece $x < x^2 < x^3 < x^4$.
 
+\section[Limiti di esponenziali, logaritmi e trigonometriche (Lezione 13 -- 5 novembre 2026)]{Limiti di esponenziali, logaritmi e trigonometriche}
+\noindent\emph{Lezione 13 -- 5 novembre 2026}
+\subsection{Limiti delle funzioni esponenziali e logaritmiche}
+
+Sia $a > 0$, $a \neq 1$. Valgono
+\[
+\lim_{x\to+\infty} a^x = \begin{cases} +\infty & a > 1 \\ 0 & 0 < a < 1 \end{cases}
+\qquad
+\lim_{x\to-\infty} a^x = \begin{cases} 0 & a > 1 \\ +\infty & 0 < a < 1 \end{cases}
+\]
+\[
+\lim_{x\to+\infty} \log_a x = \begin{cases} +\infty & a > 1 \\ -\infty & 0 < a < 1 \end{cases}
+\qquad
+\lim_{x\to 0^+} \log_a x = \begin{cases} -\infty & a > 1 \\ +\infty & 0 < a < 1 \end{cases}
+\]
+Il grafico di $a^x$ passa per $(0, 1)$, quello di $\log_a x$ per $(1, 0)$.
+
+\begin{esempio}[Giustificazione dei limiti dell'esponenziale]
+Se $0 < a < 1$ si pone $a = \dfrac{1}{b}$ con $b > 1$, e quindi $a^x = \left(\dfrac{1}{b}\right)^x = \dfrac{1}{b^x}$.
+\begin{itemize}
+  \item $0 < a < 1$, $x \to +\infty$: $a^x = \dfrac{1}{b^x} \to 0$, perché $b^x \to +\infty$ ($b > 1$).
+  \item $a > 1$, $x \to -\infty$: si pone $x = -z$ con $z > 0$ (e $z \to +\infty$); allora $a^x = a^{-z} = \dfrac{1}{a^z} \to 0$.
+  \item $0 < a < 1$, $x \to -\infty$: $a = \dfrac{1}{b}$, $x = -z$, $z > 0$, da cui $a^x = \left(\dfrac{1}{b}\right)^{-z} = \dfrac{1}{b^{-z}} = b^z \to +\infty$.
+\end{itemize}
+\end{esempio}
+
+\begin{esempio}[Giustificazione dei limiti del logaritmo]
+Sia $\log_a x = c \iff a^c = x$.
+\begin{itemize}
+  \item Se $a > 1$ e $x \to +\infty$, allora $c \to +\infty$.
+  \item Se $0 < a < 1$ e $x \to +\infty$: posto $a = \dfrac{1}{b}$ con $b > 1$, si ha $\log_{1/b} x = c \iff \left(\dfrac{1}{b}\right)^c = x$. Il limite $x \to +\infty$ è possibile solo se $c < 0$, quindi $c \to -\infty$: infatti se $c < 0$, $c = -d$ con $d > 0$, e $\left(\dfrac{1}{b}\right)^c = \left(\dfrac{1}{b}\right)^{-d} = b^d$.
+  \item Se $a > 1$ e $x \to 0^+$: $c < 0$ e $c \to -\infty$.
+  \item Se $0 < a < 1$ e $x \to 0^+$: $c > 0$ e $c \to +\infty$. Infatti $\left(\dfrac{1}{b}\right)^c = x \to 0$, cioè $\dfrac{1}{b^c} \to 0$, cioè $b^c \to +\infty$, cioè $c \to +\infty$.
+\end{itemize}
+\end{esempio}
+
+\subsection{Esempi di limiti con somme}
+
+\begin{esempio}
+\begin{itemize}
+  \item $\displaystyle\lim_{x\to+\infty}\left(\frac{1}{x} + e^x\right) = +\infty$, perché $\frac{1}{x} \to 0$ e $e^x \to +\infty$ ($e > 1$).
+  \item $\displaystyle\lim_{x\to-\infty}\left(\frac{1}{x} + e^x\right) = 0$, perché $\frac{1}{x} \to 0$ e $e^x \to 0$.
+  \item $\displaystyle\lim_{x\to+\infty}\left(\frac{1}{x} + e^{-x}\right) = 0$, perché $\frac{1}{x} \to 0$ e $e^{-x} \to 0$.
+  \item $\displaystyle\lim_{x\to+\infty}\left(x + \ln x\right) = +\infty$, perché $x \to +\infty$ e $\ln x \to +\infty$ (logaritmo in base $e > 1$).
+  \item $\displaystyle\lim_{x\to 0^+}\left(x + \ln x\right) = -\infty$, perché $x \to 0$ e $\ln x \to -\infty$.
+\end{itemize}
+\end{esempio}
+
+\subsection{Limiti delle funzioni trigonometriche}
+
+\[
+\lim_{x\to\pm\infty}\sin x, \qquad \lim_{x\to\pm\infty}\cos x, \qquad \lim_{x\to\pm\infty}\tan x \qquad\text{non esistono.}
+\]
+\[
+\lim_{x\to\left(\frac{\pi}{2} + k\pi\right)^{\pm}} \tan x = \mp\infty, \quad k \in \mathbb{Z}, \qquad\qquad
+\lim_{x\to\pm\infty}\arctan x = \pm\frac{\pi}{2}.
+\]
+
+\begin{proposizione}
+Tutte le funzioni periodiche \emph{non} hanno limite per $x \to +\infty$ o $x \to -\infty$, tranne $f(x) = a$ con $a \in \mathbb{R}$, funzione costante, per cui $\displaystyle\lim_{x\to\pm\infty} f(x) = \lim_{x\to\pm\infty} a = a$.
+\end{proposizione}
+
+\begin{esempio}[Limite della tangente in $\frac{\pi}{2}$]
+Sulla circonferenza goniometrica sia $A = (1, 0)$ e $Q$ l'intersezione tra la retta tangente in $A$ e la retta per l'origine che forma l'angolo $x$: $\tan x = \overline{AQ}$.
+\begin{itemize}
+  \item Se $0 < x < \frac{\pi}{2}$ e $x \to \frac{\pi}{2}$, il punto $Q$ sale lungo la tangente: $\tan x \to +\infty$.
+  \item Se $\frac{\pi}{2} < x < \pi$ e $x \to \frac{\pi}{2}$, il punto $Q'$ scende, $\tan x' = \overline{AQ'}$ (con segno negativo): $\tan x \to -\infty$.
+\end{itemize}
+Quindi $\displaystyle\lim_{x\to\frac{\pi}{2}^-}\tan x = +\infty$ e $\displaystyle\lim_{x\to\frac{\pi}{2}^+}\tan x = -\infty$.
+\end{esempio}
+
+\section[Forma indeterminata $\infty-\infty$ e teorema del confronto (Lezione 13 -- 5 novembre 2026)]{Forma indeterminata $\infty-\infty$ e teorema del confronto}
+\noindent\emph{Lezione 13 -- 5 novembre 2026}
+\subsection{Forma indeterminata $\infty - \infty$}
+
+Consideriamo le funzioni
+\[
+f_1(x) = x + x^2, \qquad f_2(x) = x + 1, \qquad f_3(x) = x + \frac{1}{x}, \qquad g(x) = x,
+\]
+con $\displaystyle\lim_{x\to+\infty} g(x) = +\infty$. Si ha
+\[
+\lim_{x\to+\infty} f_1(x) = +\infty, \qquad \lim_{x\to+\infty} f_2(x) = +\infty, \qquad \lim_{x\to+\infty} f_3(x) = +\infty \quad\left(\tfrac{1}{x} \to 0\right).
+\]
+Quindi $\displaystyle\lim_{x\to+\infty}\big(f_i(x) - g(x)\big)$ è una forma indeterminata $\infty - \infty$. Eppure i tre limiti hanno risultati diversi:
+\begin{align*}
+  \lim_{x\to+\infty}\big(f_1(x) - g(x)\big) &= \lim_{x\to+\infty}(x + x^2 - x) = \lim_{x\to+\infty} x^2 = +\infty,\\
+  \lim_{x\to+\infty}\big(f_2(x) - g(x)\big) &= 1,\\
+  \lim_{x\to+\infty}\big(f_3(x) - g(x)\big) &= 0 .
+\end{align*}
+Per questo $\infty - \infty$ è una \emph{forma indeterminata}: il risultato dipende dalle funzioni coinvolte.
+
+\begin{esempio}[Raccoglimento]
+\[
+\lim_{x\to-\infty}\left(x + x^2\right) \quad (\text{F.I. } \infty - \infty): \qquad
+\lim_{x\to-\infty} x^2\left(\frac{x}{x^2} + \frac{x^2}{x^2}\right) = \lim_{x\to-\infty} x^2\left(\frac{1}{x} + 1\right) = +\infty ,
+\]
+perché $x^2 \to +\infty$ e la parentesi tende a $0 + 1 = 1$.
+\end{esempio}
+
+\begin{esempio}[Razionalizzazione]
+\[
+\lim_{x\to+\infty}\left(\sqrt{1 + x} - \sqrt{x}\right) \quad (\text{F.I. } \infty - \infty).
+\]
+Si moltiplica e divide per $\sqrt{1 + x} + \sqrt{x}$ e si usa $(a - b)(a + b) = a^2 - b^2$:
+\begin{align*}
+  \lim_{x\to+\infty}\left(\sqrt{1+x} - \sqrt{x}\right)\cdot\frac{\sqrt{1+x} + \sqrt{x}}{\sqrt{1+x} + \sqrt{x}}
+  &= \lim_{x\to+\infty}\frac{\left(\sqrt{1+x} - \sqrt{x}\right)\left(\sqrt{1+x} + \sqrt{x}\right)}{\sqrt{1+x} + \sqrt{x}}\\
+  &= \lim_{x\to+\infty}\frac{1 + x - x}{\sqrt{1+x} + \sqrt{x}}
+   = \lim_{x\to+\infty}\frac{1}{\sqrt{1+x} + \sqrt{x}} = 0,
+\end{align*}
+perché al denominatore $\sqrt{1+x} + \sqrt{x} \to +\infty + \infty = +\infty$.
+\end{esempio}
+
+\subsection{Teorema del confronto}
+
+\begin{teorema}[del confronto]
+Siano $f : D_f \to \mathbb{R}$, $h : D_h \to \mathbb{R}$, $g : D_g \to \mathbb{R}$. Se
+\begin{enumerate}
+  \item per $x \to c$, $f(x) \to \ell$ e $g(x) \to \ell$;
+  \item esiste un intorno $I(c)$ di $c$ nel quale siano definite le tre funzioni (tranne al più nel punto $c$) e tale che
+  \[
+    f(x) \le h(x) \le g(x) \qquad \forall x \in I(c)\setminus\{c\},
+  \]
+\end{enumerate}
+allora anche $h(x) \to \ell$ per $x \to c$.
+\end{teorema}
+
+Le due funzioni $f$ e $g$ «stringono» $h$: se $f(x) \to \ell$ e $g(x) \to \ell$ e $f(x) \le h(x) \le g(x)$, allora anche $h(x) \to \ell$.
+
+\begin{proof}
+Vogliamo dimostrare che $\forall\varepsilon > 0$ esiste $I(c)$ (un intervallo $]c - \delta, c + \delta[$) tale che $\forall x \in I(c)\setminus\{c\}$ si abbia $|h(x) - \ell| < \varepsilon$.
+
+Fissiamo $\varepsilon > 0$. Poiché $\displaystyle\lim_{x\to c} f(x) = \ell$, esiste un intorno $I'(c)$ tale che $\forall x \in I'(c)\setminus\{c\}$, $|f(x) - \ell| < \varepsilon$, cioè
+\[
+  -\varepsilon < f(x) - \ell < \varepsilon \quad\Longrightarrow\quad -\varepsilon + \ell < f(x) < \varepsilon + \ell .
+\]
+Poiché $\displaystyle\lim_{x\to c} g(x) = \ell$, esiste un intorno $I''(c)$ tale che $\forall x \in I''(c)\setminus\{c\}$, $|g(x) - \ell| < \varepsilon$, cioè
+\[
+  -\varepsilon + \ell < g(x) < \varepsilon + \ell .
+\]
+Dall'ipotesi 2, $\forall x \in I(c)\cap I'(c)\cap I''(c)\setminus\{c\}$ si ha
+\[
+  -\varepsilon + \ell < f(x) \le h(x) \le g(x) < \ell + \varepsilon ,
+\]
+dove la prima disuguaglianza vale perché $x \in I'(c)$, la seconda e la terza perché $x \in I(c)$, la quarta perché $x \in I''(c)$. Posto $I'''(c) = I(c)\cap I'(c)\cap I''(c)$, per ogni $x \in I'''(c)\setminus\{c\}$ si ha
+\[
+  -\varepsilon + \ell < h(x) < \ell + \varepsilon \iff |h(x) - \ell| < \varepsilon .
+\]
+Quindi $h(x) \to \ell$ per $x \to c$.
+\end{proof}
+
+\section[Il limite notevole $\sin x / x$ (Lezione 13 -- 5 novembre 2026)]{Il limite notevole $\sin x / x$}
+\noindent\emph{Lezione 13 -- 5 novembre 2026}
+\subsection{Il limite notevole $\frac{\sin x}{x}$}
+
+\begin{teorema}[Limite notevole]
+\[
+  \lim_{x\to 0}\frac{\sin x}{x} = 1 .
+\]
+\end{teorema}
+
+Si tratta di una forma indeterminata $\frac{0}{0}$. La dimostrazione usa la circonferenza goniometrica e il teorema del confronto. Sia $0 < x < \frac{\pi}{2}$, $A = (1, 0)$, $P$ il punto della circonferenza che forma con l'asse $x$ l'angolo $x$ e $H$ la sua proiezione sull'asse delle ascisse. Si ha:
+\begin{itemize}
+  \item $\overline{PH} = \sin x$;
+  \item l'arco $\widehat{PA}$ ha lunghezza $x$, perché è l'arco sotteso dall'angolo $x$ misurato in radianti (raggio $1$).
+\end{itemize}
+
+\paragraph{Passo 1: $\sin x < x$.} Il segmento $\overline{PH}$ è un cateto e $\overline{PA}$ è l'ipotenusa di un triangolo rettangolo, quindi $\overline{PH} < \overline{PA}$. Inoltre la distanza tra due punti (in questo caso $P$ e $A$) in linea retta è sempre più corta di una curva che li unisce: $\overline{PA} < \widehat{PA}$. Dunque
+\[
+  \sin x = \overline{PH} < \overline{PA} < \widehat{PA} = x .
+\]
+
+\paragraph{Passo 2: $\tan x > x$.} Sia $Q$ l'intersezione tra la retta per $O$ e $P$ e la retta tangente alla circonferenza in $A$: $\tan x = \overline{AQ}$ e $\sin x = \overline{PH}$. Il triangolo $OAQ$ contiene il settore circolare $OPA$, quindi
+\[
+  \text{area}(OAQ) > \text{area}(\widehat{OPA}) .
+\]
+L'area del triangolo è $\frac{1}{2}\,\overline{OA}\cdot\overline{AQ} = \frac{1}{2}\cdot 1\cdot\tan x$, e l'area del settore è $\frac{1}{2}\,\widehat{PA}\cdot\overline{OA}^{\,2} = \frac{1}{2}\cdot x\cdot 1$. Quindi
+\[
+  \frac{1}{2}\tan x > \frac{1}{2}\,x \quad\Longrightarrow\quad \tan x > x .
+\]
+
+\paragraph{Passo 3: confronto.} Dividendo $\sin x < x$ per $x > 0$:
+\[
+  \frac{\sin x}{x} < \frac{x}{x} = 1 .
+\]
+Da $\tan x > x$, cioè $\dfrac{\sin x}{\cos x} > x$, dividendo per $x$ si ottiene $\dfrac{\sin x}{x} > \cos x$. Quindi, in un intorno destro di $0$,
+\[
+  \cos x < \frac{\sin x}{x} < 1 .
+\]
+Per $x \to 0$ si ha $\cos x \to \cos 0 = 1$ e l'ultima funzione è la costante $1 \to 1$. Per il teorema del confronto,
+\[
+  \lim_{x\to 0^+}\frac{\sin x}{x} = 1 .
+\]
+
+\begin{osservazione}
+Per $x \to 0^-$ basta osservare che $\dfrac{\sin(-x)}{-x} = \dfrac{\sin x}{x}$, cioè la funzione è pari; la slide svolge il caso $x > 0$. Il limite bilatero vale allora $1$.
+\end{osservazione}
+
 \end{document}

@@ -3299,4 +3299,276 @@ L'ultimo resto non nullo è $1 = \operatorname{MCD}(30, 13)$, con $s = -3$ e $t 
 Quindi $[7]_{30}$ è l'inverso di $[13]_{30}$. Verifica: $[7]\cdot[13] = [91] = [1]_{30}$, perché $91 = 3\cdot 30 + 1$.
 \end{esempio}
 
+\section[$\mathbb{Z}_p$ e piccolo teorema di Fermat (Lezione 14 -- 3 novembre 2026)]{$\mathbb{Z}_p$ e piccolo teorema di Fermat}
+\noindent\emph{Lezione 14 -- 3 novembre 2026}
+\subsection{$\mathbb{Z}_p$ con $p$ primo}
+
+\begin{osservazione}
+Sia $p$ un numero primo. Allora $[c] \in \mathbb{Z}_p = \{[0], [1], \dots, [p-1]\}$ e, se $[c] \neq [0]$, vale
+\[
+  \operatorname{MCD}(c, p) = 1 \iff [c] \text{ è invertibile.}
+\]
+Quindi $(\mathbb{Z}_p, +, \cdot)$ è un \emph{campo}.
+\end{osservazione}
+
+\begin{proposizione}
+Sia $p$ primo, $p > 0$, e $x, y \in \mathbb{Z}$. Allora
+\[
+  (x + y)^p \equiv x^p + y^p \pmod p .
+\]
+\end{proposizione}
+
+\begin{proof}
+Per lo sviluppo del binomio di Newton,
+\[
+  (x + y)^p = \sum_{k=0}^{p} \binom{p}{k} x^k y^{p-k} = x^p + y^p + \sum_{k=1}^{p-1}\binom{p}{k} x^k y^{p-k},
+\]
+dove si è usato $\binom{p}{p} = 1 = \binom{p}{0}$. Per $1 \le k \le p-1$,
+\[
+  \binom{p}{k} = \frac{p!}{k!\,(p-k)!} = \frac{p\,(p-1)\cdots(p-k+1)\,(p-k)!}{k!\,(p-k)!} = \frac{p\,(p-1)\cdots(p-k+1)}{k!} .
+\]
+Il numero $p$ compare al numeratore, ma non divide $k!$ (con $k < p$ e $p$ primo), quindi $p \mid \binom{p}{k}$. Dunque, modulo $p$, tutti i termini della sommatoria sono $\equiv 0$ e
+\[
+  (x + y)^p \equiv x^p + y^p \pmod p . \qedhere
+\]
+\end{proof}
+
+\begin{osservazione}
+In termini di classi: $\big([x + y]_p\big)^p = \big[(x + y)^p\big]_p = \big[x^p + y^p\big]_p$.
+\end{osservazione}
+
+\subsection{Piccolo teorema di Fermat}
+
+\begin{teorema}[Piccolo teorema di Fermat]
+Sia $a \in \mathbb{Z}$ e $p$ primo. Allora
+\[
+  a^p \equiv a \pmod p .
+\]
+\end{teorema}
+
+\begin{proof}
+Sia dapprima $a \ge 0$: si procede per induzione su $a$ (con $p$ primo, $p > 0$).
+
+\emph{Caso base:} $a = 0$: $0^p \equiv 0 \pmod p$.
+
+\emph{Passo induttivo.} Supponiamo vero $a^p \equiv a \pmod p$ (ipotesi induttiva) e dimostriamo $(a+1)^p \equiv a + 1 \pmod p$. Per la proposizione precedente e per l'ipotesi induttiva,
+\[
+  (a + 1)^p \equiv a^p + 1^p \equiv a + 1 \pmod p ,
+\]
+quindi il risultato vale per ogni $a \ge 0$.
+
+Se $a < 0$, allora $(-a) > 0$ e vale il risultato per i numeri non negativi. Si ha
+\[
+  0 = 0^p = \big(a + (-a)\big)^p \equiv a^p + (-a)^p \equiv a^p + (-a) = a^p - a \pmod p ,
+\]
+cioè $0 \equiv a^p - a \pmod p$, cioè $a \equiv a^p \pmod p$.
+\end{proof}
+
+\begin{teorema}[Corollario]
+Se $\operatorname{MCD}(a, p) = 1$ allora $a^{p-1} \equiv 1 \pmod p$.
+\end{teorema}
+
+\begin{esempio}
+Il resto di $8^3$ diviso $3$: per il piccolo teorema di Fermat $8^3 \equiv 8 \equiv 2 \pmod 3$.
+
+$12\,440^3 \equiv\, ?\pmod 3$: poiché $12\,440 = 3\cdot 4146 + 2$, si ha $12\,440^3 \equiv 12\,440 \equiv 2 \pmod 3$.
+\end{esempio}
+
+\begin{esempio}[$4^{194} \bmod 7$]
+Usiamo il corollario: $\operatorname{MCD}(4, 7) = 1$, quindi $4^6 \equiv 1 \pmod 7$. Dividiamo $194$ per $6$: $194 = 6\cdot 32 + 2$. Allora
+\[
+  4^{194} = 4^{6\cdot 32 + 2} = \left(4^6\right)^{32}\cdot 4^2 \equiv 1^{32}\cdot 4^2 = 16 \equiv 2 \pmod 7 .
+\]
+\end{esempio}
+
+\begin{osservazione}
+Il corollario ha l'ipotesi $\operatorname{MCD}(a, p) = 1$. Per $a = 6$, $p = 3$: $6^3 \equiv 6 \pmod 3$ (piccolo teorema di Fermat) è vero, ma poiché $\operatorname{MCD}(6, 3) \neq 1$, la congruenza $6^2 \equiv 1 \pmod 3$ è \emph{falsa}: $6^2 = 36 \equiv 0 \pmod 3$.
+\end{osservazione}
+
+\section[Gruppo moltiplicativo di $\mathbb{Z}_n$ e funzione di Eulero (Lezione 14 -- 3 novembre 2026)]{Gruppo moltiplicativo di $\mathbb{Z}_n$ e funzione di Eulero}
+\noindent\emph{Lezione 14 -- 3 novembre 2026}
+\subsection{Il gruppo moltiplicativo di $\mathbb{Z}_n$}
+
+\begin{itemize}
+  \item $(\mathbb{Z}_n, \cdot)$ non è mai un gruppo, perché $[0]$ non è invertibile.
+  \item $(\mathbb{Z}_p\setminus\{[0]\}, \cdot)$ con $p$ primo è un gruppo (infatti $(\mathbb{Z}_p, +, \cdot)$ è un campo).
+  \item $(\mathbb{Z}_n\setminus\{[0]\}, \cdot)$ in generale non è un gruppo.
+\end{itemize}
+Possiamo però definire
+\[
+  \mathbb{Z}_n^* = \left\{ [a]_n : \operatorname{MCD}(a, n) = 1 \right\} \subset \mathbb{Z}_n .
+\]
+$(\mathbb{Z}_n^*, \cdot)$ è un gruppo, detto \emph{gruppo moltiplicativo di $\mathbb{Z}_n$}.
+
+\begin{esempio}
+\begin{itemize}
+  \item $\mathbb{Z}_p^* = \{[1], \dots, [p-1]\}$, con $p$ primo.
+  \item $\mathbb{Z}_6^* = \{[1], [5]\}$.
+  \item $\mathbb{Z}_9^* = \{[1], [2], [4], [5], [7], [8]\}$.
+\end{itemize}
+\end{esempio}
+
+\subsection{La funzione di Eulero}
+
+\begin{definizione}[Funzione di Eulero]
+Sia $n \ge 1$. La \emph{funzione di Eulero} $\varphi$ è
+\[
+  \varphi(n) = |\mathbb{Z}_n^*| = \Big|\big\{ a \mid 1 \le a \le n,\ \operatorname{MCD}(a, n) = 1 \big\}\Big| .
+\]
+\end{definizione}
+
+\begin{esempio}
+$\varphi(6) = 2$, \qquad $\varphi(9) = 6$.
+\end{esempio}
+
+\begin{osservazione}
+$\varphi(p) = p - 1$ se $p$ è primo, e $\varphi(p^2) = p^2 - p$.
+\end{osservazione}
+
+\begin{proposizione}
+Sia $p$ primo e $n \ge 1$ intero. Allora
+\[
+  \varphi(p^n) = p^n - p^{n-1} = p^{n-1}(p - 1) .
+\]
+\end{proposizione}
+
+\begin{proof}
+Tra $1$ e $p^n$ ci sono $p^n$ numeri. Quelli non coprimi con $p^n$ hanno la forma $k\cdot p$, e $k$ può avere tutti i valori da $1$ fino a $p^{n-1}$: ci sono $p^{n-1}$ possibili numeri non coprimi con $p^n$. Quindi $\varphi(p^n) = p^n - p^{n-1}$.
+\end{proof}
+
+\begin{esempio}
+$\varphi(125) = \varphi(5^3) = 5^3 - 5^2 = 125 - 25 = 100$.
+\end{esempio}
+
+\subsection{La biiezione $\mathbb{Z}_{nk} \to \mathbb{Z}_n \times \mathbb{Z}_k$}
+
+Consideriamo la funzione
+\[
+  \psi : \mathbb{Z}_{nk} \to \mathbb{Z}_n \times \mathbb{Z}_k, \qquad [a]_{nk} \mapsto \big([a]_n, [a]_k\big).
+\]
+
+\begin{esempio}
+\begin{itemize}
+  \item $\psi_1 : \mathbb{Z}_{12} \to \mathbb{Z}_3 \times \mathbb{Z}_4$:
+  \[
+    \begin{gathered}
+    [0]_{12} \mapsto ([0]_3, [0]_4), \quad [1]_{12} \mapsto ([1]_3, [1]_4), \quad [3]_{12} \mapsto ([0]_3, [3]_4),\\
+    [6]_{12} \mapsto ([0]_3, [2]_4), \quad [7]_{12} \mapsto ([1]_3, [3]_4).
+    \end{gathered}
+  \]
+  $\psi_1$ è biunivoca.
+  \item $\psi_2 : \mathbb{Z}_{12} \to \mathbb{Z}_6 \times \mathbb{Z}_2$:
+  \[
+    \begin{gathered}
+    [0]_{12} \mapsto ([0]_6, [0]_2), \quad [1]_{12} \mapsto ([1]_6, [1]_2), \quad [3]_{12} \mapsto ([3]_6, [1]_2),\\
+    [6]_{12} \mapsto ([0]_6, [0]_2), \quad [7]_{12} \mapsto ([1]_6, [1]_2).
+    \end{gathered}
+  \]
+  $\psi_2$ \emph{non è iniettiva} (ad esempio $[1]_{12}$ e $[7]_{12}$ hanno la stessa immagine) e \emph{non è suriettiva}: non esiste $[a]_{12}$ tale che $\psi_2([a]_{12}) = ([0]_6, [1]_2)$.
+\end{itemize}
+\end{esempio}
+
+\begin{osservazione}
+$[a]_{nk}$ è invertibile in $\mathbb{Z}_{nk}$ se e solo se $[a]_n$ è invertibile in $\mathbb{Z}_n$ e $[a]_k$ è invertibile in $\mathbb{Z}_k$.
+
+\emph{Dimostrazione.} $\Rightarrow$ Se $[a]_{nk}$ è invertibile in $\mathbb{Z}_{nk}$, allora $\operatorname{MCD}(a, nk) = 1$, quindi $a$ non ha fattori comuni con $n$ e non ne ha con $k$, cioè $\operatorname{MCD}(a, n) = 1$ e $\operatorname{MCD}(a, k) = 1$: $[a]_n$ è invertibile in $\mathbb{Z}_n$ e $[a]_k$ è invertibile in $\mathbb{Z}_k$. $\Leftarrow$ Viceversa, se $\operatorname{MCD}(a, n) = 1$ e $\operatorname{MCD}(a, k) = 1$, allora $a$ non ha fattori comuni né con $n$ né con $k$, quindi $\operatorname{MCD}(a, nk) = 1$.
+\end{osservazione}
+
+\begin{proposizione}
+Se $\operatorname{MCD}(n, k) = 1$, allora $\psi : \mathbb{Z}_{nk} \to \mathbb{Z}_n \times \mathbb{Z}_k$, $\psi([a]_{nk}) = ([a]_n, [a]_k)$, è \emph{biunivoca}.
+\end{proposizione}
+
+\begin{proof}
+Si ha $|\mathbb{Z}_{nk}| = nk$ e $|\mathbb{Z}_n\times\mathbb{Z}_k| = |\mathbb{Z}_n|\cdot|\mathbb{Z}_k| = nk$. Proviamo che $\psi$ è iniettiva. Siano $[a]_{nk}, [b]_{nk}$ tali che $\psi([a]_{nk}) = \psi([b]_{nk})$, cioè $([a]_n, [a]_k) = ([b]_n, [b]_k)$, cioè
+\[
+  \begin{cases} [a]_n = [b]_n \\ [a]_k = [b]_k \end{cases}
+  \quad\text{cioè}\quad
+  \begin{cases} a \equiv b \pmod n \\ a \equiv b \pmod k \end{cases}
+  \ \Rightarrow\ a \equiv b \pmod{\operatorname{mcm}(n, k)} .
+\]
+Ma $\operatorname{MCD}(n, k) = 1$, quindi $\operatorname{mcm}(n, k) = nk$, cioè $a \equiv b \pmod{nk}$, cioè $[a]_{nk} = [b]_{nk}$. Quindi $\psi$ è iniettiva; dominio e codominio hanno la stessa cardinalità finita, quindi $\psi$ è biunivoca.
+\end{proof}
+
+\begin{proposizione}[Moltiplicatività di $\varphi$]
+Sia $\operatorname{MCD}(n, k) = 1$. Allora
+\[
+  \varphi(nk) = \varphi(n)\cdot\varphi(k) .
+\]
+\end{proposizione}
+
+\begin{proof}
+$\varphi(nk) = |\mathbb{Z}_{nk}^*| = |\mathbb{Z}_n^*\times\mathbb{Z}_k^*| = |\mathbb{Z}_n^*|\cdot|\mathbb{Z}_k^*| = \varphi(n)\cdot\varphi(k)$, dove si è usato che, per l'osservazione precedente, la restrizione $\psi : \mathbb{Z}_{nk}^* \to \mathbb{Z}_n^*\times\mathbb{Z}_k^*$ è biunivoca.
+\end{proof}
+
+\section[Teorema di Eulero e potenze modulo $n$ (Lezione 14 -- 3 novembre 2026)]{Teorema di Eulero e potenze modulo $n$}
+\noindent\emph{Lezione 14 -- 3 novembre 2026}
+\subsection{Calcolo di $\varphi(n)$}
+
+\begin{teorema}[Corollario]
+Sia $n = p_1^{h_1}\cdot p_2^{h_2}\cdots p_r^{h_r}$ la fattorizzazione in primi. Allora
+\[
+  \varphi(n) = \varphi(p_1^{h_1})\cdot\varphi(p_2^{h_2})\cdots\varphi(p_r^{h_r}) = \left(p_1^{h_1} - p_1^{h_1 - 1}\right)\left(p_2^{h_2} - p_2^{h_2 - 1}\right)\cdots\left(p_r^{h_r} - p_r^{h_r - 1}\right).
+\]
+\end{teorema}
+
+\begin{esempio}
+\begin{align*}
+  \varphi(1000) &= \varphi(10^3) = \varphi(5^3\cdot 2^3) = \varphi(5^3)\,\varphi(2^3)\\
+  &= (5^3 - 5^2)(2^3 - 2^2) = (125 - 25)(8 - 4) = 100\cdot 4 = 400,\\
+  \varphi(360) &= \varphi(2^3\cdot 3^2\cdot 5) = \varphi(2^3)\,\varphi(3^2)\,\varphi(5)\\
+  &= (2^3 - 2^2)(3^2 - 3)(5 - 1) = 4\cdot 6\cdot 4 = 96 .
+\end{align*}
+\end{esempio}
+
+\subsection{Teorema di Eulero}
+
+\begin{teorema}[di Eulero]
+Sia $n > 1$ e $a \in \mathbb{Z}$. Se $\operatorname{MCD}(a, n) = 1$ allora
+\[
+  a^{\varphi(n)} \equiv 1 \pmod n .
+\]
+\end{teorema}
+
+(Per $n = p$ primo, $\varphi(p) = p - 1$ e si ritrova il corollario del piccolo teorema di Fermat.)
+
+\subsection{Come calcolare le potenze modulo $n$}
+
+Si vuole calcolare $a^b \bmod n$.
+\begin{enumerate}
+  \item Se $a > n$, si riduce la base modulo $n$: $a = n\cdot q + a'$, e $a^b \equiv (a')^b \pmod n$.
+  \item Se $\operatorname{MCD}(a', n) = 1$, si applica il teorema di Eulero: si calcola $\varphi(n)$ e si divide $b$ per $\varphi(n)$: $b = q\cdot\varphi(n) + r$. Allora
+  \[
+    a^b \equiv (a')^b \equiv (a')^{q\varphi(n) + r} = \left((a')^{\varphi(n)}\right)^q\cdot(a')^r \equiv (a')^r \pmod n,
+  \]
+  perché $(a')^{\varphi(n)} \equiv 1 \pmod n$.
+\end{enumerate}
+
+\begin{esempio}[$187^{5\,867\,432} \bmod 12$]
+Si riduce la base modulo $12$: $187 = 12\cdot 15 + 7$, quindi $187^{5\,867\,432} \equiv 7^{5\,867\,432} \pmod{12}$. Si verifica che $\operatorname{MCD}(7, 12) = 1$, quindi si può applicare il teorema di Eulero:
+\[
+  \varphi(12) = \varphi(3\cdot 2^2) = \varphi(3)\,\varphi(2^2) = (3 - 1)(2^2 - 2) = 4 .
+\]
+Poiché $5\,867\,432$ è divisibile per $4$ (il resto è $0$), 
+\[
+  187^{5\,867\,432} \equiv 7^{5\,867\,432} \equiv 7^0 \equiv 1 \pmod{12} .
+\]
+\end{esempio}
+
+\begin{esempio}[$4^{48\,642\,369} - 33^{1\,759\,468} \bmod 10$]
+Qui $\operatorname{MCD}(4, 10) = 2$: i numeri non sono coprimi, quindi \emph{non} si può applicare il teorema di Eulero. Si cercano le potenze di $4$ modulo $10$:
+\[
+  \begin{gathered}
+  4^0 = 1,\quad 4^1 = 4,\quad 4^2 = 16 \equiv 6,\\
+  4^3 = 4^2\cdot 4 \equiv 6\cdot 4 = 24 \equiv 4,\quad 4^4 = 4^3\cdot 4 \equiv 4\cdot 4 = 16 \equiv 6 \pmod{10}.
+  \end{gathered}
+\]
+Le potenze pari di $4$ sono $\equiv 6$, quelle dispari $\equiv 4 \pmod{10}$. L'esponente $48\,642\,369$ è dispari, quindi $4^{48\,642\,369} \equiv 4 \pmod{10}$.
+
+Per l'altro termine: $33 \equiv 3 \pmod{10}$ e $\operatorname{MCD}(3, 10) = 1$, quindi si può applicare Eulero con $\varphi(10) = \varphi(2)\,\varphi(5) = (2 - 1)(5 - 1) = 4$. Poiché $1\,759\,468$ è divisibile per $4$ (resto $0$),
+\[
+  33^{1\,759\,468} \equiv 3^{1\,759\,468} \equiv 3^0 \equiv 1 \pmod{10}.
+\]
+In conclusione $4^{48\,642\,369} - 33^{1\,759\,468} \equiv 4 - 1 \equiv 3 \pmod{10}$.
+\end{esempio}
+
 \end{document}
