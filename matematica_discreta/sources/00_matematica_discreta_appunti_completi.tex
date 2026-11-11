@@ -3571,4 +3571,512 @@ Per l'altro termine: $33 \equiv 3 \pmod{10}$ e $\operatorname{MCD}(3, 10) = 1$, 
 In conclusione $4^{48\,642\,369} - 33^{1\,759\,468} \equiv 4 - 1 \equiv 3 \pmod{10}$.
 \end{esempio}
 
+\section[Criteri di divisibilità e potenze modulo $n$ (Lezione 15 -- 9 novembre 2026)]{Criteri di divisibilità e potenze modulo $n$}
+\noindent\emph{Lezione 15 -- 9 novembre 2026}
+
+\subsection{Criteri di divisibilità}
+
+Sia $n \in \mathbb{N}$ scritto in base $10$:
+\[
+  n = a_k\cdot 10^k + a_{k-1}\cdot 10^{k-1} + \dots + a_1\cdot 10 + a_0 = (a_k a_{k-1}\dots a_1 a_0)_{10}, \qquad a_i \in \{0, 1, \dots, 9\}.
+\]
+
+\begin{proposizione}[Criteri di divisibilità]
+\begin{itemize}
+  \item $n$ è divisibile per $2$ se e solo se $a_0$ è divisibile per $2$.
+  \item $n$ è divisibile per $10$ se e solo se $10 \mid a_0$ (cioè $a_0 = 0$).
+  \item $n$ è divisibile per $5$ se e solo se $5 \mid a_0$.
+  \item $n$ è divisibile per $2^j$ se e solo se $(a_{j-1}\dots a_1 a_0)_{10}$ è divisibile per $2^j$.
+  \item $n$ è divisibile per $5^j$ se e solo se $5^j \mid (a_{j-1}\dots a_1 a_0)_{10}$.
+  \item $n$ è divisibile per $3$ se e solo se $a_k + a_{k-1} + \dots + a_1 + a_0$ è divisibile per $3$.
+  \item $n$ è divisibile per $9$ se e solo se $a_k + \dots + a_1 + a_0$ è divisibile per $9$.
+  \item $n$ è divisibile per $11$ se e solo se $11 \mid a_0 - a_1 + a_2 - a_3 + \dots + (-1)^k a_k$.
+\end{itemize}
+\end{proposizione}
+
+\begin{proof}
+\emph{Criterio per $2$ (e per $5$, $10$).} Poiché $10 \equiv 0 \pmod 2$ (e analogamente $10 \equiv 0 \pmod 5$ e $10 \equiv 0 \pmod{10}$),
+\[
+  n = a_k\cdot 10^k + \dots + a_1\cdot 10 + a_0 \equiv a_0 \pmod 2 ,
+\]
+quindi $n \equiv a_0 \pmod 2$.
+
+\emph{Criterio per $3$ e per $9$.} Poiché $10 = 3\cdot 3 + 1$, cioè $10 \equiv 1 \pmod 3$ (e $10 \equiv 1 \pmod 9$),
+\[
+  n = a_k\cdot 10^k + \dots + 10\cdot a_1 + a_0 \equiv a_k + a_{k-1} + \dots + a_1 + a_0 \pmod 3 \ (\text{o } \bmod 9).
+\]
+
+\emph{Criterio per $11$.} Poiché $10 \equiv -1 \pmod{11}$ (infatti $-1 = -1\cdot 11 + 10$),
+\[
+  n = a_0 + a_1\cdot 10 + a_2\cdot 10^2 + \dots + a_k\cdot 10^k \equiv a_0 - a_1 + a_2 - a_3 + \dots + (-1)^k a_k \pmod{11}. \qedhere
+\]
+\end{proof}
+
+\begin{osservazione}
+Per $2^j$ e $5^j$ il criterio segue dal fatto che $10^j = 2^j 5^j \equiv 0$ modulo $2^j$ e modulo $5^j$: contano solo le ultime $j$ cifre.
+\end{osservazione}
+
+\begin{esempio}
+Sia $n = 16\,079$. Si calcolano i resti per diversi divisori.
+\begin{center}
+\begin{tabular}{rl}
+\toprule
+Divisore & Resto \\
+\midrule
+$2$ & $1$ \\
+$5$ & $9 \equiv 4 \pmod 5$ \\
+$10$ & $9$ \\
+$4 = 2^2$ & $79 \equiv 3 \pmod 4$ \quad ($79 = 76 + 3$) \\
+$25 = 5^2$ & $79 \equiv 4 \pmod{25}$ \\
+$1000 = 10^3$ & $079 = 79 \pmod{1000}$ \\
+$8 = 2^3$ & $079 \equiv 7 \pmod 8$ \quad ($79 = 9\cdot 8 + 7$) \\
+$3$ & $1 + 6 + 0 + 7 + 9 = 23 \equiv 2 + 3 = 5 \equiv 2 \pmod 3$ \\
+$9$ & $23 \equiv 2 + 3 = 5 \pmod 9$ \\
+$11$ & $9 - 7 + 0 - 6 + 1 = -3 \equiv 8 \pmod{11}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{esempio}
+
+\begin{esempio}[$4589 \equiv x \pmod{44}$]
+Poiché $44 = 4\cdot 11$ con $\operatorname{MCD}(4, 11) = 1$, la funzione
+\[
+  \psi : \mathbb{Z}_{44} \to \mathbb{Z}_{11}\times\mathbb{Z}_4, \qquad [x]_{44} \mapsto \big([x]_{11}, [x]_4\big)
+\]
+è biunivoca. Si ha
+\[
+  \begin{cases} 4589 \equiv 89 \equiv 1 \pmod 4 \\ 4589 \equiv 9 - 8 + 5 - 4 = 2 \pmod{11} \end{cases}
+\]
+cioè $\psi([x]_{44}) = ([2]_{11}, [1]_4)$. I numeri congrui a $2$ modulo $11$ sono $2, 13, 24, 35, \dots$; tra quelli minori di $44$:
+\[
+  \begin{gathered}
+  13 = 11 + 2,\ 13 \equiv 1 \pmod 4; \qquad 24 = 2\cdot 11 + 2,\ 24 \equiv 0 \pmod 4;\\
+  35 = 3\cdot 11 + 2,\ 35 \equiv 3 \pmod 4 .
+  \end{gathered}
+\]
+Quindi l'unica soluzione è $[13]_{44}$: $4589 \equiv 13 \pmod{44}$.
+\end{esempio}
+
+\subsection{Potenze modulo $n$: esponente in base $2$}
+
+\emph{Problema.} Calcolare $a^b \bmod n$.
+
+Si scrive l'esponente in base $2$: $b = \varepsilon_k 2^k + \varepsilon_{k-1} 2^{k-1} + \dots + \varepsilon_1 2 + \varepsilon_0$, con $\varepsilon_i \in \{0, 1\}$. Allora
+\[
+  a^b = a^{\varepsilon_k 2^k + \dots + \varepsilon_1 2 + \varepsilon_0} = a^{\varepsilon_k 2^k}\cdot a^{\varepsilon_{k-1}2^{k-1}}\cdots a^{\varepsilon_1 2}\cdot a^{\varepsilon_0}.
+\]
+Procedimento:
+\begin{enumerate}
+  \item si riduce l'esponente in base $2$;
+  \item si calcolano $a^{2^i} \bmod n$ (elevando via via al quadrato);
+  \item si calcola il prodotto (modulo $n$) dei fattori $a^{2^i}$ con $\varepsilon_i = 1$.
+\end{enumerate}
+
+\begin{esempio}[$3^{13} \bmod 100$]
+Scriviamo l'esponente in base $2$ con divisioni successive:
+\[
+  13 = 6\cdot 2 + 1,\quad 6 = 3\cdot 2 + 0,\quad 3 = 1\cdot 2 + 1,\quad 1 = 0\cdot 2 + 1,
+\]
+quindi $13 = (1101)_2 = 1\cdot 2^3 + 1\cdot 2^2 + 0\cdot 2 + 1 = 2^3 + 2^2 + 1$ e
+\[
+  3^{13} = 3^{2^3}\cdot 3^{2^2}\cdot 3 .
+\]
+Calcoliamo le potenze:
+\[
+  3^{2} = 9, \qquad 3^{2^2} = 9\cdot 9 = 81, \qquad 3^{2^3} = 81\cdot 81 = 6561 \equiv 61 \pmod{100}.
+\]
+Allora
+\[
+  3^{13} \equiv 61\cdot 81\cdot 3 \equiv 61\cdot 243 \equiv 61\cdot 43 = 2623 \equiv 23 \pmod{100}.
+\]
+\end{esempio}
+
+\begin{esercizio}
+Calcolare $203^{345\,618} \bmod 100$.
+\end{esercizio}
+
+\section[Equazioni diofantee e congruenze lineari (Lezione 15 -- 9 novembre 2026)]{Equazioni diofantee e congruenze lineari}
+\noindent\emph{Lezione 15 -- 9 novembre 2026}
+
+\subsection{Equazioni diofantee}
+
+\begin{definizione}[Equazione diofantea]
+Siano $a, b, c \in \mathbb{Z}$. Un'equazione del tipo
+\[
+  ax + by = c
+\]
+della quale cerchiamo soluzioni intere $x, y \in \mathbb{Z}$ si chiama \emph{equazione diofantea}.
+\end{definizione}
+
+\begin{esempio}
+\begin{enumerate}
+  \item $5x + 3y = 1$. Poiché $\operatorname{MCD}(5, 3) = 1 \mid 1$ ci sono soluzioni: ad esempio $(x, y) = (-1, 2)$ e $(x, y) = (2, -3)$. Tutte le soluzioni sono
+  \[
+    \begin{cases} x = -1 - 3k \\ y = 2 + 5k \end{cases} \qquad k \in \mathbb{Z}.
+  \]
+  \item $6x + 3y = 5$: impossibile in $\mathbb{Z}$, perché $3(2x + y) = 5$ e $\operatorname{MCD}(6, 3) = 3 \nmid 5$.
+\end{enumerate}
+\end{esempio}
+
+\begin{proposizione}[Esistenza di soluzioni]
+Siano $a, b, c \in \mathbb{Z}$. L'equazione diofantea $ax + by = c$ ha soluzioni se e solo se $\operatorname{MCD}(a, b) \mid c$.
+\end{proposizione}
+
+\begin{proof}
+$(\Rightarrow)$ Siano $\bar{x}, \bar{y} \in \mathbb{Z}$ soluzioni: $a\bar{x} + b\bar{y} = c$. Allora $\operatorname{MCD}(a, b)$ divide $a\bar{x} + b\bar{y} = c$.
+
+$(\Leftarrow)$ Sia $\operatorname{MCD}(a, b) = d \mid c$, cioè $c = hd$. Per il teorema di Bézout esistono $\alpha, \beta \in \mathbb{Z}$ tali che $\alpha a + \beta b = d$. Moltiplicando per $h$:
+\[
+  h\alpha\, a + h\beta\, b = dh = c,
+\]
+quindi $x = h\alpha$, $y = h\beta$ è una soluzione. \qedhere
+\end{proof}
+
+\begin{proposizione}[Tutte le soluzioni]
+Siano $a, b, c \in \mathbb{Z}$ e sia $(\bar{x}, \bar{y})$ una soluzione di $ax + by = c$. Allora tutte le soluzioni intere sono del tipo
+\[
+  \begin{cases} x' = \bar{x} - \dfrac{b}{d}\,k \\[2mm] y' = \bar{y} + \dfrac{a}{d}\,k \end{cases} \qquad k \in \mathbb{Z}, \quad d = \operatorname{MCD}(a, b).
+\]
+\end{proposizione}
+
+\begin{esempio}[$6x - 8y = 10$]
+Si vogliono trovare tutte le soluzioni intere. L'equazione è risolubile: $\operatorname{MCD}(6, -8) = 2 \mid 10$.
+
+Si applica Bézout fra $6$ e $8$ con l'algoritmo di Euclide esteso (colonne $q$, $r$, $s$, $t$):
+\begin{center}
+\begin{tabular}{c|r|r|r}
+$q$ & $r$ & $s$ & $t$ \\
+\midrule
+ & $8$ & $1$ & $0$ \\
+ & $6$ & $0$ & $1$ \\
+$1$ & $2$ & $1$ & $-1$ \\
+$3$ & $0$ & $-3$ & $4$ \\
+\end{tabular}
+\end{center}
+Quindi $\operatorname{MCD}(6, 8) = 2 = 1\cdot 8 - 1\cdot 6$. Moltiplicando per $5$:
+\[
+  10 = 5\cdot 8 - 5\cdot 6 = 6\cdot(-5) - 8\cdot(-5),
+\]
+quindi una soluzione particolare è $\bar{x} = -5$, $\bar{y} = -5$. La soluzione generica è
+\[
+  \begin{cases} x' = -5 - \dfrac{-8}{2}\,k = -5 + 4k \\[2mm] y' = -5 + \dfrac{6}{2}\,k = -5 + 3k \end{cases} \qquad k \in \mathbb{Z}.
+\]
+\end{esempio}
+
+\subsection{Equazioni modulari}
+
+\begin{definizione}[Equazione congruenziale lineare]
+Un'\emph{equazione congruenziale lineare} (o \emph{equazione modulare lineare}) nell'incognita $x$ è un'equazione della forma
+\[
+  ax \equiv b \pmod n, \qquad a, b \in \mathbb{Z},\ n \in \mathbb{N},\ n > 0.
+\]
+Si cercano soluzioni intere $x \in \mathbb{Z}$, o soluzioni $[x]_n \in \mathbb{Z}_n$.
+\end{definizione}
+
+\begin{esempio}
+\begin{enumerate}
+  \item $6x \equiv 21 \pmod 4$. Riducendo i coefficienti modulo $4$: $2x \equiv 1 \pmod 4$. Poiché $\operatorname{MCD}(6, 4) = 2 \nmid 21$, l'equazione è \emph{impossibile}.
+  \item $11x \equiv -3 \pmod 6$, cioè $5x \equiv 3 \pmod 6$. Si cerca l'inverso di $5$ in $\mathbb{Z}_6$: $5\cdot 1 \equiv 5$, $5\cdot 2 = 10 \equiv 4$, \dots, $5\cdot 5 = 25 \equiv 1 \pmod 6$, quindi $[5]_6^{-1} = [5]_6$. Moltiplicando per $5$:
+  \[
+    5\cdot 5\,x \equiv 3\cdot 5 \pmod 6 \quad\Rightarrow\quad x \equiv 15 \equiv 3 \pmod 6,
+  \]
+  quindi $S = [x]_6 = [3]_6 = \{6k + 3 \mid k \in \mathbb{Z}\}$.
+  \item $4x \equiv 2 \pmod 6$. Qui $\operatorname{MCD}(4, 6) = 2 \mid 2$. Si usa la tabella di $4\cdot x$ in $\mathbb{Z}_6$:
+  \[
+    4\cdot 0 = 0,\ 4\cdot 1 = 4,\ 4\cdot 2 = 8 \equiv 2,\ 4\cdot 3 = 12 \equiv 0,\ 4\cdot 4 = 16 \equiv 4,\ 4\cdot 5 = 20 \equiv 2.
+  \]
+  Le soluzioni sono $x = 2$ e $x = 5$:
+  \[
+    S = [2]_6 \cup [5]_6 = \{6k + 2 \mid k \in \mathbb{Z}\} \cup \{6k + 5 \mid k \in \mathbb{Z}\}.
+  \]
+\end{enumerate}
+\end{esempio}
+
+\begin{osservazione}
+\begin{enumerate}
+  \item Se $ax \equiv b \pmod n$ e $\operatorname{MCD}(a, n) = 1$, allora esiste l'inverso di $a$ in $\mathbb{Z}_n$, $\left[\tfrac{1}{a}\right]_n = [a^{-1}]_n$, e moltiplicando si ottiene $a^{-1}a\,x \equiv a^{-1}b$, cioè $x \equiv a^{-1}b \pmod n$.
+  \item Se $t \mid n$ (e $t$ divide anche $a$ e $b$), l'equazione $ax \equiv b \pmod n$ equivale a $\dfrac{a}{t}\,x \equiv \dfrac{b}{t} \pmod{\dfrac{n}{t}}$ (si veda la proposizione nella lezione successiva).
+  \item Se $ac \equiv bc \pmod n$ e $\operatorname{MCD}(c, n) = 1$, allora $a \equiv b \pmod n$ (legge di cancellazione).
+\end{enumerate}
+\end{osservazione}
+
+\begin{esempio}[$12x \equiv 8 \pmod{35}$]
+Poiché $\operatorname{MCD}(12, 35) = 1 \mid 8$, la soluzione esiste. Usiamo Euclide esteso per trovare l'inverso di $12$ in $\mathbb{Z}_{35}$:
+\begin{center}
+\begin{tabular}{c|r|r|r}
+$q$ & $r$ & $s$ & $t$ \\
+\midrule
+ & $35$ & $1$ & $0$ \\
+ & $12$ & $0$ & $1$ \\
+$2$ & $11$ & $1$ & $-2$ \\
+$1$ & $1$ & $-1$ & $3$ \\
+$11$ & $0$ & $12$ & $-35$ \\
+\end{tabular}
+\end{center}
+Quindi $1 = -1\cdot 35 + 3\cdot 12$, cioè $3\cdot 12 \equiv 1 \pmod{35}$ e $\left[\tfrac{1}{12}\right]_{35} = [3]_{35}$. Moltiplicando l'equazione per $3$: $3\cdot 12\,x \equiv 3\cdot 8 \pmod{35}$, cioè $x \equiv 24 \pmod{35}$, e
+\[
+  S = [24]_{35} = \{24 + 35k \mid k \in \mathbb{Z}\}.
+\]
+\end{esempio}
+
+\begin{proposizione}[Condizione di compatibilità]
+L'equazione modulare $ax \equiv b \pmod n$ ha soluzione se e solo se $\operatorname{MCD}(a, n) \mid b$.
+\end{proposizione}
+
+\begin{proof}
+$ax \equiv b \pmod n \iff ax - b = kn \iff ax - kn = b$. L'ultima è un'equazione diofantea (nelle incognite $x$, $k$), che ha soluzione se e solo se $\operatorname{MCD}(a, n) \mid b$.
+\end{proof}
+
+\section[Equazioni modulari e sistemi (Lezione 16 -- 10 novembre 2026)]{Equazioni modulari e sistemi}
+\noindent\emph{Lezione 16 -- 10 novembre 2026}
+
+\subsection{Equazioni modulari: riduzione e insieme delle soluzioni}
+
+Si consideri l'equazione modulare
+\[
+  ax \equiv b \pmod n, \qquad a, b \in \mathbb{Z},\ n > 0,\ n \in \mathbb{N},
+\]
+con incognita $x$. Essa ha soluzione se e solo se $\operatorname{MCD}(a, n) \mid b$.
+
+\begin{proposizione}
+Siano $a, b \in \mathbb{Z}$, $n > 0$, e $d = \operatorname{MCD}(a, n) \mid b$. Allora l'equazione
+\[
+  ax \equiv b \pmod n \tag{1}
+\]
+è equivalente a
+\[
+  \frac{a}{d}\,x \equiv \frac{b}{d} \pmod{\frac{n}{d}} . \tag{2}
+\]
+In particolare, se $\bar{x}$ è soluzione di (1) (o di (2)), allora l'insieme delle soluzioni è
+\[
+  S = \left[\bar{x}\right]_{n/d} = \left[\bar{x}\right]_n \cup \left[\bar{x} + \tfrac{n}{d}\right]_n \cup \left[\bar{x} + 2\tfrac{n}{d}\right]_n \cup \dots \cup \left[\bar{x} + (d-1)\tfrac{n}{d}\right]_n = \left\{\bar{x} + k\tfrac{n}{d} \;\middle|\; k \in \mathbb{Z}\right\}.
+\]
+\end{proposizione}
+
+In pratica, se $d \neq 1$ si divide l'equazione per $d$ ottenendo un'equazione modulo $n/d$ in cui il coefficiente di $x$ è invertibile (perché $\operatorname{MCD}\!\left(\tfrac{a}{d}, \tfrac{n}{d}\right) = 1$); la si risolve moltiplicando per l'inverso, e poi si descrivono le soluzioni modulo $n$.
+
+\begin{esempio}[$36x \equiv 24 \pmod{105}$]
+Si vogliono trovare tutte le soluzioni intere comprese fra $-100$ e $100$.
+
+\emph{Condizione di compatibilità:} $\operatorname{MCD}(36, 105) = 3 \mid 24$. Vero. $[36]_{105}$ non è invertibile.
+
+\emph{Riduzione:} si divide l'equazione per $d = 3$:
+\[
+  \frac{36}{3}\,x \equiv \frac{24}{3} \pmod{\frac{105}{3}} \quad\Rightarrow\quad 12x \equiv 8 \pmod{35}.
+\]
+Si cerca l'inverso di $[12]_{35}$ in $\mathbb{Z}_{35}$ con Euclide esteso:
+\begin{center}
+\begin{tabular}{c|r|r|r}
+$q$ & $r$ & $s$ & $t$ \\
+\midrule
+ & $35$ & $1$ & $0$ \\
+ & $12$ & $0$ & $1$ \\
+$2$ & $11$ & $1$ & $-2$ \\
+$1$ & $1$ & $-1$ & $1 + 2 = 3$ \\
+$11$ & $0$ & $1 + 11 = 12$ & $-2 - 33 = -35$ \\
+\end{tabular}
+\end{center}
+Da cui $1 = (-1)\cdot 35 + 3\cdot 12$: l'inverso di $[12]_{35}$ in $\mathbb{Z}_{35}$ è $[3]_{35}$. Moltiplicando per $3$:
+\[
+  3\cdot 12\,x \equiv 8\cdot 3 \pmod{35} \quad\Rightarrow\quad x \equiv 24 \pmod{35},
+\]
+quindi $S = [24]_{35} = \{24 + 35k \mid k \in \mathbb{Z}\}$ (soluzioni in $\mathbb{Z}_{35}$).
+
+\emph{Soluzioni fra $-100$ e $100$:}
+\[
+  24,\ 24 + 35 = 59,\ 24 + 2\cdot 35 = 94,\ (94 + 35 = 129 > 100);
+\]
+\[
+  24 - 35 = -11,\ -11 - 35 = -46,\ -46 - 35 = -81,\ (-81 - 35 = -116 < -100).
+\]
+Le soluzioni tra $-100$ e $100$ sono $\{-81, -46, -11, 24, 59, 94\}$.
+
+In $\mathbb{Z}_{105}$ le soluzioni sono tre classi: $[24]_{105} \cup [24 + 35]_{105} \cup [24 + 70]_{105} = [24]_{105} \cup [59]_{105} \cup [94]_{105}$.
+\end{esempio}
+
+\subsection{Sistemi modulari}
+
+Un sistema modulare è un insieme di equazioni modulari nella stessa incognita, da risolvere simultaneamente. Prima di tutto si verificano le \emph{condizioni di compatibilità} di ciascuna equazione.
+
+\begin{esempio}
+\begin{enumerate}
+  \item
+  \[
+    \begin{cases} 3x \equiv 5 \pmod{12} \\ x \equiv 2 \pmod 4 \end{cases}
+  \]
+  Condizioni di compatibilità: $\operatorname{MCD}(3, 12) = 3 \nmid 5$ (la prima equazione è impossibile), $\operatorname{MCD}(1, 4) = 1 \mid 2$. Il sistema è impossibile.
+  \item
+  \[
+    \begin{cases} x \equiv 3 \pmod 6 \\ x \equiv 0 \pmod 2 \end{cases}
+  \]
+  Condizioni di compatibilità: $\operatorname{MCD}(1, 6) = 1 \mid 3$, $\operatorname{MCD}(1, 2) = 1 \mid 0$. Dalla seconda equazione $x = 2k$; sostituendo nella prima: $2k \equiv 3 \pmod 6$, che è \emph{impossibile}: $\operatorname{MCD}(2, 6) = 2 \nmid 3$. Il sistema è impossibile.
+  \item
+  \[
+    \begin{cases} 5x \equiv 3 \pmod 6 \\ x \equiv 1 \pmod 5 \end{cases}
+  \]
+  Condizioni di compatibilità: $\operatorname{MCD}(5, 6) = 1 \mid 3$, $\operatorname{MCD}(1, 5) = 1 \mid 1$: ok.
+
+  Prima equazione: $5x \equiv 3 \pmod 6$, $\left[\tfrac{1}{5}\right]_6 = [5]_6$; moltiplicando per $5$: $x \equiv 15 \equiv 3 \pmod 6$, cioè $x = 6k + 3$.
+
+  Si sostituisce nella seconda equazione: $6k + 3 \equiv 1 \pmod 5$, cioè $k \equiv 1 - 3 = -2 \equiv 3 \pmod 5$, quindi $k = 5h + 3$.
+
+  Allora $x = 6(5h + 3) + 3 = 30h + 18 + 3 = 30h + 21$, cioè
+  \[
+    S = [21]_{30} = \{21 + 30h \mid h \in \mathbb{Z}\}.
+  \]
+\end{enumerate}
+\end{esempio}
+
+\section[Teorema cinese dei resti (Lezione 16 -- 10 novembre 2026)]{Teorema cinese dei resti}
+\noindent\emph{Lezione 16 -- 10 novembre 2026}
+
+\subsection{Teorema cinese dei resti}
+
+\begin{teorema}[Teorema cinese dei resti]
+Siano $n_1, \dots, n_s$ interi positivi \emph{coprimi fra loro}, cioè $\operatorname{MCD}(n_i, n_j) = 1$ per $i \neq j$. Allora il sistema modulare
+\[
+  \begin{cases}
+    x \equiv r_1 \pmod{n_1} \\
+    x \equiv r_2 \pmod{n_2} \\
+    \ \ \vdots \\
+    x \equiv r_s \pmod{n_s}
+  \end{cases}
+\]
+ha un'\emph{unica} soluzione $\bar{x}$ modulo $N = n_1\cdot n_2\cdots n_s$, cioè l'insieme delle soluzioni è
+\[
+  S = [\bar{x}]_N = \{\bar{x} + kN \mid k \in \mathbb{Z}\}.
+\]
+\end{teorema}
+
+\begin{proof}
+\emph{Esistenza.} Sia $N = n_1 n_2 \cdots n_s$ e $N_i = \dfrac{N}{n_i}$. L'equazione
+\[
+  N_i\, x \equiv r_i \pmod{n_i}
+\]
+ha sempre soluzione $\bar{x}_i$ (perché $\operatorname{MCD}(N_i, n_i) = 1 \mid r_i$). Dopo aver risolto ogni equazione in questo modo, si definisce
+\[
+  \bar{x} = N_1\bar{x}_1 + N_2\bar{x}_2 + \dots + N_s\bar{x}_s .
+\]
+Allora $\bar{x}$ è soluzione del sistema di partenza: per ogni $i$, $N_j \equiv 0 \pmod{n_i}$ per $j \neq i$, quindi
+\[
+  \bar{x} = N_1\bar{x}_1 + \dots + N_s\bar{x}_s \equiv N_i\bar{x}_i \equiv r_i \pmod{n_i}.
+\]
+
+\emph{Unicità.} Siano $\bar{x}$ e $\bar{y}$ due soluzioni ($\bar{x} \equiv r_i$, $\bar{y} \equiv r_i \pmod{n_i}$). Allora
+\[
+  \bar{x} - \bar{y} \equiv r_i - r_i \equiv 0 \pmod{n_i},
+\]
+cioè $\bar{x} - \bar{y}$ è multiplo di $n_i$ per tutti gli $i$. Poiché gli $n_i$ sono coprimi fra loro, $\bar{x} - \bar{y}$ è multiplo di $n_1 n_2 \cdots n_s = N$, cioè $\bar{x} \equiv \bar{y} \pmod N$, cioè $[\bar{x}]_N = [\bar{y}]_N$.
+\end{proof}
+
+\begin{esempio}
+\[
+  \begin{cases} x \equiv 2 \pmod 3 \\ x \equiv 3 \pmod 4 \\ x \equiv 4 \pmod 5 \end{cases}
+\]
+Condizioni di compatibilità: $\operatorname{MCD}(1, 3) = 1 \mid 2$, $\operatorname{MCD}(1, 4) = 1 \mid 3$, $\operatorname{MCD}(1, 5) = 1 \mid 4$. I moduli $3, 4, 5$ sono coprimi fra loro: si applica il teorema cinese dei resti con $N = 3\cdot 4\cdot 5 = 60$. Si risolvono tre equazioni:
+\begin{enumerate}
+  \item $N_1 = \dfrac{N}{n_1} = \dfrac{3\cdot 4\cdot 5}{3} = 4\cdot 5 = 20$: $20x_1 \equiv 2 \pmod 3$, cioè $2x_1 \equiv 2 \pmod 3$, $x_1 \equiv 1 \pmod 3$; si prende $x_1 = 1$.
+  \item $N_2 = \dfrac{N}{n_2} = 3\cdot 5 = 15$: $15x_2 \equiv 3 \pmod 4$, cioè $3x_2 \equiv 3 \pmod 4$, $x_2 \equiv 1 \pmod 4$; $x_2 = 1$.
+  \item $N_3 = \dfrac{N}{n_3} = 3\cdot 4 = 12$: $12x_3 \equiv 4 \pmod 5$, cioè $3x_3 \equiv 1 \pmod 5$ (dividendo per $4$, invertibile modulo $5$); $\left[\tfrac{1}{3}\right]_5 = [2]$, quindi $2\cdot 3\,x_3 \equiv 2 \pmod 5$, $x_3 \equiv 2 \pmod 5$; $x_3 = 2$.
+\end{enumerate}
+La soluzione generale è
+\[
+  \bar{x} = N_1x_1 + N_2x_2 + N_3x_3 = 20\cdot 1 + 15\cdot 1 + 12\cdot 2 = 59,
+\]
+modulo $N = 3\cdot 4\cdot 5 = 60$:
+\[
+  S = [59]_{60} = \{59 + 60k \mid k \in \mathbb{Z}\}.
+\]
+\end{esempio}
+
+\subsection{Sistemi modulari generali}
+
+Si consideri un sistema
+\[
+  \begin{cases} a_1x \equiv b_1 \pmod{n_1} \\ \ \ \vdots \\ a_sx \equiv b_s \pmod{n_s} \end{cases}
+\]
+Procedimento:
+\begin{enumerate}
+  \item \emph{Condizioni di compatibilità:} $\operatorname{MCD}(a_i, n_i) \mid b_i$ per ogni $i$. Se almeno una non è soddisfatta, il sistema è impossibile.
+  \item Se $d_i = \operatorname{MCD}(a_i, n_i) \neq 1$, si divide l'equazione per $d_i$: $\dfrac{a_i}{d_i}\,x \equiv \dfrac{b_i}{d_i} \pmod{\dfrac{n_i}{d_i}}$.
+  \item Si ricava $x$ in ciascuna equazione moltiplicando per $\left[\tfrac{1}{a_i}\right]_{n_i}$: $a_ix \equiv b_i \Rightarrow x \equiv b_i\left[\tfrac{1}{a_i}\right] \pmod{n_i}$, ottenendo un sistema della forma $x \equiv c_i \pmod{n_i}$.
+  \item Se gli $n_i$ sono coprimi fra loro, si applica il teorema cinese dei resti; altrimenti si trasforma il sistema in uno equivalente con moduli coprimi (vedi sotto).
+\end{enumerate}
+
+\begin{esempio}
+\[
+  \begin{cases} 2x \equiv 1 \pmod 5 \\ 3x \equiv 2 \pmod 7 \\ 4x \equiv 3 \pmod{11} \end{cases}
+\]
+\begin{enumerate}
+  \item Condizioni di compatibilità: $\operatorname{MCD}(2, 5) = 1$, $\operatorname{MCD}(3, 7) = 1$, $\operatorname{MCD}(4, 11) = 1$: ok.
+  \item I MCD sono tutti $1$: ok.
+  \item Si ricava $x$ nelle equazioni:
+  \begin{itemize}
+    \item $2x \equiv 1 \pmod 5$: $\left[\tfrac{1}{2}\right]_5 = [3]_5$, quindi $2\cdot 3\,x \equiv 3\cdot 1$, cioè $x \equiv 3 \pmod 5$;
+    \item $3x \equiv 2 \pmod 7$: $\left[\tfrac{1}{3}\right]_7 = [5]_7$, quindi $3\cdot 5\,x \equiv 2\cdot 5$, cioè $x \equiv 10 \equiv 3 \pmod 7$;
+    \item $4x \equiv 3 \pmod{11}$: $\left[\tfrac{1}{4}\right]_{11} = [3]_{11}$ (ad esempio con Euclide esteso), quindi $x \equiv 3\cdot 3 = 9 \pmod{11}$.
+  \end{itemize}
+  Il sistema diventa
+  \[
+    \begin{cases} x \equiv 3 \pmod 5 \\ x \equiv 3 \pmod 7 \\ x \equiv 9 \pmod{11} \end{cases}
+  \]
+  \item I moduli sono coprimi: si applica il teorema cinese dei resti con $N = 5\cdot 7\cdot 11 = 385$.
+  \begin{itemize}
+    \item $N_1 = 7\cdot 11 = 77$: $77x_1 \equiv 3 \pmod 5$, cioè $2x_1 \equiv 3 \pmod 5$, da cui $x_1 \equiv 4 \pmod 5$ (moltiplicando per $\left[\tfrac{1}{2}\right]_5 = [3]$: $x_1 \equiv 9 \equiv 4$).
+    \item $N_2 = 5\cdot 11 = 55$: $55x_2 \equiv 3 \pmod 7$, cioè $6x_2 \equiv 3 \pmod 7$; dividendo per $3$: $2x_2 \equiv 1 \pmod 7$, $\left[\tfrac{1}{2}\right]_7 = [4]_7$, quindi $x_2 \equiv 4 \pmod 7$.
+    \item $N_3 = 5\cdot 7 = 35$: $35x_3 \equiv 9 \pmod{11}$, cioè $2x_3 \equiv 9 \pmod{11}$; $\left[\tfrac{1}{2}\right]_{11} = [6]_{11}$, quindi $x_3 \equiv 9\cdot 6 = 54 \equiv 10 \pmod{11}$.
+  \end{itemize}
+  La soluzione generale è
+  \[
+    \bar{x} = N_1x_1 + N_2x_2 + N_3x_3 = 77\cdot 4 + 55\cdot 4 + 35\cdot 10 = 308 + 220 + 350,
+  \]
+  modulo $385$: $308 \equiv -77$ e $350 \equiv -35$, quindi $\bar{x} \equiv -77 + 220 - 35 = 108 \pmod{385}$. Dunque
+  \[
+    S = [108]_{385} = \{108 + 385k \mid k \in \mathbb{Z}\}.
+  \]
+\end{enumerate}
+\end{esempio}
+
+\subsection{Moduli non coprimi}
+
+\begin{esempio}
+\[
+  \begin{cases} x \equiv 1 \pmod{10} \\ x \equiv 5 \pmod 6 \end{cases}
+\]
+Le condizioni di compatibilità sono soddisfatte. I moduli \emph{non} sono coprimi: $\operatorname{MCD}(6, 10) = 2 \neq 1$, quindi non si può applicare direttamente il teorema cinese dei resti. Si usa la funzione biunivoca $\psi$ per spezzare ciascuna equazione in potenze di primi.
+
+Prima equazione: $\psi : \mathbb{Z}_{10} \to \mathbb{Z}_2\times\mathbb{Z}_5$,
+\[
+  x \equiv 1 \pmod{10} \iff \begin{cases} x \equiv 1 \pmod 2 \\ x \equiv 1 \pmod 5. \end{cases}
+\]
+Seconda equazione: $\psi : \mathbb{Z}_6 \to \mathbb{Z}_2\times\mathbb{Z}_3$,
+\[
+  x \equiv 5 \pmod 6 \iff \begin{cases} x \equiv 5 \equiv 2 \pmod 3 \\ x \equiv 5 \equiv 1 \pmod 2. \end{cases}
+\]
+Il sistema di partenza diventa
+\[
+  \begin{cases} x \equiv 1 \pmod 2 \\ x \equiv 1 \pmod 5 \\ x \equiv 2 \pmod 3 \\ x \equiv 1 \pmod 2 \end{cases}
+  \iff
+  \begin{cases} x \equiv 1 \pmod 2 \\ x \equiv 1 \pmod 5 \\ x \equiv 2 \pmod 3 \end{cases}
+\]
+(la quarta equazione è ridondante). Ora i moduli $2, 3, 5$ sono coprimi e si applica il teorema cinese dei resti.
+\end{esempio}
+
+\begin{osservazione}
+Il sistema
+\[
+  \begin{cases} x \equiv b \pmod{p^i} \\ x \equiv c \pmod{p^j} \end{cases} \qquad p \text{ primo},\ i < j,
+\]
+ha soluzione se e solo se $b \equiv c \pmod{p^i}$ (potenza più piccola). In tal caso il sistema è equivalente a $x \equiv c \pmod{p^j}$ (l'equazione con il modulo più alto).
+\end{osservazione}
+
+\begin{esercizio}
+Risolvere i sistemi
+\[
+  \begin{cases} x \equiv 3 \pmod 4 \\ x \equiv -1 \pmod{64} \end{cases}
+  \qquad\text{e}\qquad
+  \begin{cases} x \equiv 1 \pmod{10} \\ 2x \equiv 14 \pmod{24} \end{cases}
+\]
+\end{esercizio}
+
 \end{document}

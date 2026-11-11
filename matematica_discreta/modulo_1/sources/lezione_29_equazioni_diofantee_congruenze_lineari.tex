@@ -1,0 +1,238 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\newrunin{osservazione}{Osservazione}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Equazioni diofantee e congruenze lineari}
+\author{Marco Cerbella}
+\date{Lezione 15 -- 9 novembre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Equazioni diofantee}
+
+\begin{definizione}[Equazione diofantea]
+Siano $a, b, c \in \mathbb{Z}$. Un'equazione del tipo
+\[
+  ax + by = c
+\]
+della quale cerchiamo soluzioni intere $x, y \in \mathbb{Z}$ si chiama \emph{equazione diofantea}.
+\end{definizione}
+
+\begin{esempio}
+\begin{enumerate}
+  \item $5x + 3y = 1$. Poiché $\operatorname{MCD}(5, 3) = 1 \mid 1$ ci sono soluzioni: ad esempio $(x, y) = (-1, 2)$ e $(x, y) = (2, -3)$. Tutte le soluzioni sono
+  \[
+    \begin{cases} x = -1 - 3k \\ y = 2 + 5k \end{cases} \qquad k \in \mathbb{Z}.
+  \]
+  \item $6x + 3y = 5$: impossibile in $\mathbb{Z}$, perché $3(2x + y) = 5$ e $\operatorname{MCD}(6, 3) = 3 \nmid 5$.
+\end{enumerate}
+\end{esempio}
+
+\begin{proposizione}[Esistenza di soluzioni]
+Siano $a, b, c \in \mathbb{Z}$. L'equazione diofantea $ax + by = c$ ha soluzioni se e solo se $\operatorname{MCD}(a, b) \mid c$.
+\end{proposizione}
+
+\begin{proof}
+$(\Rightarrow)$ Siano $\bar{x}, \bar{y} \in \mathbb{Z}$ soluzioni: $a\bar{x} + b\bar{y} = c$. Allora $\operatorname{MCD}(a, b)$ divide $a\bar{x} + b\bar{y} = c$.
+
+$(\Leftarrow)$ Sia $\operatorname{MCD}(a, b) = d \mid c$, cioè $c = hd$. Per il teorema di Bézout esistono $\alpha, \beta \in \mathbb{Z}$ tali che $\alpha a + \beta b = d$. Moltiplicando per $h$:
+\[
+  h\alpha\, a + h\beta\, b = dh = c,
+\]
+quindi $x = h\alpha$, $y = h\beta$ è una soluzione. \qedhere
+\end{proof}
+
+\begin{proposizione}[Tutte le soluzioni]
+Siano $a, b, c \in \mathbb{Z}$ e sia $(\bar{x}, \bar{y})$ una soluzione di $ax + by = c$. Allora tutte le soluzioni intere sono del tipo
+\[
+  \begin{cases} x' = \bar{x} - \dfrac{b}{d}\,k \\[2mm] y' = \bar{y} + \dfrac{a}{d}\,k \end{cases} \qquad k \in \mathbb{Z}, \quad d = \operatorname{MCD}(a, b).
+\]
+\end{proposizione}
+
+\begin{esempio}[$6x - 8y = 10$]
+Si vogliono trovare tutte le soluzioni intere. L'equazione è risolubile: $\operatorname{MCD}(6, -8) = 2 \mid 10$.
+
+Si applica Bézout fra $6$ e $8$ con l'algoritmo di Euclide esteso (colonne $q$, $r$, $s$, $t$):
+\begin{center}
+\begin{tabular}{c|r|r|r}
+$q$ & $r$ & $s$ & $t$ \\
+\midrule
+ & $8$ & $1$ & $0$ \\
+ & $6$ & $0$ & $1$ \\
+$1$ & $2$ & $1$ & $-1$ \\
+$3$ & $0$ & $-3$ & $4$ \\
+\end{tabular}
+\end{center}
+Quindi $\operatorname{MCD}(6, 8) = 2 = 1\cdot 8 - 1\cdot 6$. Moltiplicando per $5$:
+\[
+  10 = 5\cdot 8 - 5\cdot 6 = 6\cdot(-5) - 8\cdot(-5),
+\]
+quindi una soluzione particolare è $\bar{x} = -5$, $\bar{y} = -5$. La soluzione generica è
+\[
+  \begin{cases} x' = -5 - \dfrac{-8}{2}\,k = -5 + 4k \\[2mm] y' = -5 + \dfrac{6}{2}\,k = -5 + 3k \end{cases} \qquad k \in \mathbb{Z}.
+\]
+\end{esempio}
+
+\section{Equazioni modulari}
+
+\begin{definizione}[Equazione congruenziale lineare]
+Un'\emph{equazione congruenziale lineare} (o \emph{equazione modulare lineare}) nell'incognita $x$ è un'equazione della forma
+\[
+  ax \equiv b \pmod n, \qquad a, b \in \mathbb{Z},\ n \in \mathbb{N},\ n > 0.
+\]
+Si cercano soluzioni intere $x \in \mathbb{Z}$, o soluzioni $[x]_n \in \mathbb{Z}_n$.
+\end{definizione}
+
+\begin{esempio}
+\begin{enumerate}
+  \item $6x \equiv 21 \pmod 4$. Riducendo i coefficienti modulo $4$: $2x \equiv 1 \pmod 4$. Poiché $\operatorname{MCD}(6, 4) = 2 \nmid 21$, l'equazione è \emph{impossibile}.
+  \item $11x \equiv -3 \pmod 6$, cioè $5x \equiv 3 \pmod 6$. Si cerca l'inverso di $5$ in $\mathbb{Z}_6$: $5\cdot 1 \equiv 5$, $5\cdot 2 = 10 \equiv 4$, \dots, $5\cdot 5 = 25 \equiv 1 \pmod 6$, quindi $[5]_6^{-1} = [5]_6$. Moltiplicando per $5$:
+  \[
+    5\cdot 5\,x \equiv 3\cdot 5 \pmod 6 \quad\Rightarrow\quad x \equiv 15 \equiv 3 \pmod 6,
+  \]
+  quindi $S = [x]_6 = [3]_6 = \{6k + 3 \mid k \in \mathbb{Z}\}$.
+  \item $4x \equiv 2 \pmod 6$. Qui $\operatorname{MCD}(4, 6) = 2 \mid 2$. Si usa la tabella di $4\cdot x$ in $\mathbb{Z}_6$:
+  \[
+    4\cdot 0 = 0,\ 4\cdot 1 = 4,\ 4\cdot 2 = 8 \equiv 2,\ 4\cdot 3 = 12 \equiv 0,\ 4\cdot 4 = 16 \equiv 4,\ 4\cdot 5 = 20 \equiv 2.
+  \]
+  Le soluzioni sono $x = 2$ e $x = 5$:
+  \[
+    S = [2]_6 \cup [5]_6 = \{6k + 2 \mid k \in \mathbb{Z}\} \cup \{6k + 5 \mid k \in \mathbb{Z}\}.
+  \]
+\end{enumerate}
+\end{esempio}
+
+\begin{osservazione}
+\begin{enumerate}
+  \item Se $ax \equiv b \pmod n$ e $\operatorname{MCD}(a, n) = 1$, allora esiste l'inverso di $a$ in $\mathbb{Z}_n$, $\left[\tfrac{1}{a}\right]_n = [a^{-1}]_n$, e moltiplicando si ottiene $a^{-1}a\,x \equiv a^{-1}b$, cioè $x \equiv a^{-1}b \pmod n$.
+  \item Se $t \mid n$ (e $t$ divide anche $a$ e $b$), l'equazione $ax \equiv b \pmod n$ equivale a $\dfrac{a}{t}\,x \equiv \dfrac{b}{t} \pmod{\dfrac{n}{t}}$ (si veda la proposizione nella lezione successiva).
+  \item Se $ac \equiv bc \pmod n$ e $\operatorname{MCD}(c, n) = 1$, allora $a \equiv b \pmod n$ (legge di cancellazione).
+\end{enumerate}
+\end{osservazione}
+
+\begin{esempio}[$12x \equiv 8 \pmod{35}$]
+Poiché $\operatorname{MCD}(12, 35) = 1 \mid 8$, la soluzione esiste. Usiamo Euclide esteso per trovare l'inverso di $12$ in $\mathbb{Z}_{35}$:
+\begin{center}
+\begin{tabular}{c|r|r|r}
+$q$ & $r$ & $s$ & $t$ \\
+\midrule
+ & $35$ & $1$ & $0$ \\
+ & $12$ & $0$ & $1$ \\
+$2$ & $11$ & $1$ & $-2$ \\
+$1$ & $1$ & $-1$ & $3$ \\
+$11$ & $0$ & $12$ & $-35$ \\
+\end{tabular}
+\end{center}
+Quindi $1 = -1\cdot 35 + 3\cdot 12$, cioè $3\cdot 12 \equiv 1 \pmod{35}$ e $\left[\tfrac{1}{12}\right]_{35} = [3]_{35}$. Moltiplicando l'equazione per $3$: $3\cdot 12\,x \equiv 3\cdot 8 \pmod{35}$, cioè $x \equiv 24 \pmod{35}$, e
+\[
+  S = [24]_{35} = \{24 + 35k \mid k \in \mathbb{Z}\}.
+\]
+\end{esempio}
+
+\begin{proposizione}[Condizione di compatibilità]
+L'equazione modulare $ax \equiv b \pmod n$ ha soluzione se e solo se $\operatorname{MCD}(a, n) \mid b$.
+\end{proposizione}
+
+\begin{proof}
+$ax \equiv b \pmod n \iff ax - b = kn \iff ax - kn = b$. L'ultima è un'equazione diofantea (nelle incognite $x$, $k$), che ha soluzione se e solo se $\operatorname{MCD}(a, n) \mid b$.
+\end{proof}
+
+\end{document}

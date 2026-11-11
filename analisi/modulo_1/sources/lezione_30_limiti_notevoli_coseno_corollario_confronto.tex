@@ -1,0 +1,196 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\newrunin{osservazione}{Osservazione}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Limiti notevoli di seno e coseno e conseguenze del teorema del confronto}
+\author{Marco Cerbella}
+\date{Lezione 14 -- 10 novembre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Limiti notevoli di seno e coseno}
+
+\begin{teorema}[Limiti notevoli]
+\[
+  \lim_{x\to 0}\frac{\sin x}{x} = 1, \qquad \lim_{x\to 0}\frac{1 - \cos x}{x^2} = \frac{1}{2}.
+\]
+\end{teorema}
+
+Il primo limite è stato dimostrato nella lezione precedente. Per il secondo si ha una forma indeterminata $\frac{0}{0}$:
+\[
+  \lim_{x\to 0}\frac{1 - \cos x}{x^2} = \frac{1 - 1}{0} = \frac{0}{0}.
+\]
+
+\begin{esempio}[Calcolo di $\lim_{x\to 0}\frac{1-\cos x}{x^2}$]
+Si moltiplica numeratore e denominatore per $1 + \cos x$, usando il prodotto notevole $(a - b)(a + b) = a^2 - b^2$:
+\[
+  \lim_{x\to 0}\frac{1 - \cos x}{x^2}\cdot\frac{1 + \cos x}{1 + \cos x} = \lim_{x\to 0}\frac{1 - \cos^2 x}{x^2}\cdot\frac{1}{1 + \cos x}.
+\]
+Dall'identità fondamentale $\cos^2 x + \sin^2 x = 1$ si ricava $\sin^2 x = 1 - \cos^2 x$, quindi
+\[
+  = \lim_{x\to 0}\frac{\sin^2 x}{x^2}\cdot\frac{1}{1 + \cos x} = \lim_{x\to 0}\left(\frac{\sin x}{x}\right)^{2}\cdot\frac{1}{1 + \cos x}
+  = \lim_{x\to 0}\frac{\sin x}{x}\cdot\frac{\sin x}{x}\cdot\frac{1}{1 + \cos x}.
+\]
+I tre fattori tendono rispettivamente a $1$, $1$ e $\frac{1}{2}$. Poiché il limite del prodotto è il prodotto dei limiti,
+\[
+  \lim_{x\to 0}\frac{1 - \cos x}{x^2} = 1\cdot 1\cdot\frac{1}{2} = \frac{1}{2}.
+\]
+\end{esempio}
+
+\section{Conseguenze del teorema del confronto}
+
+\begin{teorema}[Corollario del teorema del confronto]
+Sia $f$ una funzione \emph{limitata} in un intorno di $c$, cioè esistono un intorno $I(c)$ e una costante $C > 0$ tali che
+\[
+  |f(x)| \le C, \quad \forall x \in I(c)\setminus\{c\}
+\]
+(equivalentemente $-C \le f(x) \le C$), e sia $g$ una funzione tale che $\displaystyle\lim_{x\to c} g(x) = 0$. Allora
+\[
+  \lim_{x\to c} f(x)\,g(x) = 0.
+\]
+\end{teorema}
+
+Cioè: \emph{limitata per infinitesima è infinitesima}.
+
+\begin{esempio}[$\lim_{x\to\pm\infty}\frac{\sin x}{x}$]
+Si ha una situazione in cui il numeratore non ha limite ($\lim_{x\to+\infty}\sin x$ non esiste) e il denominatore tende a $\pm\infty$: non si può usare il rapporto dei limiti. Si scrive
+\[
+  \frac{\sin x}{x} = \sin x\cdot\frac{1}{x}.
+\]
+$\sin x$ è una funzione limitata ($-1 \le \sin x \le 1$) e $\lim_{x\to\pm\infty}\frac{1}{x} = 0$. Per il corollario del teorema del confronto,
+\[
+  \lim_{x\to\pm\infty}\sin x\cdot\frac{1}{x} = 0.
+\]
+Infatti, per $x \to +\infty$,
+\[
+  -\frac{1}{x} \le \frac{\sin x}{x} \le \frac{1}{x},
+\]
+con le due funzioni esterne che tendono a $0$ (e quindi anche quella centrale).
+\end{esempio}
+
+\begin{teorema}[Secondo teorema del confronto, caso infinito]
+Siano date due funzioni $f : D_f \to \mathbb{R}$ e $g : D_g \to \mathbb{R}$. Supponiamo che
+\[
+  \lim_{x\to c} f(x) = +\infty
+\]
+e che esista un intorno $I(c)$ in cui entrambe $f$ e $g$ siano definite tranne al più il punto $c$ e tale che
+\[
+  f(x) \le g(x) \qquad \forall x \in I(c)\setminus\{c\}.
+\]
+Allora si ha anche
+\[
+  \lim_{x\to c} g(x) = +\infty.
+\]
+Un risultato analogo vale nel caso del limite $-\infty$ (con la disuguaglianza opposta).
+\end{teorema}
+
+\begin{esempio}[$\lim_{x\to+\infty}(x + \sin x)$]
+$\lim_{x\to+\infty}\sin x$ non esiste, mentre $\lim_{x\to+\infty} x = +\infty$: non si può usare la somma dei limiti. Poiché $\sin x \ge -1$,
+\[
+  x + \sin x \ge x - 1 .
+\]
+Per $x \to +\infty$ si ha $x - 1 \to +\infty$; per il secondo teorema del confronto
+\[
+  \lim_{x\to+\infty}(x + \sin x) = +\infty.
+\]
+\end{esempio}
+
+\end{document}

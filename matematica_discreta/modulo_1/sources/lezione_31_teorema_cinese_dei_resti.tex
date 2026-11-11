@@ -1,0 +1,258 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\newrunin{osservazione}{Osservazione}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Teorema cinese dei resti}
+\author{Marco Cerbella}
+\date{Lezione 16 -- 10 novembre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Teorema cinese dei resti}
+
+\begin{teorema}[Teorema cinese dei resti]
+Siano $n_1, \dots, n_s$ interi positivi \emph{coprimi fra loro}, cioè $\operatorname{MCD}(n_i, n_j) = 1$ per $i \neq j$. Allora il sistema modulare
+\[
+  \begin{cases}
+    x \equiv r_1 \pmod{n_1} \\
+    x \equiv r_2 \pmod{n_2} \\
+    \ \ \vdots \\
+    x \equiv r_s \pmod{n_s}
+  \end{cases}
+\]
+ha un'\emph{unica} soluzione $\bar{x}$ modulo $N = n_1\cdot n_2\cdots n_s$, cioè l'insieme delle soluzioni è
+\[
+  S = [\bar{x}]_N = \{\bar{x} + kN \mid k \in \mathbb{Z}\}.
+\]
+\end{teorema}
+
+\begin{proof}
+\emph{Esistenza.} Sia $N = n_1 n_2 \cdots n_s$ e $N_i = \dfrac{N}{n_i}$. L'equazione
+\[
+  N_i\, x \equiv r_i \pmod{n_i}
+\]
+ha sempre soluzione $\bar{x}_i$ (perché $\operatorname{MCD}(N_i, n_i) = 1 \mid r_i$). Dopo aver risolto ogni equazione in questo modo, si definisce
+\[
+  \bar{x} = N_1\bar{x}_1 + N_2\bar{x}_2 + \dots + N_s\bar{x}_s .
+\]
+Allora $\bar{x}$ è soluzione del sistema di partenza: per ogni $i$, $N_j \equiv 0 \pmod{n_i}$ per $j \neq i$, quindi
+\[
+  \bar{x} = N_1\bar{x}_1 + \dots + N_s\bar{x}_s \equiv N_i\bar{x}_i \equiv r_i \pmod{n_i}.
+\]
+
+\emph{Unicità.} Siano $\bar{x}$ e $\bar{y}$ due soluzioni ($\bar{x} \equiv r_i$, $\bar{y} \equiv r_i \pmod{n_i}$). Allora
+\[
+  \bar{x} - \bar{y} \equiv r_i - r_i \equiv 0 \pmod{n_i},
+\]
+cioè $\bar{x} - \bar{y}$ è multiplo di $n_i$ per tutti gli $i$. Poiché gli $n_i$ sono coprimi fra loro, $\bar{x} - \bar{y}$ è multiplo di $n_1 n_2 \cdots n_s = N$, cioè $\bar{x} \equiv \bar{y} \pmod N$, cioè $[\bar{x}]_N = [\bar{y}]_N$.
+\end{proof}
+
+\begin{esempio}
+\[
+  \begin{cases} x \equiv 2 \pmod 3 \\ x \equiv 3 \pmod 4 \\ x \equiv 4 \pmod 5 \end{cases}
+\]
+Condizioni di compatibilità: $\operatorname{MCD}(1, 3) = 1 \mid 2$, $\operatorname{MCD}(1, 4) = 1 \mid 3$, $\operatorname{MCD}(1, 5) = 1 \mid 4$. I moduli $3, 4, 5$ sono coprimi fra loro: si applica il teorema cinese dei resti con $N = 3\cdot 4\cdot 5 = 60$. Si risolvono tre equazioni:
+\begin{enumerate}
+  \item $N_1 = \dfrac{N}{n_1} = \dfrac{3\cdot 4\cdot 5}{3} = 4\cdot 5 = 20$: $20x_1 \equiv 2 \pmod 3$, cioè $2x_1 \equiv 2 \pmod 3$, $x_1 \equiv 1 \pmod 3$; si prende $x_1 = 1$.
+  \item $N_2 = \dfrac{N}{n_2} = 3\cdot 5 = 15$: $15x_2 \equiv 3 \pmod 4$, cioè $3x_2 \equiv 3 \pmod 4$, $x_2 \equiv 1 \pmod 4$; $x_2 = 1$.
+  \item $N_3 = \dfrac{N}{n_3} = 3\cdot 4 = 12$: $12x_3 \equiv 4 \pmod 5$, cioè $3x_3 \equiv 1 \pmod 5$ (dividendo per $4$, invertibile modulo $5$); $\left[\tfrac{1}{3}\right]_5 = [2]$, quindi $2\cdot 3\,x_3 \equiv 2 \pmod 5$, $x_3 \equiv 2 \pmod 5$; $x_3 = 2$.
+\end{enumerate}
+La soluzione generale è
+\[
+  \bar{x} = N_1x_1 + N_2x_2 + N_3x_3 = 20\cdot 1 + 15\cdot 1 + 12\cdot 2 = 59,
+\]
+modulo $N = 3\cdot 4\cdot 5 = 60$:
+\[
+  S = [59]_{60} = \{59 + 60k \mid k \in \mathbb{Z}\}.
+\]
+\end{esempio}
+
+\section{Sistemi modulari generali}
+
+Si consideri un sistema
+\[
+  \begin{cases} a_1x \equiv b_1 \pmod{n_1} \\ \ \ \vdots \\ a_sx \equiv b_s \pmod{n_s} \end{cases}
+\]
+Procedimento:
+\begin{enumerate}
+  \item \emph{Condizioni di compatibilità:} $\operatorname{MCD}(a_i, n_i) \mid b_i$ per ogni $i$. Se almeno una non è soddisfatta, il sistema è impossibile.
+  \item Se $d_i = \operatorname{MCD}(a_i, n_i) \neq 1$, si divide l'equazione per $d_i$: $\dfrac{a_i}{d_i}\,x \equiv \dfrac{b_i}{d_i} \pmod{\dfrac{n_i}{d_i}}$.
+  \item Si ricava $x$ in ciascuna equazione moltiplicando per $\left[\tfrac{1}{a_i}\right]_{n_i}$: $a_ix \equiv b_i \Rightarrow x \equiv b_i\left[\tfrac{1}{a_i}\right] \pmod{n_i}$, ottenendo un sistema della forma $x \equiv c_i \pmod{n_i}$.
+  \item Se gli $n_i$ sono coprimi fra loro, si applica il teorema cinese dei resti; altrimenti si trasforma il sistema in uno equivalente con moduli coprimi (vedi sotto).
+\end{enumerate}
+
+\begin{esempio}
+\[
+  \begin{cases} 2x \equiv 1 \pmod 5 \\ 3x \equiv 2 \pmod 7 \\ 4x \equiv 3 \pmod{11} \end{cases}
+\]
+\begin{enumerate}
+  \item Condizioni di compatibilità: $\operatorname{MCD}(2, 5) = 1$, $\operatorname{MCD}(3, 7) = 1$, $\operatorname{MCD}(4, 11) = 1$: ok.
+  \item I MCD sono tutti $1$: ok.
+  \item Si ricava $x$ nelle equazioni:
+  \begin{itemize}
+    \item $2x \equiv 1 \pmod 5$: $\left[\tfrac{1}{2}\right]_5 = [3]_5$, quindi $2\cdot 3\,x \equiv 3\cdot 1$, cioè $x \equiv 3 \pmod 5$;
+    \item $3x \equiv 2 \pmod 7$: $\left[\tfrac{1}{3}\right]_7 = [5]_7$, quindi $3\cdot 5\,x \equiv 2\cdot 5$, cioè $x \equiv 10 \equiv 3 \pmod 7$;
+    \item $4x \equiv 3 \pmod{11}$: $\left[\tfrac{1}{4}\right]_{11} = [3]_{11}$ (ad esempio con Euclide esteso), quindi $x \equiv 3\cdot 3 = 9 \pmod{11}$.
+  \end{itemize}
+  Il sistema diventa
+  \[
+    \begin{cases} x \equiv 3 \pmod 5 \\ x \equiv 3 \pmod 7 \\ x \equiv 9 \pmod{11} \end{cases}
+  \]
+  \item I moduli sono coprimi: si applica il teorema cinese dei resti con $N = 5\cdot 7\cdot 11 = 385$.
+  \begin{itemize}
+    \item $N_1 = 7\cdot 11 = 77$: $77x_1 \equiv 3 \pmod 5$, cioè $2x_1 \equiv 3 \pmod 5$, da cui $x_1 \equiv 4 \pmod 5$ (moltiplicando per $\left[\tfrac{1}{2}\right]_5 = [3]$: $x_1 \equiv 9 \equiv 4$).
+    \item $N_2 = 5\cdot 11 = 55$: $55x_2 \equiv 3 \pmod 7$, cioè $6x_2 \equiv 3 \pmod 7$; dividendo per $3$: $2x_2 \equiv 1 \pmod 7$, $\left[\tfrac{1}{2}\right]_7 = [4]_7$, quindi $x_2 \equiv 4 \pmod 7$.
+    \item $N_3 = 5\cdot 7 = 35$: $35x_3 \equiv 9 \pmod{11}$, cioè $2x_3 \equiv 9 \pmod{11}$; $\left[\tfrac{1}{2}\right]_{11} = [6]_{11}$, quindi $x_3 \equiv 9\cdot 6 = 54 \equiv 10 \pmod{11}$.
+  \end{itemize}
+  La soluzione generale è
+  \[
+    \bar{x} = N_1x_1 + N_2x_2 + N_3x_3 = 77\cdot 4 + 55\cdot 4 + 35\cdot 10 = 308 + 220 + 350,
+  \]
+  modulo $385$: $308 \equiv -77$ e $350 \equiv -35$, quindi $\bar{x} \equiv -77 + 220 - 35 = 108 \pmod{385}$. Dunque
+  \[
+    S = [108]_{385} = \{108 + 385k \mid k \in \mathbb{Z}\}.
+  \]
+\end{enumerate}
+\end{esempio}
+
+\section{Moduli non coprimi}
+
+\begin{esempio}
+\[
+  \begin{cases} x \equiv 1 \pmod{10} \\ x \equiv 5 \pmod 6 \end{cases}
+\]
+Le condizioni di compatibilità sono soddisfatte. I moduli \emph{non} sono coprimi: $\operatorname{MCD}(6, 10) = 2 \neq 1$, quindi non si può applicare direttamente il teorema cinese dei resti. Si usa la funzione biunivoca $\psi$ per spezzare ciascuna equazione in potenze di primi.
+
+Prima equazione: $\psi : \mathbb{Z}_{10} \to \mathbb{Z}_2\times\mathbb{Z}_5$,
+\[
+  x \equiv 1 \pmod{10} \iff \begin{cases} x \equiv 1 \pmod 2 \\ x \equiv 1 \pmod 5. \end{cases}
+\]
+Seconda equazione: $\psi : \mathbb{Z}_6 \to \mathbb{Z}_2\times\mathbb{Z}_3$,
+\[
+  x \equiv 5 \pmod 6 \iff \begin{cases} x \equiv 5 \equiv 2 \pmod 3 \\ x \equiv 5 \equiv 1 \pmod 2. \end{cases}
+\]
+Il sistema di partenza diventa
+\[
+  \begin{cases} x \equiv 1 \pmod 2 \\ x \equiv 1 \pmod 5 \\ x \equiv 2 \pmod 3 \\ x \equiv 1 \pmod 2 \end{cases}
+  \iff
+  \begin{cases} x \equiv 1 \pmod 2 \\ x \equiv 1 \pmod 5 \\ x \equiv 2 \pmod 3 \end{cases}
+\]
+(la quarta equazione è ridondante). Ora i moduli $2, 3, 5$ sono coprimi e si applica il teorema cinese dei resti.
+\end{esempio}
+
+\begin{osservazione}
+Il sistema
+\[
+  \begin{cases} x \equiv b \pmod{p^i} \\ x \equiv c \pmod{p^j} \end{cases} \qquad p \text{ primo},\ i < j,
+\]
+ha soluzione se e solo se $b \equiv c \pmod{p^i}$ (potenza più piccola). In tal caso il sistema è equivalente a $x \equiv c \pmod{p^j}$ (l'equazione con il modulo più alto).
+\end{osservazione}
+
+\begin{esercizio}
+Risolvere i sistemi
+\[
+  \begin{cases} x \equiv 3 \pmod 4 \\ x \equiv -1 \pmod{64} \end{cases}
+  \qquad\text{e}\qquad
+  \begin{cases} x \equiv 1 \pmod{10} \\ 2x \equiv 14 \pmod{24} \end{cases}
+\]
+\end{esercizio}
+
+\end{document}

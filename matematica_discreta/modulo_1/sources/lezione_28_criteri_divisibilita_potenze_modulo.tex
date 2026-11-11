@@ -1,0 +1,230 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\newrunin{osservazione}{Osservazione}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Criteri di divisibilità e potenze modulo $n$}
+\author{Marco Cerbella}
+\date{Lezione 15 -- 9 novembre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Criteri di divisibilità}
+
+Sia $n \in \mathbb{N}$ scritto in base $10$:
+\[
+  n = a_k\cdot 10^k + a_{k-1}\cdot 10^{k-1} + \dots + a_1\cdot 10 + a_0 = (a_k a_{k-1}\dots a_1 a_0)_{10}, \qquad a_i \in \{0, 1, \dots, 9\}.
+\]
+
+\begin{proposizione}[Criteri di divisibilità]
+\begin{itemize}
+  \item $n$ è divisibile per $2$ se e solo se $a_0$ è divisibile per $2$.
+  \item $n$ è divisibile per $10$ se e solo se $10 \mid a_0$ (cioè $a_0 = 0$).
+  \item $n$ è divisibile per $5$ se e solo se $5 \mid a_0$.
+  \item $n$ è divisibile per $2^j$ se e solo se $(a_{j-1}\dots a_1 a_0)_{10}$ è divisibile per $2^j$.
+  \item $n$ è divisibile per $5^j$ se e solo se $5^j \mid (a_{j-1}\dots a_1 a_0)_{10}$.
+  \item $n$ è divisibile per $3$ se e solo se $a_k + a_{k-1} + \dots + a_1 + a_0$ è divisibile per $3$.
+  \item $n$ è divisibile per $9$ se e solo se $a_k + \dots + a_1 + a_0$ è divisibile per $9$.
+  \item $n$ è divisibile per $11$ se e solo se $11 \mid a_0 - a_1 + a_2 - a_3 + \dots + (-1)^k a_k$.
+\end{itemize}
+\end{proposizione}
+
+\begin{proof}
+\emph{Criterio per $2$ (e per $5$, $10$).} Poiché $10 \equiv 0 \pmod 2$ (e analogamente $10 \equiv 0 \pmod 5$ e $10 \equiv 0 \pmod{10}$),
+\[
+  n = a_k\cdot 10^k + \dots + a_1\cdot 10 + a_0 \equiv a_0 \pmod 2 ,
+\]
+quindi $n \equiv a_0 \pmod 2$.
+
+\emph{Criterio per $3$ e per $9$.} Poiché $10 = 3\cdot 3 + 1$, cioè $10 \equiv 1 \pmod 3$ (e $10 \equiv 1 \pmod 9$),
+\[
+  n = a_k\cdot 10^k + \dots + 10\cdot a_1 + a_0 \equiv a_k + a_{k-1} + \dots + a_1 + a_0 \pmod 3 \ (\text{o } \bmod 9).
+\]
+
+\emph{Criterio per $11$.} Poiché $10 \equiv -1 \pmod{11}$ (infatti $-1 = -1\cdot 11 + 10$),
+\[
+  n = a_0 + a_1\cdot 10 + a_2\cdot 10^2 + \dots + a_k\cdot 10^k \equiv a_0 - a_1 + a_2 - a_3 + \dots + (-1)^k a_k \pmod{11}. \qedhere
+\]
+\end{proof}
+
+\begin{osservazione}
+Per $2^j$ e $5^j$ il criterio segue dal fatto che $10^j = 2^j 5^j \equiv 0$ modulo $2^j$ e modulo $5^j$: contano solo le ultime $j$ cifre.
+\end{osservazione}
+
+\begin{esempio}
+Sia $n = 16\,079$. Si calcolano i resti per diversi divisori.
+\begin{center}
+\begin{tabular}{rl}
+\toprule
+Divisore & Resto \\
+\midrule
+$2$ & $1$ \\
+$5$ & $9 \equiv 4 \pmod 5$ \\
+$10$ & $9$ \\
+$4 = 2^2$ & $79 \equiv 3 \pmod 4$ \quad ($79 = 76 + 3$) \\
+$25 = 5^2$ & $79 \equiv 4 \pmod{25}$ \\
+$1000 = 10^3$ & $079 = 79 \pmod{1000}$ \\
+$8 = 2^3$ & $079 \equiv 7 \pmod 8$ \quad ($79 = 9\cdot 8 + 7$) \\
+$3$ & $1 + 6 + 0 + 7 + 9 = 23 \equiv 2 + 3 = 5 \equiv 2 \pmod 3$ \\
+$9$ & $23 \equiv 2 + 3 = 5 \pmod 9$ \\
+$11$ & $9 - 7 + 0 - 6 + 1 = -3 \equiv 8 \pmod{11}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{esempio}
+
+\begin{esempio}[$4589 \equiv x \pmod{44}$]
+Poiché $44 = 4\cdot 11$ con $\operatorname{MCD}(4, 11) = 1$, la funzione
+\[
+  \psi : \mathbb{Z}_{44} \to \mathbb{Z}_{11}\times\mathbb{Z}_4, \qquad [x]_{44} \mapsto \big([x]_{11}, [x]_4\big)
+\]
+è biunivoca. Si ha
+\[
+  \begin{cases} 4589 \equiv 89 \equiv 1 \pmod 4 \\ 4589 \equiv 9 - 8 + 5 - 4 = 2 \pmod{11} \end{cases}
+\]
+cioè $\psi([x]_{44}) = ([2]_{11}, [1]_4)$. I numeri congrui a $2$ modulo $11$ sono $2, 13, 24, 35, \dots$; tra quelli minori di $44$:
+\[
+  \begin{gathered}
+  13 = 11 + 2,\ 13 \equiv 1 \pmod 4; \qquad 24 = 2\cdot 11 + 2,\ 24 \equiv 0 \pmod 4;\\
+  35 = 3\cdot 11 + 2,\ 35 \equiv 3 \pmod 4 .
+  \end{gathered}
+\]
+Quindi l'unica soluzione è $[13]_{44}$: $4589 \equiv 13 \pmod{44}$.
+\end{esempio}
+
+\section{Potenze modulo $n$: esponente in base $2$}
+
+\emph{Problema.} Calcolare $a^b \bmod n$.
+
+Si scrive l'esponente in base $2$: $b = \varepsilon_k 2^k + \varepsilon_{k-1} 2^{k-1} + \dots + \varepsilon_1 2 + \varepsilon_0$, con $\varepsilon_i \in \{0, 1\}$. Allora
+\[
+  a^b = a^{\varepsilon_k 2^k + \dots + \varepsilon_1 2 + \varepsilon_0} = a^{\varepsilon_k 2^k}\cdot a^{\varepsilon_{k-1}2^{k-1}}\cdots a^{\varepsilon_1 2}\cdot a^{\varepsilon_0}.
+\]
+Procedimento:
+\begin{enumerate}
+  \item si riduce l'esponente in base $2$;
+  \item si calcolano $a^{2^i} \bmod n$ (elevando via via al quadrato);
+  \item si calcola il prodotto (modulo $n$) dei fattori $a^{2^i}$ con $\varepsilon_i = 1$.
+\end{enumerate}
+
+\begin{esempio}[$3^{13} \bmod 100$]
+Scriviamo l'esponente in base $2$ con divisioni successive:
+\[
+  13 = 6\cdot 2 + 1,\quad 6 = 3\cdot 2 + 0,\quad 3 = 1\cdot 2 + 1,\quad 1 = 0\cdot 2 + 1,
+\]
+quindi $13 = (1101)_2 = 1\cdot 2^3 + 1\cdot 2^2 + 0\cdot 2 + 1 = 2^3 + 2^2 + 1$ e
+\[
+  3^{13} = 3^{2^3}\cdot 3^{2^2}\cdot 3 .
+\]
+Calcoliamo le potenze:
+\[
+  3^{2} = 9, \qquad 3^{2^2} = 9\cdot 9 = 81, \qquad 3^{2^3} = 81\cdot 81 = 6561 \equiv 61 \pmod{100}.
+\]
+Allora
+\[
+  3^{13} \equiv 61\cdot 81\cdot 3 \equiv 61\cdot 243 \equiv 61\cdot 43 = 2623 \equiv 23 \pmod{100}.
+\]
+\end{esempio}
+
+\begin{esercizio}
+Calcolare $203^{345\,618} \bmod 100$.
+\end{esercizio}
+
+\end{document}

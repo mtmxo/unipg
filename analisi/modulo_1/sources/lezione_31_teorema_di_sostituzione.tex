@@ -1,0 +1,182 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\newrunin{osservazione}{Osservazione}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Il teorema di sostituzione}
+\author{Marco Cerbella}
+\date{Lezione 14 -- 10 novembre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Teorema di sostituzione}
+
+\begin{teorema}[Teorema di sostituzione]
+Supponiamo che esista (finito o infinito)
+\[
+  \lim_{x\to c} f(x) = \ell .
+\]
+Sia poi $g$ una funzione definita in un intorno di $\ell$ (escluso al più il punto $\ell$) e tale che:
+\begin{itemize}
+  \item[(i)] se $\ell \in \mathbb{R}$, $g$ è continua in $\ell$;
+  \item[(ii)] se $\ell = +\infty$ oppure $\ell = -\infty$, esiste finito o infinito $\displaystyle\lim_{y\to\ell} g(y)$.
+\end{itemize}
+Allora esiste il limite per $x$ tendente a $c$ della funzione composta $g\circ f$ e si ha
+\[
+  \lim_{x\to c} g(f(x)) = \lim_{y\to\ell} g(y).
+\]
+\end{teorema}
+
+Nel caso (i) si ottiene
+\[
+  \lim_{x\to c} g(f(x)) = g\!\left(\lim_{x\to c} f(x)\right).
+\]
+
+\begin{osservazione}[Variante (i$'$)]
+Se $\ell \in \mathbb{R}$ e esiste un intorno $I(c)$ di $c$ in cui $f(x) \neq \ell$ per ogni $x \neq c$, e esiste finito o infinito $\displaystyle\lim_{y\to\ell} g(y)$, allora vale ancora $\displaystyle\lim_{x\to c} g(f(x)) = \lim_{y\to\ell} g(y)$ (senza richiedere che $g$ sia continua in $\ell$, né definita in $\ell$).
+\end{osservazione}
+
+\begin{esempio}[$\lim_{x\to 0}\left(\frac{\sin x}{x}\right)^{2}$]
+Si pone $f(x) = \dfrac{\sin x}{x}$, $\ell = 1$ e $g(y) = y^2$. Si ha $\displaystyle\lim_{x\to 0}\frac{\sin x}{x} = 1$ e $g$ è continua in $\ell = 1$: siamo nelle ipotesi (i) del teorema di sostituzione, quindi
+\[
+  \lim_{x\to 0}\left(\frac{\sin x}{x}\right)^{2} = \lim_{y\to 1} g(y) = \lim_{y\to 1} y^2 = 1,
+\]
+cioè $\displaystyle\lim_{x\to 0}\left(\frac{\sin x}{x}\right)^{2} = \left(\lim_{x\to 0}\frac{\sin x}{x}\right)^{2} = 1^2 = 1$.
+\end{esempio}
+
+\begin{esempio}[$\lim_{x\to 0}\frac{\sin(x^2)}{x^2}$]
+Si pone $y = x^2$: $f(x) = x^2$, $\displaystyle\lim_{x\to 0} x^2 = 0 = \ell$. Si considera
+\[
+  g(y) = \begin{cases} \dfrac{\sin y}{y} & y \neq 0 \\[2mm] 1 & y = 0 \end{cases}
+\]
+(estensione con continuità della funzione $\frac{\sin y}{y}$): infatti $\displaystyle\lim_{y\to 0} g(y) = \lim_{y\to 0}\frac{\sin y}{y} = 1 = g(0)$, quindi $g$ è continua in $0$. Siamo nel caso (i) del teorema di sostituzione:
+\[
+  \lim_{x\to 0}\frac{\sin(x^2)}{x^2} = \lim_{y\to 0} g(y) = \lim_{y\to 0}\frac{\sin y}{y} = 1.
+\]
+\end{esempio}
+
+\begin{esempio}[$\lim_{x\to 1}\arctan\frac{1}{x-1}$]
+Sia $h(x) = \arctan\dfrac{1}{x - 1}$. Il limite $\displaystyle\lim_{x\to 1}\frac{1}{x-1}$ non esiste, perché
+\[
+  \lim_{x\to 1^+}\frac{1}{x-1} = +\infty, \qquad \lim_{x\to 1^-}\frac{1}{x-1} = -\infty .
+\]
+Si calcolano allora i limiti destro e sinistro con il teorema di sostituzione, con $f(x) = \dfrac{1}{x-1}$ e $g(y) = \arctan y$ (funzione continua, con limiti agli estremi $\pm\dfrac{\pi}{2}$). Posto $y = \dfrac{1}{x-1}$:
+\[
+  \lim_{x\to 1^+}\arctan\frac{1}{x - 1} = \lim_{y\to+\infty}\arctan y = \frac{\pi}{2}, \qquad
+  \lim_{x\to 1^-}\arctan\frac{1}{x - 1} = \lim_{y\to-\infty}\arctan y = -\frac{\pi}{2}.
+\]
+I limiti destro e sinistro sono finiti ma diversi: il limite bilatero non esiste e $x = 1$ è un punto di \emph{discontinuità a salto}. Il salto vale
+\[
+  \lim_{x\to 1^+}h(x) - \lim_{x\to 1^-}h(x) = \frac{\pi}{2} - \left(-\frac{\pi}{2}\right) = \pi .
+\]
+\end{esempio}
+
+\begin{esempio}[$\lim_{x\to+\infty}\log\left(\sin\frac{1}{x}\right)$]
+Si pone $y = \dfrac{1}{x}$. Poiché $\displaystyle\lim_{x\to+\infty}\frac{1}{x} = 0$ e $\sin y$ è una funzione continua in $y = 0$,
+\[
+  \lim_{x\to+\infty}\sin\frac{1}{x} = \lim_{y\to 0}\sin y = 0 .
+\]
+Sia $z = \sin\dfrac{1}{x}$: $\displaystyle\lim_{z\to 0^+}\log z = -\infty$. Il limite di $z$ è $0^+$, cioè $z \to 0$ con $z > 0$, perché $\sin\dfrac{1}{x} > 0$ per $x > \dfrac{1}{\pi}$, cioè quando $\dfrac{1}{x} < \pi$ e $\dfrac{1}{x} > 0$. Quindi
+\[
+  \lim_{x\to+\infty}\log\left(\sin\frac{1}{x}\right) = \lim_{z\to 0^+}\log z = -\infty .
+\]
+\end{esempio}
+
+\end{document}

@@ -1,0 +1,206 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{decorations.pathreplacing, shapes.geometric, arrows.meta, positioning}
+
+% Niente vedove/orfane: i paragrafi non lasciano righe isolate a fine/inizio pagina
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Elenchi più compatti
+\setlist{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+% --- Riquadri con bordo nero, senza numero (si spezzano tra due pagine) ---
+% Uso: \begin{definizione} ... \end{definizione}
+%      \begin{teorema}[Nome] ... \end{teorema}  (il nome è facoltativo)
+\tcbset{nota/.style={enhanced jigsaw, breakable, colback=white,
+  colframe=black, boxrule=0.5pt, sharp corners}}
+\NewTColorBox{definizione}{}{nota,
+  before upper={\textbf{Definizione.}\ }}
+\NewTColorBox{teorema}{o}{nota,
+  before upper={\textbf{Teorema\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proposizione}{o}{nota,
+  before upper={\textbf{Proposizione\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{proprieta}{o}{nota,
+  before upper={\textbf{Proprietà\IfValueT{#1}{ (#1)}.}\ }}
+\NewTColorBox{assioma}{o}{nota, boxrule=1pt,
+  before upper={\textbf{Assioma\IfValueT{#1}{ (#1)}.}\ }}
+
+% --- Ambienti semplici (senza riquadro) ---
+% Il titolo sta in cima al blocco, anche se il contenuto inizia con un riquadro o
+% con codice; e non resta mai da solo in fondo a una pagina.
+% Uso: \begin{esempio}[Titolo facoltativo] ... \end{esempio}
+\newcommand{\newrunin}[2]{%
+  \NewDocumentEnvironment{#1}{o}{%
+    \par\Needspace{4\baselineskip}\addvspace{\medskipamount}\noindent
+    \textbf{#2}\IfValueT{##1}{ (##1)}\textbf{.}\ \ignorespaces}%
+  {\par\addvspace{\medskipamount}}}
+\newrunin{esempio}{Esempio}
+\newrunin{esercizio}{Esercizio}
+\newrunin{osservazione}{Osservazione}
+
+% V e F nelle tavole di verità
+\newcommand{\V}{\textsf{V}}
+\newcommand{\F}{\textsf{F}}
+
+% --- Codice C ---
+% Uso: \begin{codice} ... \end{codice}      codice C numerato
+%      \begin{comando} ... \end{comando}    comandi da terminale
+%      \begin{risultato} ... \end{risultato} output di un programma
+%      \lstinline|printf("ciao");|           codice dentro al testo
+\lstdefinestyle{c}{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  columns=flexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  morekeywords={include, define},
+  % lettere accentate nei commenti
+  literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1 {ì}{{\`i}}1
+           {ò}{{\`o}}1 {ù}{{\`u}}1 {È}{{\`E}}1 {À}{{\`A}}1
+}
+\lstset{style=c}
+\newtcblisting{codice}{listing only, nota, left=6mm,
+  listing options={style=c}}
+\newtcblisting{comando}{listing only, nota,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+\newtcblisting{risultato}{listing only, enhanced jigsaw, breakable,
+  colback=black!5, colframe=black, boxrule=0.5pt, sharp corners,
+  listing options={basicstyle=\ttfamily\small, numbers=none, language={},
+    columns=flexible, keepspaces=true, breaklines=true}}
+
+% --- Diagrammi di flusso (simboli standard) ---
+\tikzset{
+  terminale/.style = {ellipse, draw, minimum width=2.5cm, minimum height=0.9cm},
+  io/.style        = {trapezium, trapezium left angle=70, trapezium right angle=110,
+                      draw, minimum width=2.5cm, minimum height=0.9cm},
+  processo/.style  = {rectangle, draw, minimum width=2.5cm, minimum height=0.9cm},
+  decisione/.style = {diamond, draw, aspect=2, minimum width=2.5cm},
+  freccia/.style   = {thick, -{Stealth}}
+}
+
+\title{Equazioni modulari e sistemi}
+\author{Marco Cerbella}
+\date{Lezione 16 -- 10 novembre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Equazioni modulari: riduzione e insieme delle soluzioni}
+
+Si consideri l'equazione modulare
+\[
+  ax \equiv b \pmod n, \qquad a, b \in \mathbb{Z},\ n > 0,\ n \in \mathbb{N},
+\]
+con incognita $x$. Essa ha soluzione se e solo se $\operatorname{MCD}(a, n) \mid b$.
+
+\begin{proposizione}
+Siano $a, b \in \mathbb{Z}$, $n > 0$, e $d = \operatorname{MCD}(a, n) \mid b$. Allora l'equazione
+\[
+  ax \equiv b \pmod n \tag{1}
+\]
+è equivalente a
+\[
+  \frac{a}{d}\,x \equiv \frac{b}{d} \pmod{\frac{n}{d}} . \tag{2}
+\]
+In particolare, se $\bar{x}$ è soluzione di (1) (o di (2)), allora l'insieme delle soluzioni è
+\[
+  S = \left[\bar{x}\right]_{n/d} = \left[\bar{x}\right]_n \cup \left[\bar{x} + \tfrac{n}{d}\right]_n \cup \left[\bar{x} + 2\tfrac{n}{d}\right]_n \cup \dots \cup \left[\bar{x} + (d-1)\tfrac{n}{d}\right]_n = \left\{\bar{x} + k\tfrac{n}{d} \;\middle|\; k \in \mathbb{Z}\right\}.
+\]
+\end{proposizione}
+
+In pratica, se $d \neq 1$ si divide l'equazione per $d$ ottenendo un'equazione modulo $n/d$ in cui il coefficiente di $x$ è invertibile (perché $\operatorname{MCD}\!\left(\tfrac{a}{d}, \tfrac{n}{d}\right) = 1$); la si risolve moltiplicando per l'inverso, e poi si descrivono le soluzioni modulo $n$.
+
+\begin{esempio}[$36x \equiv 24 \pmod{105}$]
+Si vogliono trovare tutte le soluzioni intere comprese fra $-100$ e $100$.
+
+\emph{Condizione di compatibilità:} $\operatorname{MCD}(36, 105) = 3 \mid 24$. Vero. $[36]_{105}$ non è invertibile.
+
+\emph{Riduzione:} si divide l'equazione per $d = 3$:
+\[
+  \frac{36}{3}\,x \equiv \frac{24}{3} \pmod{\frac{105}{3}} \quad\Rightarrow\quad 12x \equiv 8 \pmod{35}.
+\]
+Si cerca l'inverso di $[12]_{35}$ in $\mathbb{Z}_{35}$ con Euclide esteso:
+\begin{center}
+\begin{tabular}{c|r|r|r}
+$q$ & $r$ & $s$ & $t$ \\
+\midrule
+ & $35$ & $1$ & $0$ \\
+ & $12$ & $0$ & $1$ \\
+$2$ & $11$ & $1$ & $-2$ \\
+$1$ & $1$ & $-1$ & $1 + 2 = 3$ \\
+$11$ & $0$ & $1 + 11 = 12$ & $-2 - 33 = -35$ \\
+\end{tabular}
+\end{center}
+Da cui $1 = (-1)\cdot 35 + 3\cdot 12$: l'inverso di $[12]_{35}$ in $\mathbb{Z}_{35}$ è $[3]_{35}$. Moltiplicando per $3$:
+\[
+  3\cdot 12\,x \equiv 8\cdot 3 \pmod{35} \quad\Rightarrow\quad x \equiv 24 \pmod{35},
+\]
+quindi $S = [24]_{35} = \{24 + 35k \mid k \in \mathbb{Z}\}$ (soluzioni in $\mathbb{Z}_{35}$).
+
+\emph{Soluzioni fra $-100$ e $100$:}
+\[
+  24,\ 24 + 35 = 59,\ 24 + 2\cdot 35 = 94,\ (94 + 35 = 129 > 100);
+\]
+\[
+  24 - 35 = -11,\ -11 - 35 = -46,\ -46 - 35 = -81,\ (-81 - 35 = -116 < -100).
+\]
+Le soluzioni tra $-100$ e $100$ sono $\{-81, -46, -11, 24, 59, 94\}$.
+
+In $\mathbb{Z}_{105}$ le soluzioni sono tre classi: $[24]_{105} \cup [24 + 35]_{105} \cup [24 + 70]_{105} = [24]_{105} \cup [59]_{105} \cup [94]_{105}$.
+\end{esempio}
+
+\section{Sistemi modulari}
+
+Un sistema modulare è un insieme di equazioni modulari nella stessa incognita, da risolvere simultaneamente. Prima di tutto si verificano le \emph{condizioni di compatibilità} di ciascuna equazione.
+
+\begin{esempio}
+\begin{enumerate}
+  \item
+  \[
+    \begin{cases} 3x \equiv 5 \pmod{12} \\ x \equiv 2 \pmod 4 \end{cases}
+  \]
+  Condizioni di compatibilità: $\operatorname{MCD}(3, 12) = 3 \nmid 5$ (la prima equazione è impossibile), $\operatorname{MCD}(1, 4) = 1 \mid 2$. Il sistema è impossibile.
+  \item
+  \[
+    \begin{cases} x \equiv 3 \pmod 6 \\ x \equiv 0 \pmod 2 \end{cases}
+  \]
+  Condizioni di compatibilità: $\operatorname{MCD}(1, 6) = 1 \mid 3$, $\operatorname{MCD}(1, 2) = 1 \mid 0$. Dalla seconda equazione $x = 2k$; sostituendo nella prima: $2k \equiv 3 \pmod 6$, che è \emph{impossibile}: $\operatorname{MCD}(2, 6) = 2 \nmid 3$. Il sistema è impossibile.
+  \item
+  \[
+    \begin{cases} 5x \equiv 3 \pmod 6 \\ x \equiv 1 \pmod 5 \end{cases}
+  \]
+  Condizioni di compatibilità: $\operatorname{MCD}(5, 6) = 1 \mid 3$, $\operatorname{MCD}(1, 5) = 1 \mid 1$: ok.
+
+  Prima equazione: $5x \equiv 3 \pmod 6$, $\left[\tfrac{1}{5}\right]_6 = [5]_6$; moltiplicando per $5$: $x \equiv 15 \equiv 3 \pmod 6$, cioè $x = 6k + 3$.
+
+  Si sostituisce nella seconda equazione: $6k + 3 \equiv 1 \pmod 5$, cioè $k \equiv 1 - 3 = -2 \equiv 3 \pmod 5$, quindi $k = 5h + 3$.
+
+  Allora $x = 6(5h + 3) + 3 = 30h + 18 + 3 = 30h + 21$, cioè
+  \[
+    S = [21]_{30} = \{21 + 30h \mid h \in \mathbb{Z}\}.
+  \]
+\end{enumerate}
+\end{esempio}
+
+\end{document}
